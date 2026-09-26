@@ -73,6 +73,9 @@ func _ready() -> void:
 		Vector2(east_lane, 550), Vector2(east_lane, 1118), Vector2(east_lane - 18, 1152),
 		Vector2(east_lane - 60, 1180), Vector2(1000, 1180), Vector2(948, 1160)]
 	for i in 2:
+		# A circuit requires genuine directional art; never rotate the legacy PNG.
+		if not Vehicle.has_directional_art("taxi" if i == 0 else "van"):
+			continue
 		var vehicle := AnimatableBody2D.new()
 		vehicle.set_script(Vehicle)
 		vehicle.name = "Circuit_%s" % i
