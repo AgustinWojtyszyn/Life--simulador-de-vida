@@ -1,0 +1,86 @@
+{
+  "generator": "mcp__pixellab__create_image_pro_flash",
+  "style": "Buenos Aires, warm late afternoon, elevated three-quarter orthographic, cream / terracotta / teal / olive, transparent pixel art.",
+  "assets": [
+    {
+      "path": "buildings/cafe.png",
+      "job_id": "db4064ab-2d37-4315-a7c5-bec80ebcde21",
+      "source_image_id": "338bb476-b6ae-540f-9da7-4938abcf7bac",
+      "description": "Premium pixel art game asset, single entire Buenos Aires urban corner building, three storey cream stucco apartment building with terracotta roof parapet, roof terrace plants, teal shutters, wrought iron balconies, ground floor cafe with wide teal striped awning and glowing amber windows, small shop sign CAFE. Three quarter elevated orthographic RPG view, front facade faces viewer, visible right side recedes up-right, roof visible, vertical walls straight. Warm late afternoon light upper left, cool violet shadows, refined hand placed pixel clusters, tasteful muted palette, crisp pixel art, no thick black outline. Isolated building only, transparent background, no street or ground tile, fits completely with padding. Building fills canvas.",
+      "image_size": {
+        "width": 192,
+        "height": 224
+      }
+    },
+    {
+      "path": "buildings/market.png",
+      "source_image_id": "023c2262-21f0-53b0-acd2-f1ee186edcc3",
+      "job_id": "5d28f643-eaf2-489a-88dc-515b06e22554",
+      "image_size": {
+        "width": 192,
+        "height": 192
+      },
+      "description": "Premium detailed pixel art urban life simulation game asset. Single entire two storey terracotta brick neighborhood grocery store building, pale sandstone trim, sage green shopfront awning, rooftop water tank, roof parapet and plants, balconies, large storefront glass, crates by entrance. Three quarter elevated orthographic view, verticals straight, front faces viewer, visible right side recedes up-right, top visible. Warm late afternoon light from upper left, cool muted violet shadows, sophisticated cream terracotta teal olive palette, crisp hand placed pixels, selective outline, strong volume. Entire object isolated on transparent background, no scenery, no ground tile, no text, padding around silhouette."
+    },
+    {
+      "path": "vehicles/car.png",
+      "source_image_id": "9618d6fa-56eb-5787-88e4-f5e2d19cee02",
+      "job_id": "798605b6-11c0-43e4-a640-af136d6d4dbd",
+      "image_size": {
+        "width": 96,
+        "height": 64
+      },
+      "description": "Premium detailed pixel art urban life simulation game asset. Single modern petrol teal compact hatchback car facing right, mostly side view with front right visible and roof visible, four wheels, realistic proportions, silver trim, pale windows, NOT diagonal isometric diamond orientation, wheels on horizontal baseline. Three quarter elevated orthographic view, verticals straight, front faces viewer, visible right side recedes up-right, top visible. Warm late afternoon light from upper left, cool muted violet shadows, sophisticated cream terracotta teal olive palette, crisp hand placed pixels, selective outline, strong volume. Entire object isolated on transparent background, no scenery, no ground tile, no text, padding around silhouette."
+    },
+    {
+      "path": "vegetation/tree.png",
+      "source_image_id": "e5b3c796-e2a1-5afc-bc72-ca2aa7f55226",
+      "job_id": "534d0c74-9958-4ca2-b70f-1290ecea7db5",
+      "image_size": {
+        "width": 96,
+        "height": 128
+      },
+      "description": "Premium detailed pixel art urban life simulation game asset. Single lush mature urban street tree, broad rounded layered canopy of olive sage and golden green leaves, textured branching trunk, rich detailed foliage clusters, no ground. Three quarter elevated orthographic view, verticals straight, front faces viewer, visible right side recedes up-right, top visible. Warm late afternoon light from upper left, cool muted violet shadows, sophisticated cream terracotta teal olive palette, crisp hand placed pixels, selective outline, strong volume. Entire object isolated on transparent background, no scenery, no ground tile, no text, padding around silhouette."
+    },
+    {
+      "path": "props/bench.png",
+      "source_image_id": "e408dc2c-c28b-5b00-a60d-37de298c38f7",
+      "job_id": "5c320e0e-846f-4e48-a9ba-de110ea18c35",
+      "image_size": {
+        "width": 64,
+        "height": 48
+      },
+      "description": "Premium detailed pixel art urban life simulation game asset. Single park bench with warm wooden slats and dark iron legs, facing viewer slightly to left, seen elevated, complete isolated bench. Three quarter elevated orthographic view, verticals straight, front faces viewer, visible right side recedes up-right, top visible. Warm late afternoon light from upper left, cool muted violet shadows, sophisticated cream terracotta teal olive palette, crisp hand placed pixels, selective outline, strong volume. Entire object isolated on transparent background, no scenery, no ground tile, no text, padding around silhouette."
+    },
+    {
+      "path": "props/lamp.png",
+      "source_image_id": "4d2f04cd-9f1c-5003-9907-1f9d0cb99531",
+      "job_id": "a4de507b-f5af-4522-bc91-df3dde953df7",
+      "image_size": {
+        "width": 48,
+        "height": 96
+      },
+      "description": "Premium detailed hand placed pixel art game sprite for warm Buenos Aires neighborhood life simulation. Single elegant dark teal cast iron city street lamp with two warm glass lanterns, ornate base, late afternoon, no light glow outside lamp. Three quarter elevated orthographic view, front facing viewer with right side visible, warm upper left sunlight and cool violet shadow, muted cream terracotta teal olive palette. Selective outline, crisp pixels, strong volume. Entire object isolated transparent background, no ground tile, no text, no scenery, small padding."
+    },
+    {
+      "path": "props/fountain.png",
+      "source_image_id": "e72e681b-0569-5116-95bf-3dc770bbb396",
+      "job_id": "3c2c4eeb-4644-4eb6-9ea5-112de178109b",
+      "image_size": {
+        "width": 128,
+        "height": 96
+      },
+      "description": "Premium detailed hand placed pixel art game sprite for warm Buenos Aires neighborhood life simulation. Single ornate two tier pale limestone park fountain, oval basin full of turquoise water, small streams, finely carved stone volume, no surrounding ground. Three quarter elevated orthographic view, front facing viewer with right side visible, warm upper left sunlight and cool violet shadow, muted cream terracotta teal olive palette. Selective outline, crisp pixels, strong volume. Entire object isolated transparent background, no ground tile, no text, no scenery, small padding."
+    },
+    {
+      "path": "props/planter.png",
+      "source_image_id": "a0d9f3b7-a767-5775-a84e-e807efee505c",
+      "job_id": "ef88c67a-1851-4a56-9bb2-71e46bf4ad9f",
+      "image_size": {
+        "width": 64,
+        "height": 48
+      },
+      "description": "Premium detailed hand placed pixel art game sprite for warm Buenos Aires neighborhood life simulation. Single long rectangular raised sandstone urban planter, lush leafy sage shrubs and small terracotta flowers, visible top and right side, richly shaded stone sides. Three quarter elevated orthographic view, front facing viewer with right side visible, warm upper left sunlight and cool violet shadow, muted cream terracotta teal olive palette. Selective outline, crisp pixels, strong volume. Entire object isolated transparent background, no ground tile, no text, no scenery, small padding."
+    }
+  ]
+}

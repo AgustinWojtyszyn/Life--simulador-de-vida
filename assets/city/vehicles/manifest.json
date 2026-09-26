@@ -1,0 +1,38 @@
+{
+  "generator": "mcp__pixellab__create_image_pro_flash",
+  "assets": [
+    {
+      "path": "vehicles/taxi.png",
+      "job_id": "1bfbb73f-bb8e-428e-8e71-837ab2219e28",
+      "source_image_id": "8eb9a946-3be2-5b8e-be04-1ee384bfef04",
+      "image_size": {
+        "width": 96,
+        "height": 64
+      },
+      "description": "One complete a long black sedan taxi with a bright yellow roof and small TAXI roof sign, Buenos Aires taxi, four doors, longer wheelbase, chrome trim. Premium crisp detailed pixel art urban game vehicle sprite. Elevated three-quarter orthographic view MATCH reference camera, car nose pointing LEFT and slightly toward viewer, side and roof visible. Muted warm afternoon upper-left lighting, cool shadows. Entire vehicle on transparent background, no scenery, no ground. Match reference pixel density and rendering, but use the requested completely different vehicle silhouette and colors.",
+      "style_reference": "9618d6fa-56eb-5787-88e4-f5e2d19cee02"
+    },
+    {
+      "path": "vehicles/van.png",
+      "job_id": "536cd704-a45e-409a-a582-063efb724bc7",
+      "source_image_id": "bce34d6a-ca82-569a-91c6-1fee75b0fbf4",
+      "image_size": {
+        "width": 112,
+        "height": 80
+      },
+      "description": "One complete a cream white compact delivery panel van, high boxy roof and tall rear cargo body without rear side windows, charcoal bumpers, two cab windows. Premium crisp detailed pixel art urban game vehicle sprite. Elevated three-quarter orthographic view MATCH reference camera, car nose pointing LEFT and slightly toward viewer, side and roof visible. Muted warm afternoon upper-left lighting, cool shadows. Entire vehicle on transparent background, no scenery, no ground. Match reference pixel density and rendering, but use the requested completely different vehicle silhouette and colors.",
+      "style_reference": "9618d6fa-56eb-5787-88e4-f5e2d19cee02"
+    },
+    {
+      "path": "vehicles/coupe.png",
+      "job_id": "62aa25ce-c543-4972-a05b-e322b35edd97",
+      "source_image_id": "4b0658cc-f76e-5921-9ca1-cbcdc0a60511",
+      "image_size": {
+        "width": 96,
+        "height": 64
+      },
+      "description": "One complete a brick red low sporty two-door coupe, sloping fastback roof, long hood, silver wheels, noticeably different from a hatchback. Premium crisp detailed pixel art urban game vehicle sprite. Elevated three-quarter orthographic view MATCH reference camera, car nose pointing LEFT and slightly toward viewer, side and roof visible. Muted warm afternoon upper-left lighting, cool shadows. Entire vehicle on transparent background, no scenery, no ground. Match reference pixel density and rendering, but use the requested completely different vehicle silhouette and colors.",
+      "style_reference": "9618d6fa-56eb-5787-88e4-f5e2d19cee02"
+    }
+  ]
+}
