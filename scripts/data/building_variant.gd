@@ -13,7 +13,7 @@ const TYPES := {
 static func make(country: String, kind: String, index: int) -> Dictionary:
 	var types: Array = TYPES.get(country, TYPES["ar"])
 	var role := 0 if kind in ["home", "house"] else 3 if kind == "office" else 2 if kind == "shop" else 1
-	var style: String = types[(role + index * 3) % types.size()]
+	var style: String = types[(role + index * 5) % types.size()]
 	var floors := 1 + (index % 3)
 	if style in ["apartamentos", "palazzo", "oficina", "mixto"]:
 		floors += 1

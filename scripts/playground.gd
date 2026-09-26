@@ -242,6 +242,8 @@ func populate() -> void:
 		[Vector2(1022, 420), Vector2(1022, 580), Vector2(1007, 580), Vector2(1007, 420)],
 		[Vector2(east, 830), Vector2(east + 130, 830), Vector2(east + 130, 856), Vector2(east, 856)],
 		[Vector2(east - 50, 1080), Vector2(east + 100, 1080), Vector2(east + 100, 1100), Vector2(east - 50, 1100)],
+		[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
+		[Vector2(1430, 1030), Vector2(1520, 1072), Vector2(1615, 1088), Vector2(1700, 1050), Vector2(1615, 1088), Vector2(1520, 1072)],
 	]
 	for i in WorldManager.district.population:
 		var walker := Node2D.new()

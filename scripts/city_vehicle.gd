@@ -29,6 +29,9 @@ func _ready() -> void:
 	sprite.region_rect = sprite.texture.get_image().get_used_rect()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y / 2.0)
 	sprite.flip_h = direction > 0 or not route_points.is_empty()
+	if not route_points.is_empty():
+		heading = (route_points[route_index] - position).angle()
+		sprite.rotation = heading
 	add_child(sprite)
 	if model == "van":
 		half_width = 43.0

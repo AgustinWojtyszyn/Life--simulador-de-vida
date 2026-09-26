@@ -19,6 +19,7 @@ func _ready() -> void:
 	sprite.region_rect = facade.get_image().get_used_rect()
 	sprite.scale = size / facade.get_size()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
+	sprite.z_index = -1
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
 	if access != Access.EXTERIOR_ONLY:
@@ -52,7 +53,9 @@ func _draw() -> void:
 		var material: Array = colors.get(country_id, colors["ar"])
 		var left := -w * 0.5
 		var top := -h
-		draw_rect(Rect2(left, top, w, h - 19), material[0].darkened(0.08))
+		var wall: Color = material[0].darkened(0.08)
+		wall.a = 0.38
+		draw_rect(Rect2(left, top, w, h - 19), wall)
 		draw_rect(Rect2(left - 4, top - 7, w + 8, 9), material[1])
 		if variant.roof == 1:
 			draw_colored_polygon(PackedVector2Array([Vector2(left - 7, top), Vector2(0, top - 26), Vector2(-left + 7, top)]), material[1].darkened(0.16))

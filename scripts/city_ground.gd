@@ -70,6 +70,10 @@ func _draw() -> void:
 		for i in 24:
 			var p: Vector2 = bed.position + Vector2(rng.randf_range(6, bed.size.x - 6), rng.randf_range(5, bed.size.y - 5))
 			draw_rect(Rect2(p, Vector2(2, 2)), Color("d0b67a"))
+	# A diagonal walking route through the open plaza interrupts the street grid.
+	var plaza_path := PackedVector2Array([Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873)])
+	draw_polyline(plaza_path, Color("e1d6b6"), 24, true)
+	draw_polyline(plaza_path, Color("b3aa91"), 2, true)
 	for x in [98, 524, 774, 1040, 1330]:
 		draw_rect(Rect2(x, 387, 20, 4), Color("333f47"))
 		for dx in range(2, 20, 4):

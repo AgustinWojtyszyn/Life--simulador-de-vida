@@ -44,7 +44,8 @@ func _process(delta: float) -> void:
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		visual.set_art("seated" if activity == "sit" else "idle", "south", 0)
-		queue_redraw()
+		if wait_time == 0:
+			queue_redraw()
 		return
 	activity = "walk"
 	var goal := route[destination]

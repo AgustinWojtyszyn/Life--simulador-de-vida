@@ -19,8 +19,10 @@ func run() -> void:
 	var world: Node2D = load("res://scenes/playground.tscn").instantiate()
 	root.add_child(world)
 	await frames(3)
-	var cars := get_nodes_in_group("city_traffic")
+	var all_cars := get_nodes_in_group("city_traffic")
+	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty())
 	var player: CharacterBody2D = world.get_node("Player")
+	check(all_cars.size() == 8, "The turning street circuit must add two moving vehicles")
 	check(cars.size() == 6, "Six moving vehicles must spawn")
 	var models := {}
 	var starts: Array[Vector2] = []

@@ -5,6 +5,15 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	$Player/Camera2D.limit_right = 800
 	$Player/Camera2D.limit_bottom = 450
+	for wall in [Rect2(86, 64, 628, 16), Rect2(86, 388, 628, 16), Rect2(86, 64, 16, 340), Rect2(698, 64, 16, 340), Rect2(501, 161, 136, 46)]:
+		var body := StaticBody2D.new()
+		body.position = wall.get_center()
+		var collider := CollisionShape2D.new()
+		var shape := RectangleShape2D.new()
+		shape.size = wall.size
+		collider.shape = shape
+		body.add_child(collider)
+		add_child(body)
 	for entry in [
 		[Vector2(390, 359), "Salir al barrio", "exit_home", "exit"],
 		[Vector2(228, 245), "Comprar provisiones", "shop", "shelf"],

@@ -22,7 +22,7 @@ func _process(delta: float) -> void:
 	refresh_target()
 	if InputManager.interact_pressed():
 		interact()
-	elif is_instance_valid(seated_bench) and InputManager.movement() != Vector2.ZERO:
+	elif is_instance_valid(seated_bench) and not player.transitioning and InputManager.movement() != Vector2.ZERO:
 		stand_up()
 	if is_instance_valid(hud):
 		hud.set_interaction(prompt, message)
