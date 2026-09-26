@@ -1,0 +1,19 @@
+; Engine configuration file.
+; Minimal Godot 4 project for VIDA.
+
+config_version=5
+
+[application]
+
+config/name="VIDA"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

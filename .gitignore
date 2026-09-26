@@ -1,12 +1,18 @@
-node_modules/
-dist/
-.env*
-!.env.example
-android/.gradle/
-android/build/
-android/app/build/
-*.jks
-*.keystore
-.DS_Store
+# Godot
+.godot/
+.import/
+export.cfg
+export_presets.cfg
 
-*.tsbuildinfo
+build/
+dist/
+exports/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
