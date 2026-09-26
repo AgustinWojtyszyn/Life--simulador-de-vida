@@ -7,14 +7,25 @@ pixel art generado con PixelLab MCP y una tarde cálida de barrio porteño.
 godot --path .
 ```
 
-Movete con **WASD o las flechas**. La cámara sigue al personaje. El barrio incluye
+Movete con **WASD o las flechas**. La cámara sigue al personaje.
+Acercate y presioná **E** cuando aparezca la indicación:
+
+- **Bancos:** sentarte a descansar; E o una dirección para levantarte.
+- **Vecinos:** saludar con una pose propia; el vecino se detiene, devuelve el saludo y continúa.
+- **Fuente:** pedir un deseo, con una moneda y ondas sobre el agua.
+
+El agua de la fuente tiene movimiento continuo de corrientes y reflejos; la piedra
+permanece fija. El parking está al sudeste, junto a la calle vertical: cuatro
+plazas numeradas, acceso señalizado y pasillo central libre.
+
+ El barrio incluye
 fachadas comerciales, balcones, toldos, calles con cruces peatonales,
 autos estacionados y en circulación, una plaza con fuente, árboles, bancos, faroles y peatones.
 
 Los objetos se ordenan por su contacto con el suelo. Edificios y copas se atenúan
 si ocultan al personaje. Las colisiones corresponden a las bases, no a la altura
-de las imágenes. Los peatones son ambientales; no tienen interacción ni IA de
-navegación. Hay cuatro modelos de vehículos (hatchback, taxi porteño, furgón y
+de las imágenes. Los peatones siguen rutas simples y responden al saludo; no
+tienen IA de navegación. Hay cuatro modelos de vehículos (hatchback, taxi porteño, furgón y
 coupé), cuatro estacionados y seis circulando por los dos carriles de la avenida.
 El tránsito frena ante el personaje, mantiene distancia con el vehículo de
 adelante y retoma la marcha cuando se libera el paso. Los vehículos reaparecen
@@ -32,8 +43,10 @@ conexión ni generación de imágenes durante el juego.
 godot --headless --path . --editor --import --quit
 godot --headless --path . --script tests/playground_test.gd
 godot --headless --path . --script tests/traffic_test.gd
+godot --headless --path . --script tests/interactions_test.gd
 mkdir -p build
 godot --path . --script tests/city_capture.gd
+godot --path . --script tests/water_render_test.gd
 ```
 
 La prueba funcional cubre assets, aparición libre de obstáculos, movimiento,
@@ -42,7 +55,11 @@ autos, cuatro bordes, cámara y transparencia de oclusores. La prueba de tránsi
 verifica modelos distintos, ambos sentidos, frenado y reanudación ante el
 personaje, filas de vehículos, colisión móvil y reciclado fuera de cámara. La prueba gráfica
 requiere un entorno con pantalla; guarda `build/street.png`, `build/plaza.png`
-y `build/crossing.png` y mide 180 cuadros después del calentamiento.
+`build/crossing.png`, `build/parking.png` y `build/seated.png`, y mide 180 cuadros
+después del calentamiento. La prueba de interacciones usa la tecla E y verifica
+sentarse/levantarse, respuesta del vecino, deseo, alcance y posición del parking.
+La prueba gráfica del agua compara dos instantes del shader: debe cambiar el
+agua sin cambiar ningún píxel opaco de piedra.
 
 Los assets y sus prompts/IDs de generación están documentados en
 [assets/README.md](assets/README.md) y [assets/city/manifest.json](assets/city/manifest.json).

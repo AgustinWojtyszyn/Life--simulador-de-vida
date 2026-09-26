@@ -30,7 +30,7 @@ func run() -> void:
 		vehicle.collision_layer = 0
 	for path in ["environment/grass", "environment/ground", "environment/sidewalk",
 		"environment/obstacle", "characters/resident/south", "characters/resident/north",
-		"characters/resident/east", "characters/resident/west"]:
+		"characters/resident/east", "characters/resident/west", "characters/resident/seated", "characters/resident/wave"]:
 		var texture: Texture2D = load("res://assets/%s.png" % path)
 		check(texture != null and texture.get_size() == Vector2(32, 32), "Asset must be 32x32: " + path)
 	var sprite: Sprite2D = player.get_node("Sprite2D")
@@ -95,7 +95,7 @@ func run() -> void:
 		{"start": Vector2(1398, 480), "action": "move_right", "axis": "x", "expected": 1418.0},
 		{"start": Vector2(910, 40), "action": "move_up", "axis": "y", "expected": 22.0},
 		{"start": Vector2(910, 920), "action": "move_down", "axis": "y", "expected": 938.0},
-		{"start": Vector2(88, 413), "action": "move_right", "axis": "x", "expected": 109.0},
+		{"start": Vector2(1060, 720), "action": "move_right", "axis": "x", "expected": 1083.0},
 	]:
 		player.position = probe.start
 		player.velocity = Vector2.ZERO

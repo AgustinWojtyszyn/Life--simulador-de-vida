@@ -39,6 +39,22 @@ ordenados por Y; recorren `TRAFFIC_LANES` en dos sentidos, frenan ante el person
 y mantienen distancia con el vehículo que los precede. Los sprites se orientan
 según el sentido y se anclan por su región visible, sin el margen transparente.
 
+## Poses e interacción
+
+`characters/resident/seated.png` y `wave.png` son poses nuevas de 32×32 generadas
+con PixelLab a partir del residente original. Prompts, referencia e IDs están en
+[characters/resident/interactions.json](characters/resident/interactions.json).
+Se usan al sentarse y saludar; los vecinos también muestran la pose de saludo.
+
+`shaders/fountain_water.gdshader` anima únicamente los tonos turquesa de la fuente
+existente: desplazamiento por píxeles, reflejos y corrientes. La piedra y la
+silueta no se deforman. `fountain_water.gd` controla el tiempo y agrega la moneda
+y las ondas al pedir un deseo. No hay nuevas llamadas de generación durante el juego.
+
+El parking señalizado reemplaza el bloque residencial sudeste. Los cuatro autos
+estáticos se ubican dentro de sus plazas; se retiraron las marcas de aparcamiento
+en la avenida. Los seis vehículos de tránsito siguen circulando por sus carriles.
+
 ## Assets anteriores conservados
 
 `characters/resident/{south,north,east,west}.png` (32×32) sigue siendo el personaje

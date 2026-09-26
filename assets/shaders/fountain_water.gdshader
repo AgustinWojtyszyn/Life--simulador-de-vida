@@ -17,5 +17,5 @@ void fragment() {
 	float falling = step(0.7, sin(pixel.y * 1.25 - tick * 1.2 + pixel.x * 0.3));
 	float ripple = sin(length((UV - vec2(0.5, 0.71)) * vec2(1.0, 2.5)) * 95.0 - water_time * 9.0);
 	color += water * (0.10 * falling + 0.075 * ripple);
-	COLOR = vec4(color, base.a) * COLOR;
+	COLOR = vec4(color, base.a);
 }

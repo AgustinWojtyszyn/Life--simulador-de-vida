@@ -1,0 +1,19 @@
+{
+  "generator": "mcp__pixellab__create_image_pro_flash",
+  "assets": [
+    {
+      "path": "seated.png",
+      "job_id": "7b7fde9a-d2d4-48ae-bfe3-f264de6d82ba",
+      "source_image_id": "81cf7a53-46c4-5d4d-9706-f947ffd9ff64",
+      "description": "Single 32x32 pixel art character sprite. Same resident sitting on an invisible park bench, relaxed seated pose facing viewer, knees bent, feet forward, hips seated, hands on lap. Do not draw the bench. EXACT same young brown-haired person, teal jacket and dark pants as reference, same identity and scale and pixel style. Entire character visible, transparent background, no props, no text.",
+      "reference": "https://api.pixellab.ai/mcp/images/15fdd84f-eb15-4ba0-a19e-53589edfd877/download"
+    },
+    {
+      "path": "wave.png",
+      "job_id": "ca0982cb-4d06-4d04-89aa-10f8d67f0532",
+      "source_image_id": "a83b8bd1-983f-5c51-a0e6-596344311a44",
+      "description": "Single 32x32 pixel art character sprite. Same resident standing facing viewer, one arm raised with open hand greeting a neighbor, friendly waving pose. EXACT same young brown-haired person, teal jacket and dark pants as reference, same identity and scale and pixel style. Entire character visible, transparent background, no props, no text.",
+      "reference": "https://api.pixellab.ai/mcp/images/15fdd84f-eb15-4ba0-a19e-53589edfd877/download"
+    }
+  ]
+}

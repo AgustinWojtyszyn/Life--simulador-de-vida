@@ -7,13 +7,23 @@ func capture() -> void:
 	var world: Node2D = load("res://scenes/playground.tscn").instantiate()
 	root.add_child(world)
 	var player: CharacterBody2D = world.get_node("Player")
-	for view in [{"name": "street", "position": Vector2(520, 330)}, {"name": "plaza", "position": Vector2(520, 712)}, {"name": "crossing", "position": Vector2(990, 470)}]:
+	for view in [{"name": "street", "position": Vector2(520, 330)}, {"name": "plaza", "position": Vector2(520, 712)}, {"name": "crossing", "position": Vector2(990, 470)}, {"name": "parking", "position": Vector2(1150, 780)}]:
 		player.position = view.position
 		player.get_node("Camera2D").reset_smoothing()
 		for i in 20:
 			await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://build/" + view.name + ".png")
+	var actions: Node = world.get_node("Interactions")
+	var bench: Node2D = get_nodes_in_group("city_benches")[0]
+	player.position = bench.position + Vector2(0, 20)
+	actions.interact()
+	player.get_node("Camera2D").reset_smoothing()
+	for i in 20:
+		await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://build/seated.png")
+	actions.stand_up()
 	# Exclude shader compilation and startup from the performance sample.
 	await create_timer(2.0).timeout
 	var sample_start := Time.get_ticks_usec()
