@@ -8,6 +8,7 @@ const Vehicle := preload("res://scripts/city_vehicle.gd")
 const Interactions := preload("res://scripts/city_interactions.gd")
 const Water := preload("res://scripts/fountain_water.gd")
 const Hud := preload("res://scripts/city_hud.gd")
+const BuildingVariants := preload("res://scripts/data/building_variant.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
@@ -180,9 +181,11 @@ func build_expansion() -> void:
 		building.is_home = slot.kind == "home"
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.title = country.shop_names[2] if slot.kind == "clinic" else country.shop_names[4] if slot.kind == "office" else country.home_kind.to_upper() if slot.kind == "house" else country.shop_names[index % 2]
+		building.country_id = country.id
+		building.variant = BuildingVariants.make(country.id, slot.kind, index)
 		var use_house: bool = slot.kind in ["home", "house"] and country.id not in ["jp", "it"]
 		building.facade = load("res://assets/regions/home.png" if use_house else country.facade)
-		building.size = Vector2(192, 160) if use_house else Vector2(208, 236)
+		building.size = Vector2(building.variant.width, building.variant.height)
 		add_child(building)
 		city_objects.append(building)
 		occluders.append(building.get_child(0))

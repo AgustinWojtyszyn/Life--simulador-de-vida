@@ -66,7 +66,7 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	var rect: Rect2 = bounds_cache[path]
 	sprite.texture = texture
 	# Feet, not transparent canvas padding, define the ground contact.
-	sprite.scale = Vector2.ONE * (28.0 / maxf(1, rect.size.y))
+	sprite.scale = Vector2.ONE * (36.0 / maxf(1, rect.size.y))
 	sprite.position = Vector2((texture.get_width() * 0.5 - rect.get_center().x) * sprite.scale.x, (texture.get_height() * 0.5 - rect.end.y) * sprite.scale.y)
 	if state == "seated":
 		sprite.scale.y *= 0.82
