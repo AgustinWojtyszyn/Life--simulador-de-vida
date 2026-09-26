@@ -1,5 +1,5 @@
 {
-  "godotTools.editorPath.godot4": "godot",
+  "godotTools.editorPath.godot4": "/home/aggustin/.local/bin/godot",
   "godotTools.lsp.headless": true,
   "godotTools.lsp.serverPort": 6008
 }
