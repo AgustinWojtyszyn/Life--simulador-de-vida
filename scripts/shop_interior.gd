@@ -1,5 +1,7 @@
 extends Node2D
 
+const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
+
 func _ready() -> void:
 	y_sort_enabled = true
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -19,7 +21,7 @@ func _ready() -> void:
 		[Vector2(228, 245), "Comprar provisiones", "shop", "shelf"],
 		[Vector2(550, 250), "Tomar algo", "coffee", "counter"],
 	]:
-		var point := InteractionTarget.new()
+		var point := InteractionTargetScript.new()
 		point.position = entry[0]
 		point.label = entry[1]
 		point.action = entry[2]
