@@ -48,12 +48,18 @@ func switch_world() -> void:
 	var player: CharacterBody2D = world.get_node("Player")
 	player.position = WorldManager.spawn_position
 	player.get_node("Camera2D").reset_smoothing()
+	var environment := preload("res://scripts/world_environment.gd").new()
+	world.add_child(environment)
 	setup_overlay()
 	changing = false
 
 func setup_overlay() -> void:
 	overlay = CanvasLayer.new()
 	overlay.layer = 30
+	var life_panel := preload("res://scripts/ui/life_panel.gd").new()
+	life_panel.name = "LifePanel"
+	life_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	world.add_child(life_panel)
 	add_child(overlay)
 	var controls := Control.new()
 	controls.set_script(preload("res://scripts/ui/touch_controls.gd"))
@@ -99,6 +105,10 @@ func setup_overlay() -> void:
 	tween.tween_callback(fade.queue_free)
 
 func toggle_pause() -> void:
+	var life_panel := world.get_node_or_null("LifePanel")
+	if life_panel != null and life_panel.opened:
+		life_panel.close()
+		return
 	get_tree().paused = not get_tree().paused
 	pause_panel.visible = get_tree().paused
 	InputManager.reset()

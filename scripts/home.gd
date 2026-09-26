@@ -12,7 +12,15 @@ func _ready() -> void:
 		add_solid(rect)
 	furniture("bed", Vector2(190, 245), Vector2(100, 100), Rect2(147, 178, 86, 61))
 	furniture("sofa", Vector2(430, 280), Vector2(134, 90), Rect2(380, 254, 100, 20))
-	furniture("kitchen", Vector2(478, 166), Vector2(144, 96), Rect2(419, 124, 118, 35))
+	furniture("kitchen", Vector2(478, 166), Vector2(160, 100), Rect2(419, 124, 118, 35))
+	furniture("wardrobe", Vector2(267, 171), Vector2(56, 82), Rect2(243, 148, 48, 18))
+	furniture("shelf", Vector2(141, 153), Vector2(50, 68), Rect2(119, 137, 44, 14))
+	furniture("tv", Vector2(350, 242), Vector2(72, 50), Rect2(320, 226, 60, 12))
+	furniture("desk", Vector2(537, 248), Vector2(64, 68), Rect2(511, 228, 50, 14))
+	furniture("dining", Vector2(443, 345), Vector2(74, 59), Rect2(415, 320, 56, 19))
+	furniture("bathroom", Vector2(636, 185), Vector2(106, 89), Rect2(589, 110, 92, 42))
+	add_target(Vector2(635, 219), "Ducharte", "shower", "shower")
+	add_target(Vector2(417, 202), "Cocinar", "cook", "stove")
 	add_target(Vector2(260, 245), "Descansar en tu cama", "rest", WorldManager.profile.home_id + "_bed")
 	add_target(Vector2(352, 270), "Mirar televisión", "tv", "tv")
 	add_target(Vector2(535, 266), "Usar la computadora", "pc", "pc")
@@ -81,29 +89,11 @@ func _draw() -> void:
 	for x in range(576, 694, 16):
 		for y in range(88, 198, 16):
 			draw_rect(Rect2(x, y, 15, 15), Color("d2dbcb"))
-	# Suggested bathroom fixtures, with a separate walkable doorway below.
-	draw_rect(Rect2(649, 108, 28, 40), Color("e1e4d6"))
-	draw_circle(Vector2(661, 146), 13, Color("f0eddb"))
-	draw_circle(Vector2(661, 146), 7, Color("8eaaa7"))
 	draw_rect(Rect2(342, 273, 170, 54), Color("547b78"))
 	draw_rect(Rect2(347, 278, 160, 44), Color("709a90"), false, 2)
 	draw_rect(Rect2(303, 86, 10, 148), Color("ded1b1"))
 	draw_rect(Rect2(566, 86, 10, 116), Color("ded1b1"))
 	draw_rect(Rect2(363, 375, 54, 15), Color("598381"))
-	# Small readable fixtures share the room's palette and respect its walkways.
-	draw_rect(Rect2(321, 205, 54, 12), Color("29393e"))
-	draw_rect(Rect2(325, 207, 46, 7), Color("5b94a0")) # TV
-	draw_rect(Rect2(520, 217, 37, 22), Color("625446"))
-	draw_rect(Rect2(524, 210, 28, 21), Color("29393e"))
-	draw_rect(Rect2(527, 212, 22, 14), Color("8ab3b6")) # PC
-	draw_rect(Rect2(537, 109, 25, 51), Color("d3d9cf"))
-	draw_line(Vector2(540, 135), Vector2(559, 135), Color("8b9d97"), 2) # fridge
-	draw_colored_polygon(PackedVector2Array([Vector2(415, 319), Vector2(470, 314), Vector2(484, 341), Vector2(425, 346)]), Color("705340"))
-	draw_colored_polygon(PackedVector2Array([Vector2(422, 320), Vector2(468, 317), Vector2(477, 338), Vector2(428, 341)]), Color("a77d57")) # table
-	draw_circle(Vector2(442, 328), 6, Color("c8d1bf"))
-	draw_rect(Rect2(130, 157, 48, 9), Color("625746")) # bedroom shelf
-	for x in [134, 143, 154, 165]:
-		draw_rect(Rect2(x, 147, 6, 10), Color("66878b"))
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(123, 116), "DORMITORIO", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("354a48"))
 	draw_string(font, Vector2(587, 185), "BAÑO", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("354a48"))

@@ -1,0 +1,999 @@
+{
+  "style": "VIDA elevated orthographic pixel art, warm upper-left lighting",
+  "required_per_region": {
+    "buildings": 12,
+    "houses": 10
+  },
+  "assets": [
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "market",
+      "width": 180,
+      "height": 140,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: single storey neighborhood grocery with broad entrance crates and loading shutter.",
+      "path": "assets/buildings/ar/market.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "cafe",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: small coffee shop with large windows, simple signboard and two outdoor tables.",
+      "path": "assets/buildings/ar/cafe.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "clinic",
+      "width": 180,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: clean two storey neighborhood clinic with accessible entrance and plain white facade.",
+      "path": "assets/buildings/ar/clinic.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "office",
+      "width": 160,
+      "height": 252,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: modern six storey narrow office tower with glass panels and flat roof.",
+      "path": "assets/buildings/ar/office.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "workshop",
+      "width": 200,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: weathered low industrial repair workshop corrugated roof garage roller doors exposed masonry.",
+      "path": "assets/buildings/ar/workshop.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "mixed_old",
+      "width": 180,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: aged three storey mixed use building with worn plaster grocery below and apartments above.",
+      "path": "assets/buildings/ar/mixed_old.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "premium",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: contemporary premium four storey apartment building stone cladding large recessed windows.",
+      "path": "assets/buildings/ar/premium.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "cheap",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: low cost four storey apartment block plain concrete repetitive small windows rooftop tanks.",
+      "path": "assets/buildings/ar/cheap.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "bakery",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: modest small bakery in old single storey shop frontage brick oven chimney simple glass entrance.",
+      "path": "assets/buildings/ar/bakery.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "bookshop",
+      "width": 180,
+      "height": 200,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: two storey restored old bookshop building with wooden entrance and tall narrow windows.",
+      "path": "assets/buildings/ar/bookshop.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "warehouse",
+      "width": 208,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: low wide storage warehouse with loading ramp chipped metal roof.",
+      "path": "assets/buildings/ar/warehouse.png"
+    },
+    {
+      "region": "ar",
+      "category": "buildings",
+      "name": "tower",
+      "width": 160,
+      "height": 256,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: landmark slim eight storey contemporary tower with concrete core and glass corner, not futuristic.",
+      "path": "assets/buildings/ar/tower.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "modest",
+      "width": 176,
+      "height": 144,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: modest single storey everyday house, simple flat facade, iron gate, small windows.",
+      "path": "assets/houses/ar/modest.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "modern",
+      "width": 184,
+      "height": 184,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: modern two storey compact house, offset cubic volumes flat roof garage simple entrance.",
+      "path": "assets/houses/ar/modern.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "common",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: ordinary comfortable family house, modest roof, two front windows and visible front door.",
+      "path": "assets/houses/ar/common.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "compact",
+      "width": 136,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: very narrow small attached row house on tiny lot, two storeys small upstairs window.",
+      "path": "assets/houses/ar/compact.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "duplex",
+      "width": 208,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: two adjoining homes in a duplex with separate front doors and two asymmetrical roof sections.",
+      "path": "assets/houses/ar/duplex.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "old",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: old worn family home with chipped plaster repaired roof metal shutter no plants.",
+      "path": "assets/houses/ar/old.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "restored",
+      "width": 176,
+      "height": 212,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: carefully restored early twentieth century two storey townhouse modest decorative masonry.",
+      "path": "assets/houses/ar/restored.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "apartments",
+      "width": 192,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: three storey residential apartment building recessed entrance simple balconies concrete walls.",
+      "path": "assets/houses/ar/apartments.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "brick",
+      "width": 184,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: unpretentious exposed brick residence two floors small terrace utility cables.",
+      "path": "assets/houses/ar/brick.png"
+    },
+    {
+      "region": "ar",
+      "category": "houses",
+      "name": "premium_home",
+      "width": 208,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Argentina ordinary contemporary Buenos Aires neighborhood: plaster, masonry, metal shutters, mixed twentieth century and modern architecture. This asset: larger contemporary family home different split level volumes timber stone and garage.",
+      "path": "assets/houses/ar/premium_home.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "market",
+      "width": 180,
+      "height": 140,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: single storey neighborhood grocery with broad entrance crates and loading shutter.",
+      "path": "assets/buildings/jp/market.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "cafe",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: small coffee shop with large windows, simple signboard and two outdoor tables.",
+      "path": "assets/buildings/jp/cafe.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "clinic",
+      "width": 180,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: clean two storey neighborhood clinic with accessible entrance and plain white facade.",
+      "path": "assets/buildings/jp/clinic.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "office",
+      "width": 160,
+      "height": 252,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: modern six storey narrow office tower with glass panels and flat roof.",
+      "path": "assets/buildings/jp/office.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "workshop",
+      "width": 200,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: weathered low industrial repair workshop corrugated roof garage roller doors exposed masonry.",
+      "path": "assets/buildings/jp/workshop.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "mixed_old",
+      "width": 180,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: aged three storey mixed use building with worn plaster grocery below and apartments above.",
+      "path": "assets/buildings/jp/mixed_old.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "premium",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: contemporary premium four storey apartment building stone cladding large recessed windows.",
+      "path": "assets/buildings/jp/premium.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "cheap",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: low cost four storey apartment block plain concrete repetitive small windows rooftop tanks.",
+      "path": "assets/buildings/jp/cheap.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "bakery",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: modest small bakery in old single storey shop frontage brick oven chimney simple glass entrance.",
+      "path": "assets/buildings/jp/bakery.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "bookshop",
+      "width": 180,
+      "height": 200,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: two storey restored old bookshop building with wooden entrance and tall narrow windows.",
+      "path": "assets/buildings/jp/bookshop.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "warehouse",
+      "width": 208,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: low wide storage warehouse with loading ramp chipped metal roof.",
+      "path": "assets/buildings/jp/warehouse.png"
+    },
+    {
+      "region": "jp",
+      "category": "buildings",
+      "name": "tower",
+      "width": 160,
+      "height": 256,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: landmark slim eight storey contemporary tower with concrete core and glass corner, not futuristic.",
+      "path": "assets/buildings/jp/tower.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "modest",
+      "width": 176,
+      "height": 144,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: modest single storey everyday house, simple flat facade, iron gate, small windows.",
+      "path": "assets/houses/jp/modest.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "modern",
+      "width": 184,
+      "height": 184,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: modern two storey compact house, offset cubic volumes flat roof garage simple entrance.",
+      "path": "assets/houses/jp/modern.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "common",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: ordinary comfortable family house, modest roof, two front windows and visible front door.",
+      "path": "assets/houses/jp/common.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "compact",
+      "width": 136,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: very narrow small attached row house on tiny lot, two storeys small upstairs window.",
+      "path": "assets/houses/jp/compact.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "duplex",
+      "width": 208,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: two adjoining homes in a duplex with separate front doors and two asymmetrical roof sections.",
+      "path": "assets/houses/jp/duplex.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "old",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: old worn family home with chipped plaster repaired roof metal shutter no plants.",
+      "path": "assets/houses/jp/old.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "restored",
+      "width": 176,
+      "height": 212,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: carefully restored early twentieth century two storey townhouse modest decorative masonry.",
+      "path": "assets/houses/jp/restored.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "apartments",
+      "width": 192,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: three storey residential apartment building recessed entrance simple balconies concrete walls.",
+      "path": "assets/houses/jp/apartments.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "brick",
+      "width": 184,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: unpretentious exposed brick residence two floors small terrace utility cables.",
+      "path": "assets/houses/jp/brick.png"
+    },
+    {
+      "region": "jp",
+      "category": "houses",
+      "name": "premium_home",
+      "width": 208,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Japan contemporary urban residential neighborhood: narrow frontage, compact massing, light concrete tile cladding small signs exterior AC, NOT all traditional. This asset: larger contemporary family home different split level volumes timber stone and garage.",
+      "path": "assets/houses/jp/premium_home.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "market",
+      "width": 180,
+      "height": 140,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: single storey neighborhood grocery with broad entrance crates and loading shutter.",
+      "path": "assets/buildings/br/market.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "cafe",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: small coffee shop with large windows, simple signboard and two outdoor tables.",
+      "path": "assets/buildings/br/cafe.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "clinic",
+      "width": 180,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: clean two storey neighborhood clinic with accessible entrance and plain white facade.",
+      "path": "assets/buildings/br/clinic.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "office",
+      "width": 160,
+      "height": 252,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: modern six storey narrow office tower with glass panels and flat roof.",
+      "path": "assets/buildings/br/office.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "workshop",
+      "width": 200,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: weathered low industrial repair workshop corrugated roof garage roller doors exposed masonry.",
+      "path": "assets/buildings/br/workshop.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "mixed_old",
+      "width": 180,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: aged three storey mixed use building with worn plaster grocery below and apartments above.",
+      "path": "assets/buildings/br/mixed_old.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "premium",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: contemporary premium four storey apartment building stone cladding large recessed windows.",
+      "path": "assets/buildings/br/premium.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "cheap",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: low cost four storey apartment block plain concrete repetitive small windows rooftop tanks.",
+      "path": "assets/buildings/br/cheap.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "bakery",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: modest small bakery in old single storey shop frontage brick oven chimney simple glass entrance.",
+      "path": "assets/buildings/br/bakery.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "bookshop",
+      "width": 180,
+      "height": 200,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: two storey restored old bookshop building with wooden entrance and tall narrow windows.",
+      "path": "assets/buildings/br/bookshop.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "warehouse",
+      "width": 208,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: low wide storage warehouse with loading ramp chipped metal roof.",
+      "path": "assets/buildings/br/warehouse.png"
+    },
+    {
+      "region": "br",
+      "category": "buildings",
+      "name": "tower",
+      "width": 160,
+      "height": 256,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: landmark slim eight storey contemporary tower with concrete core and glass corner, not futuristic.",
+      "path": "assets/buildings/br/tower.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "modest",
+      "width": 176,
+      "height": 144,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: modest single storey everyday house, simple flat facade, iron gate, small windows.",
+      "path": "assets/houses/br/modest.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "modern",
+      "width": 184,
+      "height": 184,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: modern two storey compact house, offset cubic volumes flat roof garage simple entrance.",
+      "path": "assets/houses/br/modern.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "common",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: ordinary comfortable family house, modest roof, two front windows and visible front door.",
+      "path": "assets/houses/br/common.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "compact",
+      "width": 136,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: very narrow small attached row house on tiny lot, two storeys small upstairs window.",
+      "path": "assets/houses/br/compact.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "duplex",
+      "width": 208,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: two adjoining homes in a duplex with separate front doors and two asymmetrical roof sections.",
+      "path": "assets/houses/br/duplex.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "old",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: old worn family home with chipped plaster repaired roof metal shutter no plants.",
+      "path": "assets/houses/br/old.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "restored",
+      "width": 176,
+      "height": 212,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: carefully restored early twentieth century two storey townhouse modest decorative masonry.",
+      "path": "assets/houses/br/restored.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "apartments",
+      "width": 192,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: three storey residential apartment building recessed entrance simple balconies concrete walls.",
+      "path": "assets/houses/br/apartments.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "brick",
+      "width": 184,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: unpretentious exposed brick residence two floors small terrace utility cables.",
+      "path": "assets/houses/br/brick.png"
+    },
+    {
+      "region": "br",
+      "category": "houses",
+      "name": "premium_home",
+      "width": 208,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Brazil ordinary contemporary urban neighborhood: concrete plaster brick tiled roofs where appropriate mixed income no palm tree stereotype. This asset: larger contemporary family home different split level volumes timber stone and garage.",
+      "path": "assets/houses/br/premium_home.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "market",
+      "width": 180,
+      "height": 140,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: single storey neighborhood grocery with broad entrance crates and loading shutter.",
+      "path": "assets/buildings/it/market.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "cafe",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: small coffee shop with large windows, simple signboard and two outdoor tables.",
+      "path": "assets/buildings/it/cafe.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "clinic",
+      "width": 180,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: clean two storey neighborhood clinic with accessible entrance and plain white facade.",
+      "path": "assets/buildings/it/clinic.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "office",
+      "width": 160,
+      "height": 252,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: modern six storey narrow office tower with glass panels and flat roof.",
+      "path": "assets/buildings/it/office.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "workshop",
+      "width": 200,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: weathered low industrial repair workshop corrugated roof garage roller doors exposed masonry.",
+      "path": "assets/buildings/it/workshop.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "mixed_old",
+      "width": 180,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: aged three storey mixed use building with worn plaster grocery below and apartments above.",
+      "path": "assets/buildings/it/mixed_old.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "premium",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: contemporary premium four storey apartment building stone cladding large recessed windows.",
+      "path": "assets/buildings/it/premium.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "cheap",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: low cost four storey apartment block plain concrete repetitive small windows rooftop tanks.",
+      "path": "assets/buildings/it/cheap.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "bakery",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: modest small bakery in old single storey shop frontage brick oven chimney simple glass entrance.",
+      "path": "assets/buildings/it/bakery.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "bookshop",
+      "width": 180,
+      "height": 200,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: two storey restored old bookshop building with wooden entrance and tall narrow windows.",
+      "path": "assets/buildings/it/bookshop.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "warehouse",
+      "width": 208,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: low wide storage warehouse with loading ramp chipped metal roof.",
+      "path": "assets/buildings/it/warehouse.png"
+    },
+    {
+      "region": "it",
+      "category": "buildings",
+      "name": "tower",
+      "width": 160,
+      "height": 256,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: landmark slim eight storey contemporary tower with concrete core and glass corner, not futuristic.",
+      "path": "assets/buildings/it/tower.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "modest",
+      "width": 176,
+      "height": 144,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: modest single storey everyday house, simple flat facade, iron gate, small windows.",
+      "path": "assets/houses/it/modest.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "modern",
+      "width": 184,
+      "height": 184,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: modern two storey compact house, offset cubic volumes flat roof garage simple entrance.",
+      "path": "assets/houses/it/modern.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "common",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: ordinary comfortable family house, modest roof, two front windows and visible front door.",
+      "path": "assets/houses/it/common.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "compact",
+      "width": 136,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: very narrow small attached row house on tiny lot, two storeys small upstairs window.",
+      "path": "assets/houses/it/compact.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "duplex",
+      "width": 208,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: two adjoining homes in a duplex with separate front doors and two asymmetrical roof sections.",
+      "path": "assets/houses/it/duplex.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "old",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: old worn family home with chipped plaster repaired roof metal shutter no plants.",
+      "path": "assets/houses/it/old.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "restored",
+      "width": 176,
+      "height": 212,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: carefully restored early twentieth century two storey townhouse modest decorative masonry.",
+      "path": "assets/houses/it/restored.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "apartments",
+      "width": 192,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: three storey residential apartment building recessed entrance simple balconies concrete walls.",
+      "path": "assets/houses/it/apartments.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "brick",
+      "width": 184,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: unpretentious exposed brick residence two floors small terrace utility cables.",
+      "path": "assets/houses/it/brick.png"
+    },
+    {
+      "region": "it",
+      "category": "houses",
+      "name": "premium_home",
+      "width": 208,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: Italy everyday contemporary city outskirts: modern concrete apartments and worn stucco masonry, restrained historical details only on restored old buildings, NOT tourist postcard. This asset: larger contemporary family home different split level volumes timber stone and garage.",
+      "path": "assets/houses/it/premium_home.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "market",
+      "width": 180,
+      "height": 140,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: single storey neighborhood grocery with broad entrance crates and loading shutter.",
+      "path": "assets/buildings/us/market.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "cafe",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: small coffee shop with large windows, simple signboard and two outdoor tables.",
+      "path": "assets/buildings/us/cafe.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "clinic",
+      "width": 180,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: clean two storey neighborhood clinic with accessible entrance and plain white facade.",
+      "path": "assets/buildings/us/clinic.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "office",
+      "width": 160,
+      "height": 252,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: modern six storey narrow office tower with glass panels and flat roof.",
+      "path": "assets/buildings/us/office.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "workshop",
+      "width": 200,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: weathered low industrial repair workshop corrugated roof garage roller doors exposed masonry.",
+      "path": "assets/buildings/us/workshop.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "mixed_old",
+      "width": 180,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: aged three storey mixed use building with worn plaster grocery below and apartments above.",
+      "path": "assets/buildings/us/mixed_old.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "premium",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: contemporary premium four storey apartment building stone cladding large recessed windows.",
+      "path": "assets/buildings/us/premium.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "cheap",
+      "width": 192,
+      "height": 240,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: low cost four storey apartment block plain concrete repetitive small windows rooftop tanks.",
+      "path": "assets/buildings/us/cheap.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "bakery",
+      "width": 180,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: modest small bakery in old single storey shop frontage brick oven chimney simple glass entrance.",
+      "path": "assets/buildings/us/bakery.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "bookshop",
+      "width": 180,
+      "height": 200,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: two storey restored old bookshop building with wooden entrance and tall narrow windows.",
+      "path": "assets/buildings/us/bookshop.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "warehouse",
+      "width": 208,
+      "height": 152,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: low wide storage warehouse with loading ramp chipped metal roof.",
+      "path": "assets/buildings/us/warehouse.png"
+    },
+    {
+      "region": "us",
+      "category": "buildings",
+      "name": "tower",
+      "width": 160,
+      "height": 256,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: landmark slim eight storey contemporary tower with concrete core and glass corner, not futuristic.",
+      "path": "assets/buildings/us/tower.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "modest",
+      "width": 176,
+      "height": 144,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: modest single storey everyday house, simple flat facade, iron gate, small windows.",
+      "path": "assets/houses/us/modest.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "modern",
+      "width": 184,
+      "height": 184,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: modern two storey compact house, offset cubic volumes flat roof garage simple entrance.",
+      "path": "assets/houses/us/modern.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "common",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: ordinary comfortable family house, modest roof, two front windows and visible front door.",
+      "path": "assets/houses/us/common.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "compact",
+      "width": 136,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: very narrow small attached row house on tiny lot, two storeys small upstairs window.",
+      "path": "assets/houses/us/compact.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "duplex",
+      "width": 208,
+      "height": 180,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: two adjoining homes in a duplex with separate front doors and two asymmetrical roof sections.",
+      "path": "assets/houses/us/duplex.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "old",
+      "width": 184,
+      "height": 160,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: old worn family home with chipped plaster repaired roof metal shutter no plants.",
+      "path": "assets/houses/us/old.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "restored",
+      "width": 176,
+      "height": 212,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: carefully restored early twentieth century two storey townhouse modest decorative masonry.",
+      "path": "assets/houses/us/restored.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "apartments",
+      "width": 192,
+      "height": 220,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: three storey residential apartment building recessed entrance simple balconies concrete walls.",
+      "path": "assets/houses/us/apartments.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "brick",
+      "width": 184,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: unpretentious exposed brick residence two floors small terrace utility cables.",
+      "path": "assets/houses/us/brick.png"
+    },
+    {
+      "region": "us",
+      "category": "houses",
+      "name": "premium_home",
+      "width": 208,
+      "height": 192,
+      "prompt": "Detailed crisp pixel art for VIDA life simulator. Elevated three-quarter orthographic view, FRONT facade facing viewer, right wall recedes up-right, verticals straight. Warm upper-left sunlight, cool muted shadows, restrained cream terracotta olive teal palette. Complete isolated building on transparent background, no ground tile, no scenery, no text. Modest vegetation only when appropriate, no obligatory balconies or awnings. Regional architecture: United States small city: red brick wood siding pitched roofs where appropriate, detached homes, contemporary downtown small businesses. This asset: larger contemporary family home different split level volumes timber stone and garage.",
+      "path": "assets/houses/us/premium_home.png"
+    }
+  ]
+}

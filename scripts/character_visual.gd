@@ -14,6 +14,7 @@ var textures := {}
 var bounds_cache := {}
 var last_art := ""
 var pose := "idle"
+var activity_phase := 0.0
 
 func _ready() -> void:
 	if profile == null:
@@ -36,24 +37,33 @@ func apply_profile(value: PlayerProfile) -> void:
 
 func animate_motion(direction: Vector2, traveled: float) -> void:
 	if direction.length_squared() > 0.001:
-		facing = ("east" if direction.x > 0 else "west") if absf(direction.x) > absf(direction.y) else ("south" if direction.y > 0 else "north")
+		var names := ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]
+		var requested: String = names[posmod(roundi(direction.angle() / (PI / 4)), 8)]
+		facing = requested if ResourceLoader.exists("res://assets/characters/%s/%s.png" % [profile.gender, requested]) else (("east" if direction.x > 0 else "west") if absf(direction.x) > absf(direction.y) else ("south" if direction.y > 0 else "north"))
 	if traveled > 0.02:
 		distance_phase += traveled
 		set_art("walk", facing, int(distance_phase / 7.0) % 4)
 	else:
 		distance_phase = 0
-		set_art("idle", facing, 0)
+		if facing == "south" and ResourceLoader.exists("res://assets/characters/%s/idle_live/south_0.png" % profile.gender):
+			animate_activity("idle_live", get_process_delta_time())
+		else:
+			set_art("idle", facing, 0)
 
 func set_art(state: String, direction: String, frame: int) -> void:
 	pose = state
 	var path := "res://assets/characters/%s/%s.png" % [profile.gender, direction]
 	if state == "walk":
 		path = "res://assets/characters/%s/walk/%s_%d.png" % [profile.gender, direction, frame]
+	elif state in ["phone", "drink", "idle_live", "eat", "look", "chat", "browse", "pickup", "pc", "tv", "stand", "sit"]:
+		path = "res://assets/characters/%s/%s/south_%d.png" % [profile.gender, state, frame % 9]
 	elif state in ["seated", "wave"]:
 		var folder := "resident" if profile.gender == "male" else "female"
 		path = "res://assets/characters/%s/%s.png" % [folder, state]
 	if not ResourceLoader.exists(path):
-		path = "res://assets/characters/resident/%s.png" % direction
+		path = "res://assets/characters/%s/%s.png" % [profile.gender, direction]
+		if not ResourceLoader.exists(path):
+			path = "res://assets/characters/%s/south.png" % profile.gender
 	if not textures.has(path):
 		var art: Texture2D = load(path)
 		textures[path] = art
@@ -66,9 +76,18 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	var rect: Rect2 = bounds_cache[path]
 	sprite.texture = texture
 	# Feet, not transparent canvas padding, define the ground contact.
-	sprite.scale = Vector2.ONE * (36.0 / maxf(1, rect.size.y))
+	var reference_path := "res://assets/characters/%s/south.png" % profile.gender
+	if not bounds_cache.has(reference_path):
+		bounds_cache[reference_path] = load(reference_path).get_image().get_used_rect()
+	var standing: Rect2 = bounds_cache[reference_path]
+	sprite.scale = Vector2.ONE * (44.0 / maxf(1, standing.size.y))
 	sprite.position = Vector2((texture.get_width() * 0.5 - rect.get_center().x) * sprite.scale.x, (texture.get_height() * 0.5 - rect.end.y) * sprite.scale.y)
 	if state == "seated":
 		sprite.scale.y *= 0.82
 		sprite.position.y -= 6
 	palette.set_shader_parameter("bounds", Vector4(rect.position.x / texture.get_width(), rect.position.y / texture.get_height(), rect.size.x / texture.get_width(), rect.size.y / texture.get_height()))
+
+func animate_activity(state: String, delta: float) -> void:
+	activity_phase += delta
+	set_art(state, "south", int(activity_phase * 7.0) % 9)
+	if state == "idle_live": pose = "idle"

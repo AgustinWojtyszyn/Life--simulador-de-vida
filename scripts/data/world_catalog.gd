@@ -44,8 +44,24 @@ static func countries() -> Array[CountryData]:
 			{"position": Vector2(1530, 1460), "kind": "office", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(east, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
 		]
-		if country.id == "jp":
-			district.building_slots.append({"position": Vector2(1550, 1040), "kind": "shop", "mode": "INTERACTABLE"})
+		# Nine walkable blocks, with mixed frontages and distinct house silhouettes.
+		# Slots leave doors, sidewalks, the plaza and parking circulation clear.
+		var mixed_positions := [Vector2(150, 1060), Vector2(380, 1060), Vector2(620, 1060),
+			Vector2(1160, 1060), Vector2(1370, 1060),
+			Vector2(1630, 1060), Vector2(east + 160, 1060), Vector2(2200, 610),
+			Vector2(780, 1460), Vector2(2280, 1460)]
+		for i in mixed_positions.size():
+			var housing := i % 3 != 1
+			district.building_slots.append({"position": mixed_positions[i], "kind": "house" if housing else "office", "mode": "EXTERIOR_ONLY", "asset_index": i})
+		var home_index := 0
+		var commercial_index := 2
+		for slot in district.building_slots:
+			if slot.kind in ["home", "house"]:
+				slot["asset_index"] = home_index
+				home_index += 1
+			else:
+				slot["asset_index"] = commercial_index
+				commercial_index += 1
 		city.districts.append(district)
 		country.cities.append(city)
 		result.append(country)

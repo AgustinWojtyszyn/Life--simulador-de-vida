@@ -56,11 +56,11 @@ func refresh_target() -> void:
 	match kind:
 		"interactables": prompt = "E · " + (target.label if target.get_script() == InteractionTargetScript else str(target.get_meta("prompt", "Interactuar")))
 		"city_benches": prompt = "E · Sentarte a descansar"
-		"city_residents": prompt = "E · Saludar al vecino"
+		"city_residents": prompt = "E · Hablar con " + str(target.get_meta("person_name", "el vecino"))
 		"city_fountain": prompt = "E · Pedir un deseo"
 
 func interact() -> void:
-	if cooldown > 0 or player.transitioning:
+	if cooldown > 0 or player.transitioning or player.action_time > 0:
 		return
 	if is_instance_valid(seated_bench):
 		stand_up()
@@ -82,6 +82,9 @@ func interact() -> void:
 			player.sit(target.global_position + Vector2(0, 2))
 			say("Un descanso a la sombra. E o movete para levantarte.")
 		"city_residents":
+			if target.has_meta("person_id") and get_parent().has_node("LifePanel"):
+				get_parent().get_node("LifePanel").talk(str(target.get_meta("person_id")))
+				return
 			player.wave()
 			target.greet()
 			say("Vecino: ¡Buenas! Linda tarde para pasear.")

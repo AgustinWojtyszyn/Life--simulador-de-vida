@@ -1,6 +1,7 @@
 extends Node2D
 
 const MAP_SIZE := Vector2(2400, 1600)
+const Regional := preload("res://scripts/data/regional_assets.gd")
 const CityProp := preload("res://scripts/city_prop.gd")
 const Ground := preload("res://scripts/city_ground.gd")
 const Walker := preload("res://scripts/city_walker.gd")
@@ -16,8 +17,8 @@ var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
-	{"from": Vector2(-140, 454), "to": Vector2(2540, 454), "direction": Vector2.RIGHT},
-	{"from": Vector2(2540, 512), "to": Vector2(-140, 512), "direction": Vector2.LEFT},
+	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
+	{"from": Vector2(2540, 454), "to": Vector2(-140, 454), "direction": Vector2.LEFT},
 ]
 
 func _ready() -> void:
@@ -53,13 +54,14 @@ func _ready() -> void:
 	for i in parked_positions.size():
 		var size := Vector2(98, 70) if parked_models[i] == "van" else Vector2(90, 60)
 		add_asset("vehicles/" + parked_models[i], parked_positions[i], size, Rect2(-37, -19, 74, 18))
+	var regional_models: Array = {"ar": ["compact", "taxi", "van", "sedan"], "jp": ["hatchback", "compact", "van", "sedan"], "us": ["pickup", "suv", "sedan", "van"], "it": ["compact", "hatchback", "sedan", "van"], "br": ["compact", "pickup", "sedan", "suv"]}[WorldManager.country.id]
 	for lane_index in TRAFFIC_LANES.size():
 		var lane: Dictionary = TRAFFIC_LANES[lane_index]
 		for i in 3:
 			var vehicle := AnimatableBody2D.new()
 			vehicle.set_script(Vehicle)
 			vehicle.name = "Traffic_%s_%s" % [lane_index, i]
-			vehicle.model = parked_models[(i + lane_index * 2) % parked_models.size()]
+			vehicle.model = regional_models[(i + lane_index * 2) % regional_models.size()]
 			vehicle.position = Vector2(100 + i * 560 + lane_index * 200, lane.from.y)
 			vehicle.direction = lane.direction.x
 			vehicle.cruise_speed = 62.0 + i * 5.0
@@ -67,22 +69,19 @@ func _ready() -> void:
 			add_child(vehicle)
 	# A second circuit turns through both intersections and the southern street.
 	# Chamfered waypoints keep vehicles in paved space through each turn.
-	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.5
-	var circuit: Array[Vector2] = [Vector2(920, 1170), Vector2(920, 550), Vector2(940, 508),
-		Vector2(1005, 480), Vector2(east_lane - 58, 480), Vector2(east_lane - 16, 500),
-		Vector2(east_lane, 550), Vector2(east_lane, 1118), Vector2(east_lane - 18, 1152),
-		Vector2(east_lane - 60, 1180), Vector2(1000, 1180), Vector2(948, 1160)]
+	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
+	var circuit: Array[Vector2] = [Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)]
 	for i in 2:
 		# A circuit requires genuine directional art; never rotate the legacy PNG.
-		if not Vehicle.has_directional_art("taxi" if i == 0 else "van"):
+		if not Vehicle.has_directional_art(regional_models[i]):
 			continue
 		var vehicle := AnimatableBody2D.new()
 		vehicle.set_script(Vehicle)
 		vehicle.name = "Circuit_%s" % i
-		vehicle.model = "taxi" if i == 0 else "van"
+		vehicle.model = regional_models[i]
 		vehicle.route_points = circuit
 		vehicle.route_index = 1 if i == 0 else 7
-		vehicle.position = circuit[0] if i == 0 else circuit[6]
+		vehicle.position = Vector2(958, 680) if i == 0 else Vector2(east_lane, 950)
 		vehicle.cruise_speed = 47.0 if i == 0 else 38.0
 		vehicle.player = $Player
 		add_child(vehicle)
@@ -103,6 +102,7 @@ func _ready() -> void:
 	add_prop("sign", Vector2(499, 354), Rect2(-7, -5, 14, 6))
 	build_expansion()
 	populate()
+	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
 	var layer := CanvasLayer.new()
 	var hud := Control.new()
 	hud.set_script(Hud)
@@ -151,7 +151,8 @@ func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, 
 	building.interior_type = "cafe" if asset == "cafe" else "shop"
 	building.title = WorldManager.country.shop_names[1 if asset == "cafe" else 0]
 	building.building_id = "%s_front_%d" % [building.country_id, index]
-	building.facade = load("res://assets/city/buildings/%s.png" % asset) if building.country_id == "ar" else load(WorldManager.country.facade)
+	building.facade = load(Regional.facade(building.country_id, index == 2, index if index < 2 else 2 if index == 2 else 8))
+	building.size = building.facade.get_size() * 1.25
 	add_child(building)
 	city_objects.append(building)
 	occluders.append(building.get_child(0))
@@ -179,6 +180,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		prop.add_to_group("city_benches")
 	if asset.begins_with("vehicles/"):
 		prop.add_to_group("parked_vehicles")
+	if asset == "props/lamp":
+		prop.add_to_group("street_lamps")
 	add_child(prop)
 	city_objects.append(prop)
 	if asset.begins_with("buildings/"):
@@ -203,6 +206,9 @@ func _process(delta: float) -> void:
 	# Keep the controllable resident readable while passing behind a facade/canopy.
 	var player: Node2D = $Player
 	for sprite in occluders:
+		var nearby := player.position.distance_squared_to(sprite.get_parent().position) < 1050.0 * 1050.0
+		sprite.get_parent().visible = nearby
+		if not nearby: continue
 		var behind: bool = player.position.y < sprite.get_parent().position.y
 		var local_head := sprite.to_local(player.position - Vector2(0, 15))
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
@@ -224,9 +230,9 @@ func build_expansion() -> void:
 		building.title = country.shop_names[2] if slot.kind == "clinic" else country.shop_names[4] if slot.kind == "office" else country.home_kind.to_upper() if slot.kind == "house" else country.shop_names[index % 2]
 		building.country_id = country.id
 		building.variant = BuildingVariants.make(country.id, slot.kind, index)
-		var use_house: bool = slot.kind in ["home", "house"] and country.id not in ["jp", "it"]
-		building.facade = load("res://assets/regions/home.png" if use_house else country.facade)
-		building.size = Vector2(building.variant.width, building.variant.height)
+		var use_house: bool = slot.kind in ["home", "house"]
+		building.facade = load(Regional.facade(country.id, use_house, int(slot.get("asset_index", index))))
+		building.size = building.facade.get_size() * 1.15
 		add_child(building)
 		city_objects.append(building)
 		occluders.append(building.get_child(0))
@@ -283,3 +289,13 @@ func populate() -> void:
 		walker.route_kind = "bench" if i % routes.size() == 8 else "shop" if i % routes.size() == 9 else "crossing" if i % routes.size() == 10 else "walk"
 		add_child(walker)
 		system.residents.append(walker)
+
+func add_neighbor(id: String, title: String, at: Vector2) -> void:
+	var walker := Walker.new()
+	walker.position = at
+	walker.route.assign([at, at + Vector2(32, 0), at + Vector2(32, 18), at + Vector2(0, 18)])
+	walker.profile = PlayerProfile.new()
+	walker.profile.gender = "female" if id == "mara" else "male"
+	walker.set_meta("person_id", id)
+	walker.set_meta("person_name", title)
+	add_child(walker)

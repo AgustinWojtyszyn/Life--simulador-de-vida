@@ -12,7 +12,7 @@ func _ready() -> void:
 func can_interact(player: Node2D) -> bool:
 	return is_visible_in_tree() and player.global_position.distance_to(global_position) < 50.0 and not player.transitioning
 
-func perform(_player: Node2D) -> String:
+func perform(player: Node2D) -> String:
 	match action:
 		"enter_home", "exit_home", "enter_shop", "enter_cafe":
 			if action in ["enter_shop", "enter_cafe"]:
@@ -20,14 +20,11 @@ func perform(_player: Node2D) -> String:
 			var destination := "home" if action == "enter_home" else "shop" if action == "enter_shop" else "cafe" if action == "enter_cafe" else "street"
 			WorldManager.call_deferred("travel", destination)
 			return ""
-		"rest":
-			WorldManager.basic_state["rested"] = true
-			LifeEvents.rested.emit(WorldManager.profile.home_id)
-			return "Descansaste en tu cama."
+		"rest", "tv", "pc", "fridge", "eat", "coffee", "cook", "shower", "buy_food":
+			var result := LifeSimulation.act(action)
+			if not result.begins_with("Necesitás") and not result.begins_with("Faltan"):
+				player.perform_activity(action)
+			if action == "buy_food": MissionSystem.purchased()
+			return result
 		"shop": return detail + " · Horario de atención: 9 a 20."
-		"tv": return "Encendiste la televisión. Un programa acompaña la tarde."
-		"pc": return "Revisaste mensajes y trabajaste un rato."
-		"fridge": return "Abriste la heladera y preparaste algo fresco."
-		"eat": return "Te sentaste a comer y recuperaste energía."
-		"coffee": return "Tomaste algo en " + detail + "."
 	return ""

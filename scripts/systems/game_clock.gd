@@ -42,10 +42,11 @@ func tint() -> Color:
 	return colors[0]
 
 func to_dict() -> Dictionary:
-	return {"minutes": total_minutes, "played_seconds": played_seconds}
+	return {"minutes": total_minutes, "played_seconds": played_seconds, "speed": minutes_per_second}
 
 func restore(data: Dictionary) -> void:
 	total_minutes = maxf(0, float(data.get("minutes", 480)))
 	played_seconds = maxf(0, float(data.get("played_seconds", 0)))
+	minutes_per_second = clampf(float(data.get("speed", minutes_per_second)), 0.25, 4.0)
 	last_minute = -1
 	advance(0)

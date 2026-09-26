@@ -80,10 +80,14 @@ func button(text: String, action: Callable) -> Button:
 
 func main_screen() -> void:
 	shell("VIDA", "Tu vida. Tu ciudad. Tus decisiones.")
-	button("Nueva partida", create_screen)
+	button("Nueva vida", create_screen)
 	var resume := button("Continuar", resume_game)
 	resume.disabled = not SaveSystem.has_save()
-	label("Un hogar. Cinco destinos. Una vida por empezar.", 14)
+	button("Partidas guardadas", saves_screen)
+	button("Opciones", options_screen)
+	button("Créditos", credits_screen)
+	if not OS.has_feature("mobile"):
+		button("Salir", func(): get_tree().quit())
 	error_label = label("")
 
 func resume_game() -> void:
@@ -174,3 +178,50 @@ func country_screen() -> void:
 		busy = true
 		WorldManager.new_game(draft, chosen))
 	button("Volver al personaje", create_screen)
+
+func saves_screen() -> void:
+	shell("PARTIDAS GUARDADAS", "Cada vida conserva su propia historia.")
+	for slot in SaveSystem.list_slots():
+		var data: Dictionary = slot.data
+		var profile_data: Dictionary = data.profile
+		label(str(data.get("slot_name", profile_data.player_name)), 20)
+		label("%s · %s · Día %d · %s" % [profile_data.player_name, profile_data.city_id, int(float(data.get("clock", {}).get("minutes", 480)) / 1440) + 1, data.get("modified_at", "Partida anterior")], 12)
+		button("Jugar", func():
+			if SaveSystem.select_slot(slot.path): resume_game())
+		button("Renombrar", func(): rename_screen(slot.path, str(data.get("slot_name", profile_data.player_name))))
+		button("Borrar…", func(): delete_screen(slot.path))
+	if SaveSystem.list_slots().is_empty(): label("Todavía no hay vidas guardadas.")
+	error_label = label("")
+	button("Volver", main_screen)
+
+func rename_screen(path: String, title: String) -> void:
+	shell("RENOMBRAR PARTIDA", "El nombre del personaje se conserva.")
+	var entry := LineEdit.new()
+	entry.text = title
+	entry.max_length = 40
+	panel.add_child(entry)
+	button("Guardar nombre", func():
+		if not entry.text.strip_edges().is_empty() and SaveSystem.rename_slot(path, entry.text): saves_screen())
+	button("Cancelar", saves_screen)
+
+func delete_screen(path: String) -> void:
+	shell("¿BORRAR ESTA VIDA?", "Se eliminarán esta partida y su respaldo. Esta acción no se puede deshacer.")
+	button("Sí, borrar esta partida", func():
+		SaveSystem.delete_slot(path)
+		saves_screen())
+	button("Conservar y volver", saves_screen)
+
+func options_screen() -> void:
+	shell("OPCIONES", "Tiempo del mundo")
+	var speed := OptionButton.new()
+	for title in ["Rápido · 30 s por hora", "Normal · 60 s por hora", "Tranquilo · 120 s por hora"]:
+		speed.add_item(title)
+	speed.selected = 1
+	speed.item_selected.connect(func(i: int): GameClock.minutes_per_second = [2.0, 1.0, 0.5][i])
+	panel.add_child(speed)
+	button("Volver", main_screen)
+
+func credits_screen() -> void:
+	shell("CRÉDITOS", "VIDA / LIFE · Agustín Wojtyszyn")
+	label("Hecho con Godot 4. Arte generado con PixelLab.", 16)
+	button("Volver", main_screen)

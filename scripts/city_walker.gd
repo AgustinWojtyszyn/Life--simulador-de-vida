@@ -1,5 +1,9 @@
 extends Node2D
 
+enum State { WALK, IDLE, SIT, PHONE, DRINK, EAT, SHOP, CHAT, WAIT_CROSSING, ENTER_BUILDING, EXIT_BUILDING, LOOK_AROUND, REST, OPTIONAL_JOG }
+var state := State.WALK
+var personality := 0
+
 var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var route: Array[Vector2] = []
@@ -19,6 +23,8 @@ var activity_time := 0.0
 
 func _ready() -> void:
 	add_to_group("city_residents")
+	personality = get_index() % 5
+	wait_time = float(personality) * 0.73
 	if route.is_empty():
 		route.assign([start, finish, finish + Vector2(0, 14), start + Vector2(0, 14)])
 	if profile == null:
@@ -34,6 +40,7 @@ func _process(delta: float) -> void:
 		visible = indoor_time == 0
 		if indoor_time == 0:
 			activity = "walk"
+			state = State.EXIT_BUILDING
 		return
 	if greeting_time > 0:
 		greeting_time = maxf(0, greeting_time - delta)
@@ -43,20 +50,25 @@ func _process(delta: float) -> void:
 	if wait_time > 0:
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
-		visual.set_art("seated" if activity == "sit" else "idle", "south", 0)
+		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
+			visual.animate_activity(activity, delta)
+		else:
+			visual.set_art("seated" if activity == "sit" else "wave" if activity == "chat" else "idle", "south", 0)
 		if wait_time == 0:
 			queue_redraw()
 		return
 	activity = "walk"
+	state = State.WALK
 	var goal := route[destination]
 	# Wait at the curb, then finish the crossing; cars also yield to residents.
 	if route_kind == "crossing" and not crossing and absf(goal.y - position.y) > 80:
 		for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 			if absf(vehicle.position.x - position.x) < 170:
+				state = State.WAIT_CROSSING
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	var step := position.move_toward(goal, speed * delta)
+	var step := position.move_toward(goal, speed * (1.3 if WeatherSystem.state == "rain" else 1.0) * delta)
 	var movement := step - position
 	position = step
 	visual.animate_motion(movement, movement.length())
@@ -66,13 +78,16 @@ func _process(delta: float) -> void:
 		destination = (destination + 1) % route.size()
 		choose_activity()
 		if route_kind == "shop" and destination == 1 and visits > 1:
-			indoor_time = 4.0
+			state = State.ENTER_BUILDING
+			indoor_time = 12.0 + personality * 4.0
 			visible = false
 
 func choose_activity() -> void:
-	var options := ["phone", "drink", "look", "rest", "chat"]
+	var options := ["phone", "drink", "look", "rest", "chat", "eat"]
 	activity = "sit" if route_kind == "bench" and destination == 1 else "browse" if route_kind == "shop" and destination == 1 else "wait" if route_kind == "crossing" else options[(visits + profile.skin + profile.top) % options.size()]
-	wait_time = 2.0 + float((visits + profile.hair) % 4)
+	state = {"sit": State.SIT, "phone": State.PHONE, "drink": State.DRINK, "eat": State.EAT, "look": State.LOOK_AROUND, "rest": State.REST, "chat": State.CHAT, "browse": State.SHOP, "wait": State.WAIT_CROSSING}.get(activity, State.IDLE)
+	wait_time = 3.0 + float((visits + personality) % 6)
+	if WeatherSystem.state == "rain": wait_time *= 0.4
 	activity_time = 0.0
 	queue_redraw()
 
@@ -88,7 +103,5 @@ func _draw() -> void:
 	if greeting_time > 0:
 		draw_rect(Rect2(-24, -48, 52, 17), Color("243c40"))
 		draw_string(ThemeDB.fallback_font, Vector2(-19, -36), "¡Buenas!", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f5ecd7"))
-	elif wait_time > 0 and activity in ["phone", "drink", "browse", "chat"]:
-		var icon := "▣" if activity == "phone" else "◦" if activity == "drink" else "…" if activity == "browse" else "¡"
-		draw_rect(Rect2(-12, -51, 24, 15), Color("243c40"))
-		draw_string(ThemeDB.fallback_font, Vector2(-6, -40), icon, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("f5ecd7"))
+	if has_meta("person_name"):
+		draw_string(ThemeDB.fallback_font, Vector2(-28, -55), str(get_meta("person_name")), HORIZONTAL_ALIGNMENT_CENTER, 56, 11, Color("fff0c5"))

@@ -9,6 +9,8 @@ const EAST := preload("res://assets/characters/resident/east.png")
 const WEST := preload("res://assets/characters/resident/west.png")
 const SEATED := preload("res://assets/characters/resident/seated.png")
 const WAVE := preload("res://assets/characters/resident/wave.png")
+var action_time := 0.0
+var action_pose := "idle"
 var seated := false
 var transitioning := false
 var wave_time := 0.0
@@ -25,6 +27,11 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if action_time > 0:
+		action_time = maxf(0, action_time - delta)
+		velocity = Vector2.ZERO
+		visual.animate_activity(action_pose, delta)
+		return
 	if seated or transitioning:
 		velocity = Vector2.ZERO
 		return
@@ -110,3 +117,9 @@ func stand(at: Vector2) -> void:
 func wave() -> void:
 	wave_time = 1.5
 	sprite.texture = WAVE
+
+func perform_activity(action: String) -> void:
+	action_pose = {"coffee": "drink", "fridge": "eat", "cook": "eat", "buy_food": "browse", "rest": "idle_live"}.get(action, action)
+	if not ResourceLoader.exists("res://assets/characters/%s/%s/south_0.png" % [visual.profile.gender, action_pose]): return
+	action_time = 2.6
+	visual.activity_phase = 0.0

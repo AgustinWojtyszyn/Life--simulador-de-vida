@@ -24,13 +24,23 @@ func run() -> void:
 	var player: CharacterBody2D = world.get_node("Player")
 	check(all_cars.size() == 8, "The turning street circuit must add two moving vehicles")
 	check(cars.size() == 6, "Six moving vehicles must spawn")
+	var circuit_cars := all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty())
+	for turning in circuit_cars:
+		var seen := {}
+		for distance in range(0, int(turning.curve.get_baked_length()), 3):
+			turning.heading = turning.tangent(float(distance)).angle()
+			turning.update_art()
+			seen[turning.facing_index] = true
+			check(is_zero_approx(turning.sprite.rotation), "Cornering must change frames without rotating artwork")
+		check(seen.size() == 8, "Circuit must use all eight directions through continuous arcs")
 	var models := {}
 	var starts: Array[Vector2] = []
 	for car in cars:
 		models[car.model] = true
 		starts.append(car.position)
 		check(car.get_parent() == world, "Traffic must participate in world Y sorting")
-		check(car.sprite.flip_h == (car.direction > 0), "Sprite must face its travel direction")
+		check(car.directional_art.size() == 8, "Every moving car must have eight authored directions")
+		check(is_zero_approx(car.sprite.rotation), "Vehicle textures must never rotate")
 	await frames(60)
 	for i in cars.size():
 		check((cars[i].position.x - starts[i].x) * cars[i].direction > 15, "Both lanes must actually move")
@@ -62,6 +72,9 @@ func run() -> void:
 	car.current_speed = 66.0
 	car._physics_process(0.1)
 	check(car.position.x < -120 and car.position.x >= -140, "Cars must recycle outside the visible map")
+	# Isolate the collision probe from the opposite lane car at x=300.
+	for other in all_cars:
+		if other != car: other.collision_layer = 0
 	car.position = Vector2(350, 454)
 	player.position = Vector2(350 - car.half_width - 12, 444)
 	await frames(3)

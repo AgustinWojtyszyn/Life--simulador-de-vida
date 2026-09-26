@@ -1,0 +1,566 @@
+{
+  "generator": "PixelLab create_8_direction_object",
+  "camera": "high top-down",
+  "assets": [
+    {
+      "path": "assets/vehicles/compact/west.png",
+      "model": "compact",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/south-east.png",
+      "model": "compact",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/north.png",
+      "model": "compact",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/south-west.png",
+      "model": "compact",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/north-west.png",
+      "model": "compact",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/north-east.png",
+      "model": "compact",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/south.png",
+      "model": "compact",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/compact/east.png",
+      "model": "compact",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/west.png",
+      "model": "van",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/south-east.png",
+      "model": "van",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/north.png",
+      "model": "van",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/south-west.png",
+      "model": "van",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/north-west.png",
+      "model": "van",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/north-east.png",
+      "model": "van",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/south.png",
+      "model": "van",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/van/east.png",
+      "model": "van",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/west.png",
+      "model": "sedan",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/south-east.png",
+      "model": "sedan",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/north.png",
+      "model": "sedan",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/south-west.png",
+      "model": "sedan",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/north-west.png",
+      "model": "sedan",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/north-east.png",
+      "model": "sedan",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/south.png",
+      "model": "sedan",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/sedan/east.png",
+      "model": "sedan",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/west.png",
+      "model": "suv",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/south-east.png",
+      "model": "suv",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/north.png",
+      "model": "suv",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/south-west.png",
+      "model": "suv",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/north-west.png",
+      "model": "suv",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/north-east.png",
+      "model": "suv",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/south.png",
+      "model": "suv",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/suv/east.png",
+      "model": "suv",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/west.png",
+      "model": "pickup",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/south-east.png",
+      "model": "pickup",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/north.png",
+      "model": "pickup",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/south-west.png",
+      "model": "pickup",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/north-west.png",
+      "model": "pickup",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/north-east.png",
+      "model": "pickup",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/south.png",
+      "model": "pickup",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/pickup/east.png",
+      "model": "pickup",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/west.png",
+      "model": "taxi",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/south-east.png",
+      "model": "taxi",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/north.png",
+      "model": "taxi",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/south-west.png",
+      "model": "taxi",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/north-west.png",
+      "model": "taxi",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/north-east.png",
+      "model": "taxi",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/south.png",
+      "model": "taxi",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/taxi/east.png",
+      "model": "taxi",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/west.png",
+      "model": "hatchback",
+      "direction": "west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/south-east.png",
+      "model": "hatchback",
+      "direction": "south-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/north.png",
+      "model": "hatchback",
+      "direction": "north",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/south-west.png",
+      "model": "hatchback",
+      "direction": "south-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/north-west.png",
+      "model": "hatchback",
+      "direction": "north-west",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/north-east.png",
+      "model": "hatchback",
+      "direction": "north-east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/south.png",
+      "model": "hatchback",
+      "direction": "south",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    },
+    {
+      "path": "assets/vehicles/hatchback/east.png",
+      "model": "hatchback",
+      "direction": "east",
+      "category": "vehicle",
+      "footprint": [
+        70,
+        20
+      ]
+    }
+  ]
+}

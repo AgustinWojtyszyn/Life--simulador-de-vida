@@ -11,6 +11,8 @@ func set_interaction(prompt: String, message: String) -> void:
 
 func _ready() -> void:
 	get_viewport().size_changed.connect(queue_redraw)
+	GameClock.changed.connect(queue_redraw)
+	WeatherSystem.changed.connect(queue_redraw)
 
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
@@ -23,7 +25,8 @@ func _draw() -> void:
 	draw_string(font, Vector2(104, 55), ("Tu vivienda · " if WorldManager.location == "home" else "") + WorldManager.country.title, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("9dafaa"))
 	draw_style_box(panel(), Rect2(width - 127, 16, 109, 39))
 	draw_circle(Vector2(width - 109, 35), 5, Color("dfb575"))
-	draw_string(font, Vector2(width - 96, 39), "17:40  /  TARDE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("eee3ca"))
+	draw_string(font, Vector2(width - 96, 39), GameClock.display(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("eee3ca"))
+	draw_string(font, Vector2(width - 126, 67), WeatherSystem.title(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("eee3ca"))
 	draw_style_box(panel(), Rect2(18, height - 39, 314, 23))
 	draw_string(font, Vector2(30, height - 23), ("Arrastrá para caminar · Botón para actuar" if InputManager.touch_enabled else "WASD / Flechas · Caminar      E · Interactuar"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d8d4bf"))
 
