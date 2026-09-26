@@ -10,6 +10,7 @@ const WEST := preload("res://assets/characters/resident/west.png")
 const SEATED := preload("res://assets/characters/resident/seated.png")
 const WAVE := preload("res://assets/characters/resident/wave.png")
 var seated := false
+var transitioning := false
 var wave_time := 0.0
 var facing := Vector2.DOWN
 @onready var sprite: Sprite2D = $Sprite2D
@@ -24,7 +25,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if seated:
+	if seated or transitioning:
 		velocity = Vector2.ZERO
 		return
 	wave_time = maxf(0, wave_time - delta)
@@ -61,25 +62,50 @@ func draw_ellipse_shadow() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func sit(at: Vector2) -> void:
-	seated = true
+	if transitioning or seated:
+		return
+	transitioning = true
 	wave_time = 0
 	velocity = Vector2.ZERO
-	global_position = at
+	# Approach the seat on foot, face it, then lower into the seated pose.
+	var approach := at + Vector2(0, 17)
+	var walk := create_tween()
+	walk.tween_property(self, "global_position", approach, global_position.distance_to(approach) / 85.0)
+	await walk.finished
+	if not is_inside_tree():
+		return
+	facing = Vector2.UP
+	visual.set_art("idle", "north", 0)
+	var lower := create_tween()
+	lower.tween_property(self, "global_position", at, 0.28).set_trans(Tween.TRANS_SINE)
+	await lower.finished
+	if not is_inside_tree():
+		return
 	collision_layer = 0
 	collision_mask = 0
 	sprite.texture = SEATED
 	sprite.position.y = -22
 	visual.set_art("seated", "south", 0)
+	seated = true
+	transitioning = false
 
 func stand(at: Vector2) -> void:
-	global_position = at
+	if transitioning or not seated:
+		return
+	transitioning = true
 	seated = false
+	visual.set_art("idle", "south", 0)
+	var rise := create_tween()
+	rise.tween_property(self, "global_position", at, 0.3).set_trans(Tween.TRANS_SINE)
+	await rise.finished
+	if not is_inside_tree():
+		return
 	collision_layer = 1
 	collision_mask = 3
 	facing = Vector2.DOWN
 	sprite.texture = SOUTH
 	sprite.position.y = -14
-	visual.set_art("idle", "south", 0)
+	transitioning = false
 
 func wave() -> void:
 	wave_time = 1.5

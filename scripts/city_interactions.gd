@@ -32,12 +32,14 @@ func refresh_target() -> void:
 	kind = ""
 	prompt = ""
 	if is_instance_valid(seated_bench):
-		prompt = "E · Levantarte"
+		prompt = "" if player.transitioning else "E · Levantarte"
 		return
 	var nearest := 49.0
 	for group in ["interactables", "city_benches", "city_residents", "city_fountain"]:
 		for node in get_tree().get_nodes_in_group(group):
 			if not node.is_visible_in_tree():
+				continue
+			if node is InteractionTarget and not node.can_interact(player):
 				continue
 			var anchor: Vector2 = node.global_position
 			if group == "city_benches":
@@ -50,13 +52,13 @@ func refresh_target() -> void:
 				target = node
 				kind = group
 	match kind:
-		"interactables": prompt = "E · " + str(target.get_meta("prompt", "Interactuar"))
+		"interactables": prompt = "E · " + (target.label if target is InteractionTarget else str(target.get_meta("prompt", "Interactuar")))
 		"city_benches": prompt = "E · Sentarte a descansar"
 		"city_residents": prompt = "E · Saludar al vecino"
 		"city_fountain": prompt = "E · Pedir un deseo"
 
 func interact() -> void:
-	if cooldown > 0:
+	if cooldown > 0 or player.transitioning:
 		return
 	if is_instance_valid(seated_bench):
 		stand_up()
@@ -67,14 +69,10 @@ func interact() -> void:
 	LifeEvents.interacted.emit(kind, str(target.get_meta("id", target.name)))
 	match kind:
 		"interactables":
-			match str(target.get_meta("action", "")):
-				"enter_home": WorldManager.call_deferred("travel", "home")
-				"exit_home": WorldManager.call_deferred("travel", "street")
-				"rest":
-					WorldManager.basic_state["rested"] = true
-					LifeEvents.rested.emit(WorldManager.profile.home_id)
-					say("Descansaste en tu cama. Este es tu hogar.")
-				"shop": say(str(target.get_meta("title", "Comercio")) + " · Horario de atención: 9 a 20.")
+			if target is InteractionTarget:
+				say(target.perform(player))
+			else:
+				legacy_interaction()
 		"city_benches":
 			# Always stand back on the approach side, outside the bench footprint.
 			stand_position = target.global_position + Vector2(0, 18)
@@ -90,6 +88,16 @@ func interact() -> void:
 			target.make_wish()
 			say("Pediste un deseo. Las ondas se alejan por el agua.")
 	cooldown = 0.4
+
+func legacy_interaction() -> void:
+	match str(target.get_meta("action", "")):
+		"enter_home": WorldManager.call_deferred("travel", "home")
+		"exit_home": WorldManager.call_deferred("travel", "street")
+		"rest":
+			WorldManager.basic_state["rested"] = true
+			LifeEvents.rested.emit(WorldManager.profile.home_id)
+			say("Descansaste en tu cama. Este es tu hogar.")
+		"shop": say(str(target.get_meta("title", "Comercio")) + " · Horario de atención: 9 a 20.")
 
 func stand_up() -> void:
 	player.stand(stand_position)
