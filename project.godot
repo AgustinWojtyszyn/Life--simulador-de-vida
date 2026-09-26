@@ -14,6 +14,13 @@ config/name="VIDA"
 run/main_scene="res://scenes/playground.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+LifeEvents="*res://scripts/systems/life_events.gd"
+InputManager="*res://scripts/systems/input_manager.gd"
+SaveSystem="*res://scripts/systems/save_system.gd"
+WorldManager="*res://scripts/systems/world_manager.gd"
+
 [display]
 
 window/size/viewport_width=800
@@ -21,6 +28,8 @@ window/size/viewport_height=450
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=0
 
 [rendering]
 
