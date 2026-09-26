@@ -17,6 +17,10 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 LifeEvents="*res://scripts/systems/life_events.gd"
+GameClock="*res://scripts/systems/game_clock.gd"
+WeatherSystem="*res://scripts/systems/weather_system.gd"
+LifeSimulation="*res://scripts/systems/life_simulation.gd"
+MissionSystem="*res://scripts/systems/mission_system.gd"
 InputManager="*res://scripts/systems/input_manager.gd"
 SaveSystem="*res://scripts/systems/save_system.gd"
 WorldManager="*res://scripts/systems/world_manager.gd"

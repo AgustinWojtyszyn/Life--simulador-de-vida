@@ -29,12 +29,17 @@ func select_country(id: String) -> void:
 			return
 
 func new_game(new_profile: PlayerProfile, id: String) -> void:
+	SaveSystem.new_slot()
 	profile = new_profile
 	select_country(id)
 	location = "home"
 	return_position = Vector2.ZERO
 	spawn_position = HomeSystem.INTERIOR_SPAWN
 	basic_state = {"rested": false}
+	GameClock.restore({})
+	WeatherSystem.restore({})
+	LifeSimulation.restore({})
+	MissionSystem.restore({})
 	playing = true
 	LifeEvents.profile_created.emit(profile)
 	travel_requested.emit()
@@ -52,6 +57,10 @@ func continue_game() -> bool:
 	spawn_position = Vector2(float(data.position[0]), float(data.position[1])).clamp(Vector2(24, 24), limit - Vector2(24, 24))
 	basic_state = data.get("state", {"rested": false}) if data.get("state") is Dictionary else {"rested": false}
 	settings = data.get("settings", settings) if data.get("settings", settings) is Dictionary else settings
+	GameClock.restore(data.get("clock", {}))
+	WeatherSystem.restore(data.get("weather", {}))
+	LifeSimulation.restore(data.get("life", {}))
+	MissionSystem.restore(data.get("mission", {}))
 	playing = true
 	travel_requested.emit()
 	return true
@@ -73,7 +82,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result
