@@ -64,6 +64,24 @@ func _ready() -> void:
 			vehicle.cruise_speed = 62.0 + i * 5.0
 			vehicle.player = $Player
 			add_child(vehicle)
+	# A second circuit turns through both intersections and the southern street.
+	# Chamfered waypoints keep vehicles in paved space through each turn.
+	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.5
+	var circuit: Array[Vector2] = [Vector2(920, 1170), Vector2(920, 550), Vector2(940, 508),
+		Vector2(1005, 480), Vector2(east_lane - 58, 480), Vector2(east_lane - 16, 500),
+		Vector2(east_lane, 550), Vector2(east_lane, 1118), Vector2(east_lane - 18, 1152),
+		Vector2(east_lane - 60, 1180), Vector2(1000, 1180), Vector2(948, 1160)]
+	for i in 2:
+		var vehicle := AnimatableBody2D.new()
+		vehicle.set_script(Vehicle)
+		vehicle.name = "Circuit_%s" % i
+		vehicle.model = "taxi" if i == 0 else "van"
+		vehicle.route_points = circuit
+		vehicle.route_index = 1 if i == 0 else 7
+		vehicle.position = circuit[0] if i == 0 else circuit[6]
+		vehicle.cruise_speed = 47.0 if i == 0 else 38.0
+		vehicle.player = $Player
+		add_child(vehicle)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
@@ -179,6 +197,7 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
+		building.interior_type = ("cafe" if index % 2 else "shop") if slot.kind == "shop" else ""
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.title = country.shop_names[2] if slot.kind == "clinic" else country.shop_names[4] if slot.kind == "office" else country.home_kind.to_upper() if slot.kind == "house" else country.shop_names[index % 2]
 		building.country_id = country.id

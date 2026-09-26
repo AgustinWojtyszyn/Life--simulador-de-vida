@@ -10,6 +10,7 @@ var size := Vector2(208, 236)
 var is_home := false
 var variant: Dictionary = {}
 var country_id := "ar"
+var interior_type := ""
 
 func _ready() -> void:
 	var sprite := Sprite2D.new()
@@ -21,8 +22,12 @@ func _ready() -> void:
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
 	if access != Access.EXTERIOR_ONLY:
-		var door := Node2D.new()
+		var door := InteractionTarget.new()
 		door.position = Vector2(0, 16)
+		door.label = "Entrar a tu vivienda" if is_home else "Entrar a " + title if interior_type != "" else "Consultar " + title
+		door.action = "enter_home" if is_home else "enter_" + interior_type if interior_type != "" else "shop"
+		door.detail = title
+		door.target_id = building_id
 		door.set_meta("prompt", "Entrar a tu vivienda" if is_home else "Consultar " + title)
 		door.set_meta("action", "enter_home" if is_home else "shop")
 		door.set_meta("id", building_id)

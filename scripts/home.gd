@@ -12,6 +12,11 @@ func _ready() -> void:
 	furniture("sofa", Vector2(430, 280), Vector2(134, 90), Rect2(380, 254, 100, 20))
 	furniture("kitchen", Vector2(478, 166), Vector2(144, 96), Rect2(419, 124, 118, 35))
 	add_target(Vector2(260, 245), "Descansar en tu cama", "rest", WorldManager.profile.home_id + "_bed")
+	add_target(Vector2(352, 270), "Mirar televisión", "tv", "tv")
+	add_target(Vector2(535, 266), "Usar la computadora", "pc", "pc")
+	add_target(Vector2(478, 207), "Abrir la heladera", "fridge", "fridge")
+	add_target(Vector2(436, 335), "Comer en la mesa", "eat", "table")
+	add_target(Vector2(440, 305), "Descansar en el sofá", "rest", "sofa")
 	add_target(Vector2(390, 362), "Salir al barrio", "exit_home", WorldManager.profile.home_id + "_exit")
 	var camera: Camera2D = $Player/Camera2D
 	camera.limit_right = 800
@@ -54,12 +59,11 @@ func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2) -> v
 	add_solid(footprint)
 
 func add_target(at: Vector2, title: String, action: String, id: String) -> void:
-	var target := Node2D.new()
+	var target := InteractionTarget.new()
 	target.position = at
-	target.set_meta("prompt", title)
-	target.set_meta("action", action)
-	target.set_meta("id", id)
-	target.add_to_group("interactables")
+	target.label = title
+	target.action = action
+	target.target_id = id
 	add_child(target)
 
 func _draw() -> void:
@@ -84,6 +88,20 @@ func _draw() -> void:
 	draw_rect(Rect2(303, 86, 10, 148), Color("ded1b1"))
 	draw_rect(Rect2(566, 86, 10, 116), Color("ded1b1"))
 	draw_rect(Rect2(363, 375, 54, 15), Color("598381"))
+	# Small readable fixtures share the room's palette and respect its walkways.
+	draw_rect(Rect2(321, 205, 54, 12), Color("29393e"))
+	draw_rect(Rect2(325, 207, 46, 7), Color("5b94a0")) # TV
+	draw_rect(Rect2(520, 217, 37, 22), Color("625446"))
+	draw_rect(Rect2(524, 210, 28, 21), Color("29393e"))
+	draw_rect(Rect2(527, 212, 22, 14), Color("8ab3b6")) # PC
+	draw_rect(Rect2(537, 109, 25, 51), Color("d3d9cf"))
+	draw_line(Vector2(540, 135), Vector2(559, 135), Color("8b9d97"), 2) # fridge
+	draw_colored_polygon(PackedVector2Array([Vector2(415, 319), Vector2(470, 314), Vector2(484, 341), Vector2(425, 346)]), Color("705340"))
+	draw_colored_polygon(PackedVector2Array([Vector2(422, 320), Vector2(468, 317), Vector2(477, 338), Vector2(428, 341)]), Color("a77d57")) # table
+	draw_circle(Vector2(442, 328), 6, Color("c8d1bf"))
+	draw_rect(Rect2(130, 157, 48, 9), Color("625746")) # bedroom shelf
+	for x in [134, 143, 154, 165]:
+		draw_rect(Rect2(x, 147, 6, 10), Color("66878b"))
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(123, 116), "DORMITORIO", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("354a48"))
 	draw_string(font, Vector2(587, 185), "BAÑO", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("354a48"))

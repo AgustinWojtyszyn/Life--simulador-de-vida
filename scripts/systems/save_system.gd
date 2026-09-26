@@ -48,7 +48,7 @@ func valid(data: Dictionary) -> bool:
 	if country not in ["ar", "us", "jp", "it", "br"]:
 		return false
 	var p = data.get("position")
-	return p is Array and p.size() == 2 and (p[0] is float or p[0] is int) and (p[1] is float or p[1] is int) and is_finite(float(p[0])) and is_finite(float(p[1])) and data.get("location") in ["home", "street"]
+	return p is Array and p.size() == 2 and (p[0] is float or p[0] is int) and (p[1] is float or p[1] is int) and is_finite(float(p[0])) and is_finite(float(p[1])) and data.get("location") in ["home", "street", "shop", "cafe"]
 
 func has_save() -> bool:
 	return not read_save().is_empty()

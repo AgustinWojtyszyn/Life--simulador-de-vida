@@ -40,7 +40,7 @@ func switch_world() -> void:
 		remove_child(world)
 		world.queue_free()
 	get_tree().paused = false
-	var scene := HomeSystem.INTERIOR_SCENE if WorldManager.location == "home" else "res://scenes/playground.tscn"
+	var scene := HomeSystem.INTERIOR_SCENE if WorldManager.location == "home" else "res://scenes/shop.tscn" if WorldManager.location in ["shop", "cafe"] else "res://scenes/playground.tscn"
 	world = load(scene).instantiate()
 	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(world)
