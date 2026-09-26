@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 const SPEED := 140.0
-const ACCELERATION := 1100.0
-const DECELERATION := 1500.0
+const ACCELERATION := 1800.0
+const DECELERATION := 2200.0
 const SOUTH := preload("res://assets/characters/resident/south.png")
 const NORTH := preload("res://assets/characters/resident/north.png")
 const EAST := preload("res://assets/characters/resident/east.png")
@@ -13,6 +13,14 @@ var seated := false
 var wave_time := 0.0
 var facing := Vector2.DOWN
 @onready var sprite: Sprite2D = $Sprite2D
+var visual: CharacterVisual
+
+func _ready() -> void:
+	visual = CharacterVisual.new()
+	visual.profile = WorldManager.profile
+	add_child(visual)
+	sprite.hide() # Retained for old scene references; visible body uses directional walk frames.
+	$Camera2D.position_smoothing_speed = 12.0
 
 
 func _physics_process(delta: float) -> void:
@@ -24,7 +32,7 @@ func _physics_process(delta: float) -> void:
 		sprite.texture = WAVE
 	else:
 		sprite.texture = (EAST if facing.x > 0 else WEST) if absf(facing.x) > absf(facing.y) else (SOUTH if facing.y >= 0 else NORTH)
-	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var direction := InputManager.movement()
 	var rate := ACCELERATION if direction != Vector2.ZERO else DECELERATION
 	velocity = velocity.move_toward(direction * SPEED, rate * delta)
 	if direction != Vector2.ZERO:
@@ -35,7 +43,12 @@ func _physics_process(delta: float) -> void:
 			sprite.texture = SOUTH if facing.y > 0 else NORTH
 	if wave_time > 0:
 		sprite.texture = WAVE
+	var before := position
 	move_and_slide()
+	if wave_time > 0:
+		visual.set_art("wave", "south", 0)
+	else:
+		visual.animate_motion(direction, position.distance_to(before))
 
 
 func _draw() -> void:
@@ -56,6 +69,7 @@ func sit(at: Vector2) -> void:
 	collision_mask = 0
 	sprite.texture = SEATED
 	sprite.position.y = -22
+	visual.set_art("seated", "south", 0)
 
 func stand(at: Vector2) -> void:
 	global_position = at
@@ -65,6 +79,7 @@ func stand(at: Vector2) -> void:
 	facing = Vector2.DOWN
 	sprite.texture = SOUTH
 	sprite.position.y = -14
+	visual.set_art("idle", "south", 0)
 
 func wave() -> void:
 	wave_time = 1.5
