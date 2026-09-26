@@ -56,7 +56,7 @@ func run() -> void:
 		car._physics_process(1.0 / 60.0)
 	check(leader.position.x - car.position.x >= leader.half_width + car.half_width + 21.9, "Queue must preserve clearance")
 	check(car.current_speed < 0.1, "Follower must stop behind a stopped vehicle")
-	car.position = Vector2(1579, 454)
+	car.position = Vector2(2539, 454)
 	car.current_speed = 66.0
 	car._physics_process(0.1)
 	check(car.position.x < -120 and car.position.x >= -140, "Cars must recycle outside the visible map")

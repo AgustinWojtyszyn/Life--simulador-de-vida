@@ -32,7 +32,10 @@ func read_save() -> Dictionary:
 	for path in [save_path, save_path + ".bak"]:
 		if not FileAccess.file_exists(path):
 			continue
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var json := JSON.new()
+		if json.parse(FileAccess.get_file_as_string(path)) != OK:
+			continue
+		var parsed = json.data
 		if parsed is Dictionary and valid(parsed):
 			return parsed
 	last_error = "No hay una partida válida para continuar."

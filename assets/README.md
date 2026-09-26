@@ -1,5 +1,11 @@
 # Dirección visual de VIDA
 
+La ampliación de Fase 1 agrega `regions/`, `interior/` y personajes direccionales
+en `characters/male/` y `characters/female/`. Sus IDs están en
+[regions/manifest.json](regions/manifest.json); la integración actual se documenta
+en [docs/PHASE1.md](../docs/PHASE1.md). El barrio descrito abajo se conserva como
+úcleo del distrito argentino.
+
 Barrio porteño de tarde, perspectiva elevada de tres cuartos, fachadas con
 volumen, luz cálida desde arriba a la izquierda, sombras frías, crema,
 terracota, turquesa y oliva. Pixel art con transparencia y filtro nearest.

@@ -1,0 +1,41 @@
+{
+  "generator": "PixelLab MCP",
+  "poses": [
+    {
+      "name": "seated",
+      "background_job_id": "87fe69fc-7dd8-4400-975b-ecaedeaaee40",
+      "image_id": "2825a516-5ec0-537b-b327-0ffeb370a1ce",
+      "status": "processing",
+      "source_image_id": "2825a516-5ec0-537b-b327-0ffeb370a1ce",
+      "job_id": "87fe69fc-7dd8-4400-975b-ecaedeaaee40",
+      "image_size": {
+        "width": 48,
+        "height": 48
+      },
+      "output_count": 1,
+      "estimated_generations": 5,
+      "pricing_provisional": true,
+      "poll_tool": "get_image",
+      "download_path": "/mcp/images/87fe69fc-7dd8-4400-975b-ecaedeaaee40/download",
+      "description": "The exact same female resident from reference, same small pixel art body proportions, teal jacket and dark trousers, sitting on an invisible park bench, knees bent, hands resting on lap. Entire character, 48x48 pixel art canvas, isolated transparent background, no bench or other props. Preserve reference identity."
+    },
+    {
+      "name": "wave",
+      "background_job_id": "209009f4-c2c2-45f2-b77b-a2d15927d064",
+      "image_id": "72e54bc5-c36c-5746-97e6-3eb230170380",
+      "status": "processing",
+      "source_image_id": "72e54bc5-c36c-5746-97e6-3eb230170380",
+      "job_id": "209009f4-c2c2-45f2-b77b-a2d15927d064",
+      "image_size": {
+        "width": 48,
+        "height": 48
+      },
+      "output_count": 1,
+      "estimated_generations": 5,
+      "pricing_provisional": true,
+      "poll_tool": "get_image",
+      "download_path": "/mcp/images/209009f4-c2c2-45f2-b77b-a2d15927d064/download",
+      "description": "The exact same female resident from reference, same small pixel art body proportions, teal jacket and dark trousers, standing and greeting with one arm raised and open hand waving. Entire character, 48x48 pixel art canvas, isolated transparent background, no bench or other props. Preserve reference identity."
+    }
+  ]
+}

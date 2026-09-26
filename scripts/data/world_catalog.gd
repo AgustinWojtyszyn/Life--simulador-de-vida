@@ -30,14 +30,14 @@ static func countries() -> Array[CountryData]:
 		district.side_street_x = row[5]
 		district.side_street_width = row[6]
 		district.population = 18 if country.id in ["jp", "br"] else 14
-		var east := district.side_street_x + district.side_street_width + 140
+		var east := minf(district.side_street_x + district.side_street_width + 140, 2080)
 		district.building_slots = [
 			{"position": district.home_position, "kind": "home", "mode": "ENTERABLE"},
 			{"position": Vector2(east, 330), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(east + 245, 335), "kind": "office", "mode": "EXTERIOR_ONLY"},
+			{"position": Vector2(minf(east + 245, 2270), 335), "kind": "office", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(1560, 780), "kind": "clinic", "mode": "INTERACTABLE"},
 			{"position": Vector2(east, 800), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(east + 225, 920), "kind": "house", "mode": "EXTERIOR_ONLY"},
+			{"position": Vector2(minf(east + 225, 2270), 920), "kind": "house", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(230, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(560, 1460), "kind": "shop", "mode": "INTERACTABLE"},
 			{"position": Vector2(1160, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},

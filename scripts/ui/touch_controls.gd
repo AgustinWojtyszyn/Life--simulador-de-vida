@@ -21,11 +21,18 @@ func layout_controls() -> void:
 	if screen.x > 0 and screen.y > 0:
 		inset = Vector2(maxf(24, safe.position.x * size.x / screen.x), maxf(24, (screen.y - safe.end.y) * size.y / screen.y))
 	stick_center = Vector2(inset.x + radius + 18, size.y - inset.y - radius - 8)
-	action_center = Vector2(size.x - inset.x - 54, size.y - inset.y - 60)
+	var right_inset := maxf(24, (screen.x - safe.end.x) * size.x / maxf(screen.x, 1))
+	action_center = Vector2(size.x - right_inset - 54, size.y - inset.y - 60)
 	queue_redraw()
 
 func _process(_delta: float) -> void:
 	if not visible:
+		return
+	if get_tree().paused:
+		stick_finger = -1
+		action_finger = -1
+		InputManager.reset()
+		queue_redraw()
 		return
 	var world: Node2D = WorldManager.active_world
 	var available := false

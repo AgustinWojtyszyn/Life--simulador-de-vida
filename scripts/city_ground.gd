@@ -33,14 +33,14 @@ func _draw() -> void:
 		if (p.y > 396 and p.y < 562) or (p.x > 854 and p.x < 988):
 			draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color("495560") if i % 3 else Color("3d4954"))
 	for x in range(32, 2380, 44):
-		if x < 816 or x > 1010:
+		if (x < 816 or x > 1010) and not (x > sx - 30 and x < sx + sw + 30):
 			draw_rect(Rect2(x, 478, 22, 2), Color("c9b783"))
 	for y in range(24, 1580, 44):
-		if y < 370 or y > 590:
+		if (y < 370 or y > 590) and not (y > 1100 and y < 1280):
 			draw_rect(Rect2(920, y, 2, 22), Color("c9b783"))
 	# Crosswalks at the intersection, on all four approaches.
 	for y in range(405, 555, 18):
-		for x in [807, 1009]:
+		for x in [807, 1009, int(sx - 40), int(sx + sw + 20)]:
 			draw_rect(Rect2(x, y, 26, 9), Color("dcd8c2"))
 	for x in range(861, 984, 18):
 		for y in [355, 580]:

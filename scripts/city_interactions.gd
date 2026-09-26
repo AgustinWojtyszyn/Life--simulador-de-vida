@@ -74,7 +74,7 @@ func interact() -> void:
 					WorldManager.basic_state["rested"] = true
 					LifeEvents.rested.emit(WorldManager.profile.home_id)
 					say("Descansaste en tu cama. Este es tu hogar.")
-				"shop": say(str(target.get_meta("title", "Comercio")) + " · Atención al público. Compras en una próxima etapa.")
+				"shop": say(str(target.get_meta("title", "Comercio")) + " · Horario de atención: 9 a 20.")
 		"city_benches":
 			# Always stand back on the approach side, outside the bench footprint.
 			stand_position = target.global_position + Vector2(0, 18)

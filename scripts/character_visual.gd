@@ -12,6 +12,7 @@ var facing := "south"
 var distance_phase := 0.0
 var textures := {}
 var bounds_cache := {}
+var last_art := ""
 var pose := "idle"
 
 func _ready() -> void:
@@ -25,6 +26,7 @@ func _ready() -> void:
 
 func apply_profile(value: PlayerProfile) -> void:
 	profile = value
+	last_art = ""
 	palette.set_shader_parameter("skin_color", SKINS[profile.skin])
 	palette.set_shader_parameter("hair_color", HAIRS[profile.hair_color])
 	palette.set_shader_parameter("top_color", TOPS[profile.top])
@@ -48,15 +50,18 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	if state == "walk":
 		path = "res://assets/characters/%s/walk/%s_%d.png" % [profile.gender, direction, frame]
 	elif state in ["seated", "wave"]:
-		# Existing expressive poses stay available for the original male resident.
-		if profile.gender == "male":
-			path = "res://assets/characters/resident/%s.png" % state
+		var folder := "resident" if profile.gender == "male" else "female"
+		path = "res://assets/characters/%s/%s.png" % [folder, state]
 	if not ResourceLoader.exists(path):
 		path = "res://assets/characters/resident/%s.png" % direction
 	if not textures.has(path):
 		var art: Texture2D = load(path)
 		textures[path] = art
 		bounds_cache[path] = art.get_image().get_used_rect()
+	var art_key := path + state
+	if last_art == art_key:
+		return
+	last_art = art_key
 	var texture: Texture2D = textures[path]
 	var rect: Rect2 = bounds_cache[path]
 	sprite.texture = texture

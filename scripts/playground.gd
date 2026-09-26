@@ -142,6 +142,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		prop.add_to_group("parked_vehicles")
 	add_child(prop)
 	city_objects.append(prop)
+	if asset.begins_with("buildings/"):
+		prop.set_meta("building_mode", "EXTERIOR_ONLY")
 	if asset.begins_with("buildings/") or asset.begins_with("vegetation/"):
 		occluders.append(sprite)
 	add_solid(Rect2(pos + footprint.position, footprint.size))
@@ -177,7 +179,7 @@ func build_expansion() -> void:
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
-		building.title = country.shop_names[index % country.shop_names.size()]
+		building.title = country.shop_names[2] if slot.kind == "clinic" else country.shop_names[4] if slot.kind == "office" else country.home_kind.to_upper() if slot.kind == "house" else country.shop_names[index % 2]
 		var use_house: bool = slot.kind in ["home", "house"] and country.id not in ["jp", "it"]
 		building.facade = load("res://assets/regions/home.png" if use_house else country.facade)
 		building.size = Vector2(192, 160) if use_house else Vector2(208, 236)
@@ -186,6 +188,10 @@ func build_expansion() -> void:
 		occluders.append(building.get_child(0))
 		add_solid(Rect2(building.position + Vector2(-76, -48), Vector2(150, 44)))
 		index += 1
+	var east := data.side_street_x + data.side_street_width + 140
+	add_asset("props/fountain", Vector2(east, 1040), Vector2(100, 75), Rect2(-32, -21, 64, 20))
+	add_asset("props/bench", Vector2(east - 80, 1080), Vector2(58, 43), Rect2(-23, -12, 46, 12))
+	add_asset("props/planter", Vector2(east + 70, 1044), Vector2(48, 36), Rect2(-18, -10, 36, 12))
 	for p in [Vector2(1435, 354), Vector2(1710, 352), Vector2(1990, 580), Vector2(2340, 590), Vector2(1480, 1020), Vector2(1720, 950), Vector2(110, 1280), Vector2(760, 1280), Vector2(1040, 1280), Vector2(1720, 1280), Vector2(2340, 1280)]:
 		add_prop("tree_bed", p + Vector2(0, 3), Rect2())
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
@@ -199,6 +205,7 @@ func populate() -> void:
 	system.name = "PopulationSystem"
 	system.set_script(preload("res://scripts/population_system.gd"))
 	add_child(system)
+	var east := WorldManager.district.side_street_x + WorldManager.district.side_street_width + 140
 	var routes := [
 		[Vector2(340, 373), Vector2(462, 373), Vector2(462, 355), Vector2(340, 355)],
 		[Vector2(200, 608), Vector2(490, 608), Vector2(490, 626), Vector2(200, 626)],
@@ -211,6 +218,8 @@ func populate() -> void:
 		[Vector2(270, 784), Vector2(270, 816), Vector2(335, 816), Vector2(335, 797)],
 		[Vector2(445, 334), Vector2(445, 363), Vector2(380, 363), Vector2(380, 340)],
 		[Vector2(1022, 420), Vector2(1022, 580), Vector2(1007, 580), Vector2(1007, 420)],
+		[Vector2(east, 830), Vector2(east + 130, 830), Vector2(east + 130, 856), Vector2(east, 856)],
+		[Vector2(east - 50, 1080), Vector2(east + 100, 1080), Vector2(east + 100, 1100), Vector2(east - 50, 1100)],
 	]
 	for i in WorldManager.district.population:
 		var walker := Node2D.new()
