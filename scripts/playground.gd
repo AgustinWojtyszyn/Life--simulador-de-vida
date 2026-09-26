@@ -9,6 +9,7 @@ const Interactions := preload("res://scripts/city_interactions.gd")
 const Water := preload("res://scripts/fountain_water.gd")
 const Hud := preload("res://scripts/city_hud.gd")
 const BuildingVariants := preload("res://scripts/data/building_variant.gd")
+const CityBuildingScript := preload("res://scripts/building.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
@@ -138,7 +139,7 @@ func add_solid(rect: Rect2) -> void:
 	solid_rects.append(rect)
 
 func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, index: int) -> void:
-	var building := CityBuilding.new()
+	var building := CityBuildingScript.new()
 	building.position = pos
 	building.size = size
 	building.country_id = WorldManager.country.id
@@ -203,7 +204,7 @@ func _process(delta: float) -> void:
 		var local_head := sprite.to_local(player.position - Vector2(0, 15))
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
 		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, delta * 4.0)
-		if sprite.get_parent() is CityBuilding:
+		if sprite.get_parent().get_script() == CityBuildingScript:
 			sprite.get_parent().modulate.a = sprite.modulate.a
 
 func build_expansion() -> void:
@@ -211,7 +212,7 @@ func build_expansion() -> void:
 	var country: CountryData = WorldManager.country
 	var index := 0
 	for slot in data.building_slots:
-		var building := CityBuilding.new()
+		var building := CityBuildingScript.new()
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
