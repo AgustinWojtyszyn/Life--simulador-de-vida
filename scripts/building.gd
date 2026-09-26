@@ -1,6 +1,8 @@
 class_name CityBuilding
 extends Node2D
 
+const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
+
 enum Access { EXTERIOR_ONLY, INTERACTABLE, ENTERABLE }
 var access := Access.EXTERIOR_ONLY
 var building_id := ""
@@ -23,7 +25,7 @@ func _ready() -> void:
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
 	if access != Access.EXTERIOR_ONLY:
-		var door := InteractionTarget.new()
+		var door := InteractionTargetScript.new()
 		door.position = Vector2(0, 16)
 		door.label = "Entrar a tu vivienda" if is_home else "Entrar a " + title if interior_type != "" else "Consultar " + title
 		door.action = "enter_home" if is_home else "enter_" + interior_type if interior_type != "" else "shop"
