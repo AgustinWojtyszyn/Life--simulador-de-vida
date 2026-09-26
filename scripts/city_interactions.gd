@@ -1,5 +1,7 @@
 extends Node
 
+const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
+
 var player: CharacterBody2D
 var hud: Control
 var target: Node2D
@@ -39,7 +41,7 @@ func refresh_target() -> void:
 		for node in get_tree().get_nodes_in_group(group):
 			if not node.is_visible_in_tree():
 				continue
-			if node is InteractionTarget and not node.can_interact(player):
+			if node.get_script() == InteractionTargetScript and not node.can_interact(player):
 				continue
 			var anchor: Vector2 = node.global_position
 			if group == "city_benches":
@@ -52,7 +54,7 @@ func refresh_target() -> void:
 				target = node
 				kind = group
 	match kind:
-		"interactables": prompt = "E · " + (target.label if target is InteractionTarget else str(target.get_meta("prompt", "Interactuar")))
+		"interactables": prompt = "E · " + (target.label if target.get_script() == InteractionTargetScript else str(target.get_meta("prompt", "Interactuar")))
 		"city_benches": prompt = "E · Sentarte a descansar"
 		"city_residents": prompt = "E · Saludar al vecino"
 		"city_fountain": prompt = "E · Pedir un deseo"
@@ -69,7 +71,7 @@ func interact() -> void:
 	LifeEvents.interacted.emit(kind, str(target.get_meta("id", target.name)))
 	match kind:
 		"interactables":
-			if target is InteractionTarget:
+			if target.get_script() == InteractionTargetScript:
 				say(target.perform(player))
 			else:
 				legacy_interaction()
