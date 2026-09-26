@@ -1,0 +1,5 @@
+{
+  "godotTools.editorPath.godot4": "godot",
+  "godotTools.lsp.headless": true,
+  "godotTools.lsp.serverPort": 6008
+}
