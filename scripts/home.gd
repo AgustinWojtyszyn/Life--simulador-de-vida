@@ -1,5 +1,7 @@
 extends Node2D
 
+const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
+
 var city_objects: Array[Node2D] = []
 var solid_rects: Array[Rect2] = []
 
@@ -59,7 +61,7 @@ func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2) -> v
 	add_solid(footprint)
 
 func add_target(at: Vector2, title: String, action: String, id: String) -> void:
-	var target := InteractionTarget.new()
+	var target := InteractionTargetScript.new()
 	target.position = at
 	target.label = title
 	target.action = action
