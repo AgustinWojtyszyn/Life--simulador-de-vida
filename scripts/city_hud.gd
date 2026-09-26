@@ -19,17 +19,17 @@ func _draw() -> void:
 	draw_style_box(panel(), Rect2(18, 16, 208, 57))
 	draw_rect(Rect2(30, 29, 3, 30), Color("dfb575"))
 	draw_string(font, Vector2(42, 42), "VIDA", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("f5ecd7"))
-	draw_string(font, Vector2(104, 39), "BARRIO DEL SOL", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d8ccaf"))
-	draw_string(font, Vector2(104, 55), "Una tarde en la ciudad", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("9dafaa"))
+	draw_string(font, Vector2(104, 39), WorldManager.district.title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d8ccaf"))
+	draw_string(font, Vector2(104, 55), ("Tu vivienda · " if WorldManager.location == "home" else "") + WorldManager.country.title, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("9dafaa"))
 	draw_style_box(panel(), Rect2(width - 127, 16, 109, 39))
 	draw_circle(Vector2(width - 109, 35), 5, Color("dfb575"))
 	draw_string(font, Vector2(width - 96, 39), "17:40  /  TARDE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("eee3ca"))
 	draw_style_box(panel(), Rect2(18, height - 39, 314, 23))
-	draw_string(font, Vector2(30, height - 23), "WASD / Flechas · Caminar      E · Interactuar cerca", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d8d4bf"))
+	draw_string(font, Vector2(30, height - 23), ("Arrastrá para caminar · Botón para actuar" if InputManager.touch_enabled else "WASD / Flechas · Caminar      E · Interactuar"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d8d4bf"))
 
 	if not interaction_prompt.is_empty():
 		draw_style_box(panel(), Rect2(width / 2 - 120, height - 75, 240, 27))
-		draw_string(font, Vector2(width / 2 - 108, height - 57), interaction_prompt, HORIZONTAL_ALIGNMENT_CENTER, 216, 12, Color("f3d799"))
+		draw_string(font, Vector2(width / 2 - 108, height - 57), interaction_prompt.replace("E · ", "") if InputManager.touch_enabled else interaction_prompt, HORIZONTAL_ALIGNMENT_CENTER, 216, 12, Color("f3d799"))
 	if not interaction_message.is_empty():
 		draw_style_box(panel(), Rect2(width / 2 - 200, 86, 400, 28))
 		draw_string(font, Vector2(width / 2 - 188, 105), interaction_message, HORIZONTAL_ALIGNMENT_CENTER, 376, 11, Color("eee3ca"))

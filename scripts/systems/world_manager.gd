@@ -6,9 +6,10 @@ var profile := PlayerProfile.new()
 var country: CountryData
 var district: DistrictData
 var location := "home"
-var spawn_position := Vector2(390, 330)
+var spawn_position := HomeSystem.INTERIOR_SPAWN
 var active_world: Node2D
 var playing := false
+var basic_state := {"rested": false}
 var settings := {"touch_controls": false}
 
 func _ready() -> void:
@@ -30,7 +31,8 @@ func new_game(new_profile: PlayerProfile, id: String) -> void:
 	profile = new_profile
 	select_country(id)
 	location = "home"
-	spawn_position = Vector2(390, 330)
+	spawn_position = HomeSystem.INTERIOR_SPAWN
+	basic_state = {"rested": false}
 	playing = true
 	LifeEvents.profile_created.emit(profile)
 	travel_requested.emit()
@@ -44,6 +46,7 @@ func continue_game() -> bool:
 	location = data.location
 	var limit := Vector2(800, 450) if location == "home" else district.world_size
 	spawn_position = Vector2(float(data.position[0]), float(data.position[1])).clamp(Vector2(24, 24), limit - Vector2(24, 24))
+	basic_state = data.get("state", {"rested": false}) if data.get("state") is Dictionary else {"rested": false}
 	settings = data.get("settings", settings) if data.get("settings", settings) is Dictionary else settings
 	playing = true
 	travel_requested.emit()
@@ -53,7 +56,8 @@ func travel(destination: String) -> void:
 	if destination not in ["home", "street"]:
 		return
 	location = destination
-	spawn_position = Vector2(390, 330) if destination == "home" else district.home_position + Vector2(0, 34)
+	var home := HomeSystem.starter_home(country)
+	spawn_position = home.interior_spawn if destination == "home" else home.street_spawn
 	travel_requested.emit()
 	LifeEvents.location_changed.emit(country.id, district.id, location)
 
@@ -64,7 +68,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "settings": settings, "state": {"rested": active_world.get_meta("rested", false)}})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "settings": settings, "state": basic_state})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result

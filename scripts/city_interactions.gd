@@ -20,9 +20,9 @@ func _process(delta: float) -> void:
 	if message_time == 0:
 		message = ""
 	refresh_target()
-	if Input.is_action_just_pressed("interact"):
+	if InputManager.interact_pressed():
 		interact()
-	elif is_instance_valid(seated_bench) and Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO:
+	elif is_instance_valid(seated_bench) and InputManager.movement() != Vector2.ZERO:
 		stand_up()
 	if is_instance_valid(hud):
 		hud.set_interaction(prompt, message)
@@ -35,8 +35,10 @@ func refresh_target() -> void:
 		prompt = "E · Levantarte"
 		return
 	var nearest := 49.0
-	for group in ["city_benches", "city_residents", "city_fountain"]:
+	for group in ["interactables", "city_benches", "city_residents", "city_fountain"]:
 		for node in get_tree().get_nodes_in_group(group):
+			if not node.is_visible_in_tree():
+				continue
 			var anchor: Vector2 = node.global_position
 			if group == "city_benches":
 				anchor += Vector2(0, 16)
@@ -48,6 +50,7 @@ func refresh_target() -> void:
 				target = node
 				kind = group
 	match kind:
+		"interactables": prompt = "E · " + str(target.get_meta("prompt", "Interactuar"))
 		"city_benches": prompt = "E · Sentarte a descansar"
 		"city_residents": prompt = "E · Saludar al vecino"
 		"city_fountain": prompt = "E · Pedir un deseo"
@@ -61,7 +64,17 @@ func interact() -> void:
 	refresh_target()
 	if not is_instance_valid(target):
 		return
+	LifeEvents.interacted.emit(kind, str(target.get_meta("id", target.name)))
 	match kind:
+		"interactables":
+			match str(target.get_meta("action", "")):
+				"enter_home": WorldManager.call_deferred("travel", "home")
+				"exit_home": WorldManager.call_deferred("travel", "street")
+				"rest":
+					WorldManager.basic_state["rested"] = true
+					LifeEvents.rested.emit(WorldManager.profile.home_id)
+					say("Descansaste en tu cama. Este es tu hogar.")
+				"shop": say(str(target.get_meta("title", "Comercio")) + " · Atención al público. Compras en una próxima etapa.")
 		"city_benches":
 			# Always stand back on the approach side, outside the bench footprint.
 			stand_position = target.global_position + Vector2(0, 18)
