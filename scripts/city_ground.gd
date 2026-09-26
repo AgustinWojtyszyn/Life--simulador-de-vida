@@ -2,27 +2,40 @@ extends Node2D
 
 # Static drawing is cached by Godot; no per-frame tile generation.
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 1440, 960), Color("b5ae95"))
-	paving(Rect2(20, 24, 1400, 366))
-	paving(Rect2(20, 574, 1400, 366))
+	draw_rect(Rect2(0, 0, 2400, 1600), Color("b5ae95"))
+	paving(Rect2(20, 24, 2360, 366))
+	paving(Rect2(20, 574, 2360, 1006))
 	# Two intersecting streets, with a darker gutter and a raised stone curb.
-	for road in [Rect2(16, 394, 1408, 170), Rect2(852, 16, 138, 928)]:
+	for road in [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(WorldManager.district.side_street_x, 16, WorldManager.district.side_street_width, 1568)]:
 		draw_rect(road.grow(9), Color("787d79"))
 		draw_rect(road.grow(5), Color("e3d7b7"))
 		draw_rect(road.grow(1), Color("575f65"))
 		draw_rect(road, Color("424e59"))
 	# Open the shared intersection: no curb may cut across an active road.
 	draw_rect(Rect2(842, 384, 158, 190), Color("424e59"))
+	var sx := WorldManager.district.side_street_x
+	var sw := WorldManager.district.side_street_width
+	for at in [Vector2(842, 1120), Vector2(sx - 10, 384), Vector2(sx - 10, 1120)]:
+		draw_rect(Rect2(at, Vector2(158 if at.x == 842 else sw + 20, 190 if at.y == 384 else 140)), Color("424e59"))
+	for x in range(32, 2370, 44):
+		if not (x > 820 and x < 1010) and not (x > sx - 30 and x < sx + sw + 30):
+			draw_rect(Rect2(x, 1189, 22, 2), Color("c9b783"))
+	for y in range(24, 1580, 44):
+		if not (y > 370 and y < 590) and not (y > 1100 and y < 1280):
+			draw_rect(Rect2(sx + sw / 2, y, 2, 22), Color("c9b783"))
+	for y in range(1140, 1240, 18):
+		for x in [807, 1009, int(sx - 40), int(sx + sw + 20)]:
+			draw_rect(Rect2(x, y, 26, 9), Color("dcd8c2"))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 519
 	for i in 14000:
-		var p := Vector2(rng.randi_range(18, 1420), rng.randi_range(18, 940))
+		var p := Vector2(rng.randi_range(18, 2380), rng.randi_range(18, 1580))
 		if (p.y > 396 and p.y < 562) or (p.x > 854 and p.x < 988):
 			draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color("495560") if i % 3 else Color("3d4954"))
-	for x in range(32, 1420, 44):
+	for x in range(32, 2380, 44):
 		if x < 816 or x > 1010:
 			draw_rect(Rect2(x, 478, 22, 2), Color("c9b783"))
-	for y in range(24, 940, 44):
+	for y in range(24, 1580, 44):
 		if y < 370 or y > 590:
 			draw_rect(Rect2(920, y, 2, 22), Color("c9b783"))
 	# Crosswalks at the intersection, on all four approaches.

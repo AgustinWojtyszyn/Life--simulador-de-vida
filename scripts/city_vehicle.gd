@@ -3,7 +3,7 @@ extends AnimatableBody2D
 # Six reusable traffic bodies follow two horizontal lanes. They yield to the
 # resident and the car ahead; their collision shapes travel with their sprites.
 const ROUTE_LEFT := -140.0
-const ROUTE_RIGHT := 1580.0
+const ROUTE_RIGHT := 2540.0
 const ROUTE_LENGTH := ROUTE_RIGHT - ROUTE_LEFT
 const BRAKING := 150.0
 var model := "car"
@@ -43,10 +43,16 @@ func free_distance() -> float:
 			continue
 		var ahead: float = fposmod((other.position.x - position.x) * direction, ROUTE_LENGTH)
 		gap = minf(gap, ahead - half_width - other.half_width - 22.0)
-	if is_instance_valid(player) and absf(player.position.y - (position.y - 10.0)) < 24.0:
-		var ahead := (player.position.x - position.x) * direction
-		if ahead >= -half_width - 6.0:
-			gap = minf(gap, ahead - half_width - 18.0)
+	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
+	if is_instance_valid(player):
+		pedestrians.append(player)
+	for pedestrian in pedestrians:
+		if not pedestrian.is_visible_in_tree():
+			continue
+		if absf(pedestrian.position.y - (position.y - 10.0)) < 24.0:
+			var ahead: float = (pedestrian.position.x - position.x) * direction
+			if ahead >= -half_width - 6.0:
+				gap = minf(gap, ahead - half_width - 18.0)
 	return maxf(0.0, gap)
 
 func _physics_process(delta: float) -> void:

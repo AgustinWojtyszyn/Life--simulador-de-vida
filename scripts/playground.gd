@@ -1,6 +1,6 @@
 extends Node2D
 
-const MAP_SIZE := Vector2(1440, 960)
+const MAP_SIZE := Vector2(2400, 1600)
 const CityProp := preload("res://scripts/city_prop.gd")
 const Ground := preload("res://scripts/city_ground.gd")
 const Walker := preload("res://scripts/city_walker.gd")
@@ -14,13 +14,15 @@ var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
-	{"from": Vector2(-140, 454), "to": Vector2(1580, 454), "direction": Vector2.RIGHT},
-	{"from": Vector2(1580, 512), "to": Vector2(-140, 512), "direction": Vector2.LEFT},
+	{"from": Vector2(-140, 454), "to": Vector2(2540, 454), "direction": Vector2.RIGHT},
+	{"from": Vector2(2540, 512), "to": Vector2(-140, 512), "direction": Vector2.LEFT},
 ]
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	configure_input()
+	$Player/Camera2D.limit_right = int(MAP_SIZE.x)
+	$Player/Camera2D.limit_bottom = int(MAP_SIZE.y)
 	# Render thousands of static ground marks only once, then reuse one GPU texture.
 	var ground_view := SubViewport.new()
 	ground_view.name = "GroundCache"
@@ -36,8 +38,8 @@ func _ready() -> void:
 	ground_sprite.centered = false
 	ground_sprite.z_index = -10
 	add_child(ground_sprite)
-	for rect in [Rect2(0, 0, 1440, 16), Rect2(0, 944, 1440, 16),
-		Rect2(0, 0, 16, 960), Rect2(1424, 0, 16, 960)]:
+	for rect in [Rect2(0, 0, 2400, 16), Rect2(0, 1584, 2400, 16),
+		Rect2(0, 0, 16, 1600), Rect2(2384, 0, 16, 1600)]:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
 	add_asset("buildings/cafe", Vector2(195, 318), Vector2(230, 268), Rect2(-87, -64, 166, 58))
@@ -76,14 +78,8 @@ func _ready() -> void:
 	add_asset("props/fountain", Vector2(457, 819), Vector2(144, 108), Rect2(-49, -31, 98, 28))
 	add_prop("sign", Vector2(266, 355), Rect2(-7, -5, 14, 6))
 	add_prop("sign", Vector2(499, 354), Rect2(-7, -5, 14, 6))
-	for route in [Vector4(340, 373, 462, 373), Vector4(200, 608, 490, 608), Vector4(1120, 370, 1300, 370)]:
-		var walker := Node2D.new()
-		walker.set_script(Walker)
-		walker.start = Vector2(route.x, route.y)
-		walker.finish = Vector2(route.z, route.w)
-		walker.position = walker.start
-		walker.modulate = Color("d6c7ac")
-		add_child(walker)
+	build_expansion()
+	populate()
 	var layer := CanvasLayer.new()
 	var hud := Control.new()
 	hud.set_script(Hud)
@@ -127,7 +123,12 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	prop.name = asset.get_file().capitalize()
 	prop.position = pos
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://assets/city/%s.png" % asset)
+	var path := "res://assets/city/%s.png" % asset
+	if asset.begins_with("buildings/") and WorldManager.country.id != "ar":
+		path = WorldManager.country.facade
+	elif asset == "vegetation/tree":
+		path = WorldManager.country.greenery
+	sprite.texture = load(path)
 	sprite.centered = false
 	sprite.position = Vector2(-size.x / 2, -size.y)
 	sprite.scale = size / sprite.texture.get_size()
@@ -165,3 +166,65 @@ func _process(delta: float) -> void:
 		var local_head := sprite.to_local(player.position - Vector2(0, 15))
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
 		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, delta * 4.0)
+
+func build_expansion() -> void:
+	var data: DistrictData = WorldManager.district
+	var country: CountryData = WorldManager.country
+	var index := 0
+	for slot in data.building_slots:
+		var building := CityBuilding.new()
+		building.position = slot.position
+		building.building_id = country.id + "_building_" + str(index)
+		building.is_home = slot.kind == "home"
+		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
+		building.title = country.shop_names[index % country.shop_names.size()]
+		var use_house: bool = slot.kind in ["home", "house"] and country.id not in ["jp", "it"]
+		building.facade = load("res://assets/regions/home.png" if use_house else country.facade)
+		building.size = Vector2(192, 160) if use_house else Vector2(208, 236)
+		add_child(building)
+		city_objects.append(building)
+		occluders.append(building.get_child(0))
+		add_solid(Rect2(building.position + Vector2(-76, -48), Vector2(150, 44)))
+		index += 1
+	for p in [Vector2(1435, 354), Vector2(1710, 352), Vector2(1990, 580), Vector2(2340, 590), Vector2(1480, 1020), Vector2(1720, 950), Vector2(110, 1280), Vector2(760, 1280), Vector2(1040, 1280), Vector2(1720, 1280), Vector2(2340, 1280)]:
+		add_prop("tree_bed", p + Vector2(0, 3), Rect2())
+		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
+	for p in [Vector2(1460, 600), Vector2(1650, 930), Vector2(530, 1285), Vector2(2170, 1030)]:
+		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
+	for p in [Vector2(1460, 380), Vector2(1730, 380), Vector2(2000, 380), Vector2(2340, 1040), Vector2(1630, 1110), Vector2(450, 1110), Vector2(1080, 1110)]:
+		add_asset("props/lamp", p, Vector2(48, 96), Rect2(-4, -4, 8, 8))
+
+func populate() -> void:
+	var system := Node.new()
+	system.name = "PopulationSystem"
+	system.set_script(preload("res://scripts/population_system.gd"))
+	add_child(system)
+	var routes := [
+		[Vector2(340, 373), Vector2(462, 373), Vector2(462, 355), Vector2(340, 355)],
+		[Vector2(200, 608), Vector2(490, 608), Vector2(490, 626), Vector2(200, 626)],
+		[Vector2(1120, 370), Vector2(1300, 370), Vector2(1300, 350), Vector2(1120, 350)],
+		[Vector2(1490, 362), Vector2(1640, 362), Vector2(1640, 382), Vector2(1490, 382)],
+		[Vector2(2050, 364), Vector2(2270, 364), Vector2(2270, 380), Vector2(2050, 380)],
+		[Vector2(1550, 816), Vector2(1680, 816), Vector2(1680, 840), Vector2(1550, 840)],
+		[Vector2(140, 1500), Vector2(370, 1500), Vector2(370, 1520), Vector2(140, 1520)],
+		[Vector2(1130, 1500), Vector2(1420, 1500), Vector2(1420, 1520), Vector2(1130, 1520)],
+		[Vector2(270, 784), Vector2(270, 816), Vector2(335, 816), Vector2(335, 797)],
+		[Vector2(445, 334), Vector2(445, 363), Vector2(380, 363), Vector2(380, 340)],
+		[Vector2(1022, 420), Vector2(1022, 580), Vector2(1007, 580), Vector2(1007, 420)],
+	]
+	for i in WorldManager.district.population:
+		var walker := Node2D.new()
+		walker.set_script(Walker)
+		walker.route.assign(routes[i % routes.size()])
+		walker.position = walker.route[0] + Vector2((i / routes.size()) * 25, 0)
+		walker.speed = 22.0 + (i % 4) * 3
+		walker.profile = PlayerProfile.new()
+		walker.profile.gender = "female" if i % 2 else "male"
+		walker.profile.skin = i % 3
+		walker.profile.hair = (i / 2) % 3
+		walker.profile.hair_color = (i / 3) % 3
+		walker.profile.top = (i + 1) % 3
+		walker.profile.bottom = (i / 2) % 3
+		walker.route_kind = "bench" if i % routes.size() == 8 else "shop" if i % routes.size() == 9 else "crossing" if i % routes.size() == 10 else "walk"
+		add_child(walker)
+		system.residents.append(walker)

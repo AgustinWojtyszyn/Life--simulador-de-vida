@@ -1,0 +1,70 @@
+{
+  "generator": "PixelLab MCP create_image_pro_flash",
+  "assets": [
+    {
+      "name": "us",
+      "job_id": "861a8a93-616b-47a2-a386-f654b389b231",
+      "source_image_id": "d4ceed18-ec68-5ec9-a4ca-002d476f9205",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. American red brick mixed use corner building, three floors, broad glass ground floor diner with blue awning, fire escape, rooftop HVAC, restrained downtown architecture. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "jp",
+      "job_id": "320bb9b8-bd6c-4441-8078-2c82940f7b4c",
+      "source_image_id": "9064d35b-5d76-53da-8e26-8c1865f76b15",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. Japanese compact four storey apartment and small ground floor convenience shop, pale concrete, narrow balconies, vertical shop sign, exterior air conditioners, neat subdued streetscape, not anime. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "it",
+      "job_id": "ce224d4c-a05e-4765-b164-cbabc6c559a7",
+      "source_image_id": "dbcd6514-54fc-54f6-ae89-3aaba5e6da34",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. Italian ochre stucco three floor Mediterranean apartment building, terracotta roof, green shutters, wrought iron balconies, small ground floor trattoria and outdoor awning. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "br",
+      "job_id": "34a97418-f737-4ed4-8ec8-1af2e2d789de",
+      "source_image_id": "f2d62a65-5133-5342-868c-9b651d5dcdcc",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. Brazilian contemporary two storey coral and cream urban apartment with open ground floor bakery, broad shaded balcony, lush tropical potted plants, flat roof. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "home",
+      "job_id": "dd880b58-1639-45fb-a119-53ef7d5144dc",
+      "source_image_id": "d7dfa71e-6d6d-5e7e-910e-58badca8086e",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. Small comfortable one storey urban starter home, pale cream masonry, terracotta roof, teal door clearly visible at front center, two windows with shutters, small planted entrance. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "palm",
+      "job_id": "fd57a721-d558-4f87-9777-49f40a96752a",
+      "source_image_id": "1a1fbdca-a509-5550-b633-58b02b0abfef",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. One lush urban palm tree, tall textured trunk, richly shaded green arching fronds. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "bed",
+      "job_id": "797b610e-b4d6-46d0-9c2b-e04a89bcfb16",
+      "source_image_id": "af180c28-b00c-5783-99d9-3b32179c0670",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. One comfortable single wooden bed with cream pillow, teal blanket and bedside table, viewed from above three quarter, no ground. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "sofa",
+      "job_id": "fb2746f8-b1d3-4de9-b955-ffcabbf206a4",
+      "source_image_id": "43eb5962-db25-5294-b57d-bdbeaeddac62",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. One warm terracotta upholstered two-seat sofa, wood feet, cream cushion, viewed from above three quarter, no ground. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    },
+    {
+      "name": "kitchen",
+      "job_id": "15c56b18-1bc6-456d-a2fa-fd2abf9facec",
+      "source_image_id": "98fe0ccd-96d0-5f10-bb15-d0c2dafaea6f",
+      "prompt": "Premium crisp pixel art asset for VIDA modern life game. One compact kitchen counter with sink, cooker, wooden cupboards and small white refrigerator, viewed above three quarter, no ground. Elevated three-quarter orthographic view, front facade toward viewer and right side receding up-right, verticals straight, strong volume. Warm upper-left sunlight, cool muted shadows, cream terracotta olive teal palette. Entire isolated object fits canvas, transparent background, no ground or scenery. Match style of VIDA cafe."
+    }
+  ],
+  "characters": {
+    "male": {
+      "id": "f1f9c2e4-3626-4757-844f-9678fae4b5db",
+      "animation_group": "2c5c3c7d-0da4-4290-9697-8aff9eefe2a2"
+    },
+    "female": {
+      "id": "a7d060a9-0876-4f91-ad6b-dc501afbfdfc",
+      "animation_group": "392bc9f6-3ef3-4bcd-8b96-c29468be28df"
+    }
+  },
+  "animation": "walking-4-frames, south/east/north/west"
+}
