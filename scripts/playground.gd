@@ -43,10 +43,10 @@ func _ready() -> void:
 		Rect2(0, 0, 16, 1600), Rect2(2384, 0, 16, 1600)]:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
-	add_asset("buildings/cafe", Vector2(195, 318), Vector2(230, 268), Rect2(-87, -64, 166, 58))
-	add_asset("buildings/market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53))
-	add_asset("buildings/cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), Color("e3d3c8"))
-	add_asset("buildings/market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64))
+	add_frontage("cafe", Vector2(195, 318), Vector2(230, 268), Rect2(-87, -64, 166, 58), 0)
+	add_frontage("market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53), 1)
+	add_frontage("cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), 2)
+	add_frontage("market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64), 3)
 	var parked_positions := [Vector2(1126, 732), Vector2(1304, 732), Vector2(1126, 876), Vector2(1304, 876)]
 	var parked_models := ["car", "van", "coupe", "taxi"]
 	for i in parked_positions.size():
@@ -137,6 +137,22 @@ func add_solid(rect: Rect2) -> void:
 	add_child(body)
 	solid_rects.append(rect)
 
+func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, index: int) -> void:
+	var building := CityBuilding.new()
+	building.position = pos
+	building.size = size
+	building.country_id = WorldManager.country.id
+	building.variant = BuildingVariants.make(building.country_id, "shop", index + 13)
+	building.access = CityBuilding.Access.ENTERABLE
+	building.interior_type = "cafe" if asset == "cafe" else "shop"
+	building.title = WorldManager.country.shop_names[1 if asset == "cafe" else 0]
+	building.building_id = "%s_front_%d" % [building.country_id, index]
+	building.facade = load("res://assets/city/buildings/%s.png" % asset) if building.country_id == "ar" else load(WorldManager.country.facade)
+	add_child(building)
+	city_objects.append(building)
+	occluders.append(building.get_child(0))
+	add_solid(Rect2(pos + footprint.position, footprint.size))
+
 func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tint := Color.WHITE) -> void:
 	var prop := Node2D.new()
 	prop.name = asset.get_file().capitalize()
@@ -187,6 +203,8 @@ func _process(delta: float) -> void:
 		var local_head := sprite.to_local(player.position - Vector2(0, 15))
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
 		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, delta * 4.0)
+		if sprite.get_parent() is CityBuilding:
+			sprite.get_parent().modulate.a = sprite.modulate.a
 
 func build_expansion() -> void:
 	var data: DistrictData = WorldManager.district
