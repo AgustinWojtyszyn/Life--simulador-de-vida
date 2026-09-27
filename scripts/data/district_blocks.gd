@@ -115,6 +115,10 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 			elif y > 600 and column % 11 == 7:
 				kind = "office"
 				mode = "ENTERABLE"
+			elif y > 600 and column % 5 == 2:
+				# A second region-specific building family prevents the long
+				# residential rows from becoming copies of one house model.
+				kind = "mixed"
 			slots.append({"position": Vector2(x, y), "kind": kind, "mode": mode, "asset_index": index, "facing": "south", "street_normal": "south"})
 			index += 1
 
