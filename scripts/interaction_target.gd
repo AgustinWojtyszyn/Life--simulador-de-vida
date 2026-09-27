@@ -14,6 +14,15 @@ func can_interact(player: Node2D) -> bool:
 	return is_visible_in_tree() and player.global_position.distance_to(global_position) < reach and not player.transitioning
 
 func perform(player: Node2D) -> String:
+	var poi: Dictionary = get_meta("poi", {})
+	var hours: Dictionary = poi.get("opening_hours", {})
+	if action.begins_with("enter_") and action != "enter_home":
+		if not PoiData.is_open(hours, GameClock.total_minutes):
+			return "Cerrado · " + PoiData.hours_text(hours)
+		WorldManager.active_poi = poi
+	if action == "hospital_floor":
+		WorldManager.call_deferred("travel", "hospital" if WorldManager.location == "hospital_ward" else "hospital_ward")
+		return ""
 	if action == "enter_home":
 		WorldManager.call_deferred("travel", "home")
 		return ""
@@ -38,5 +47,5 @@ func perform(player: Node2D) -> String:
 				AudioSystem.play_sfx("kick", player.global_position)
 			return result
 		"shop":
-			return detail + " · Horario de atención: 9 a 20."
+			return detail + " · " + PoiData.status_text(hours if not poi.is_empty() else WorldManager.active_poi.get("opening_hours", {}), GameClock.total_minutes)
 	return ""

@@ -12,7 +12,8 @@ var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
 var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0}
-const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini"]
+const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini", "ice_cream_shop", "grill", "hospital", "hospital_ward", "supermarket", "pharmacy", "gym", "gas_station"]
+var active_poi: Dictionary = {}
 
 func _ready() -> void:
 	countries = preload("res://scripts/data/world_catalog.gd").countries()

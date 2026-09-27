@@ -43,6 +43,11 @@ func _ready() -> void:
 	set_meta("building_type", building_type)
 	set_meta("building_title", "TU HOGAR" if is_home else title)
 	set_meta("orientation", orientation)
+	var poi := PoiData.make(building_id, "home" if is_home else building_type, "TU HOGAR" if is_home else title,
+		global_position, global_position + door_offset, country_id, WorldManager.profile.city_id, WorldManager.district.id)
+	poi["interior_type"] = interior_type
+	set_meta("poi", poi)
+	add_to_group("map_pois")
 	if access != Access.EXTERIOR_ONLY:
 		var door := InteractionTargetScript.new()
 		door.position = door_offset
@@ -50,6 +55,7 @@ func _ready() -> void:
 		door.action = "enter_home" if is_home else "enter_" + interior_type if interior_type != "" else "shop"
 		door.detail = title
 		door.target_id = building_id
+		door.set_meta("poi", poi)
 		door.set_meta("prompt", "Entrar a tu vivienda" if is_home else "Consultar " + title)
 		door.set_meta("action", "enter_home" if is_home else "shop")
 		door.set_meta("id", building_id)

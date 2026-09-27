@@ -12,22 +12,22 @@ func _ready() -> void:
 		add_solid(rect)
 	# Furniture now alternates authored diagonal views instead of every object
 	# leaning from the same upper-right to lower-left axis.
-	furniture("bed", Vector2(190, 245), Vector2(100, 100), Rect2(147, 178, 86, 61), "south-west")
-	furniture("sofa", Vector2(430, 280), Vector2(134, 90), Rect2(380, 254, 100, 20), "south-east")
+	furniture("bed_front", Vector2(190, 245), Vector2(100, 100), Rect2(147, 178, 86, 61), "south")
+	furniture("sofa_front", Vector2(430, 275), Vector2(134, 80), Rect2(380, 253, 100, 22), "south")
 	furniture("kitchen", Vector2(478, 166), Vector2(160, 100), Rect2(419, 124, 118, 35), "south-west")
 	furniture("wardrobe", Vector2(267, 171), Vector2(56, 82), Rect2(243, 148, 48, 18), "south-east")
 	furniture("shelf", Vector2(141, 153), Vector2(50, 68), Rect2(119, 137, 44, 14), "south-west")
-	furniture("tv", Vector2(350, 242), Vector2(72, 50), Rect2(320, 226, 60, 12), "south-west")
+	furniture("tv_back", Vector2(430, 331), Vector2(83, 56), Rect2(395, 315, 70, 16), "north")
 	furniture("desk", Vector2(537, 248), Vector2(64, 68), Rect2(511, 228, 50, 14), "south-east")
-	furniture("dining", Vector2(443, 345), Vector2(74, 59), Rect2(415, 320, 56, 19), "south-west")
+	furniture("dining", Vector2(600, 331), Vector2(74, 59), Rect2(572, 306, 56, 19), "south-west")
 	furniture("bathroom", Vector2(636, 185), Vector2(106, 89), Rect2(589, 110, 92, 42), "south-east")
 	add_target(Vector2(635, 219), "Ducharte", "shower", "shower")
 	add_target(Vector2(417, 202), "Cocinar", "cook", "stove")
 	add_target(Vector2(260, 245), "Descansar en tu cama", "rest", WorldManager.profile.home_id + "_bed")
-	add_target(Vector2(352, 270), "Mirar televisión", "tv", "tv")
+	add_target(Vector2(430, 295), "Mirar televisión", "tv", "tv")
 	add_target(Vector2(535, 266), "Usar la computadora", "pc", "pc")
 	add_target(Vector2(478, 207), "Abrir la heladera", "fridge", "fridge")
-	add_target(Vector2(436, 335), "Comer en la mesa", "eat", "table")
+	add_target(Vector2(590, 350), "Comer en la mesa", "eat", "table")
 	add_target(Vector2(440, 305), "Descansar en el sofá", "rest", "sofa")
 	add_target(Vector2(390, 362), "Salir al barrio", "exit_home", WorldManager.profile.home_id + "_exit")
 	var camera: Camera2D = $Player/Camera2D
@@ -64,9 +64,10 @@ func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2, faci
 	node.set_meta("interior_asset", asset)
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/interior/%s.png" % asset)
-	sprite.centered = false
-	sprite.position = Vector2(-size.x / 2, -size.y)
-	sprite.scale = size / sprite.texture.get_size()
+	sprite.region_enabled = true
+	sprite.region_rect = sprite.texture.get_image().get_used_rect()
+	sprite.position = Vector2(0, -size.y / 2)
+	sprite.scale = size / sprite.region_rect.size
 	# Interior props contain no signage, so a horizontal authored mirror is a
 	# safe second isometric view. We never rotate the sprite upside-down.
 	sprite.flip_h = facing in ["south-west", "west", "north-west"]
