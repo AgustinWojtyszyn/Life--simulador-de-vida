@@ -12,7 +12,7 @@ concurrency:
 jobs:
   godot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Set up Godot
@@ -22,11 +22,9 @@ jobs:
           use-dotnet: false
       - name: Import project
         run: godot --headless --path . --editor --quit-after 2
-      - name: Phase 1 smoke
-        run: godot --headless --path . -s tests/phase1_test.gd
-      - name: Regional streets
-        run: godot --headless --path . -s tests/regional_streets_test.gd
-      - name: Orientation
-        run: godot --headless --path . -s tests/orientation_test.gd
+      - name: Expanded city + mobile smoke
+        run: godot --headless --path . -s tests/iteration_smoke_test.gd
       - name: Interactions
         run: godot --headless --path . -s tests/interactions_test.gd
+      - name: Movement
+        run: godot --headless --path . -s tests/movement_test.gd
