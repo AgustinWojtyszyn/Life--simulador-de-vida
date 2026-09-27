@@ -3,12 +3,11 @@ extends Node
 # Original procedural audio for VIDA. Nothing here samples or reproduces
 # third-party music: every track and effect is synthesized at runtime.
 const SAMPLE_RATE := 16000
-const TRACK_SECONDS := 12.0
+const TRACK_SECONDS := 24.0
 
 var music_player := AudioStreamPlayer.new()
 var current_country := "ar"
 var track_index := 0
-var track_clock := 0.0
 var enabled := true
 var music_cache := {}
 var sfx_cache := {}
@@ -24,7 +23,6 @@ func start_world(country_id: String) -> void:
 		return
 	current_country = country_id
 	track_index = country_seed(country_id) % 3
-	track_clock = 0.0
 	if enabled:
 		play_track(track_index)
 
@@ -41,15 +39,6 @@ func set_enabled(value: bool) -> void:
 func set_music_volume(value: float) -> void:
 	var linear := clampf(value, 0.0, 1.0)
 	music_player.volume_db = -40.0 if linear <= 0.01 else linear_to_db(linear)
-
-func _process(delta: float) -> void:
-	if not enabled or not WorldManager.playing:
-		return
-	track_clock += delta
-	if track_clock >= TRACK_SECONDS * 2.0:
-		track_clock = 0.0
-		track_index = (track_index + 1) % 3
-		play_track(track_index)
 
 func play_track(index: int) -> void:
 	var key := "%s_%d" % [current_country, index]
@@ -100,34 +89,43 @@ func country_scale(id: String) -> Array[int]:
 			return [0, 2, 4, 7, 9, 11]
 
 func make_music(style: int, country: String) -> AudioStreamWAV:
+	# A smooth, original ambient loop. The previous half-beat note sequencer
+	# sounded like repeated "pim" tones and made the broken-frame-rate problem
+	# much more obvious. Frequencies are quantized to whole loop cycles so the
+	# WAV can loop without a click at the seam.
 	var frames: int = int(SAMPLE_RATE * TRACK_SECONDS)
 	var bytes := PackedByteArray()
 	bytes.resize(frames * 4)
-	var scale: Array[int] = country_scale(country)
-	var root: float = float({"ar": 196.0, "us": 174.61, "jp": 220.0, "it": 196.0, "br": 185.0}.get(country, 196.0))
-	var tempos: Array[float] = [82.0, 112.0, 98.0]
-	var tempo: float = tempos[style]
-	var beat: float = 60.0 / tempo
+	var root: float = float({"ar": 130.81, "us": 116.54, "jp": 146.83, "it": 130.81, "br": 123.47}.get(country, 130.81))
+	var progressions := [
+		[0, 7], [4, 11], [2, 9], [5, 12],
+	]
+	var chord_freqs: Array = []
+	for chord in progressions:
+		var pair: Array[float] = []
+		for semitone in chord:
+			var raw: float = root * pow(2.0, float(semitone) / 12.0)
+			pair.append(round(raw * TRACK_SECONDS) / TRACK_SECONDS)
+		chord_freqs.append(pair)
+	var bass_raw := root * 0.5
+	var bass_freq := round(bass_raw * TRACK_SECONDS) / TRACK_SECONDS
+	var shimmer_raw := root * (2.0 if style == 2 else 1.5)
+	var shimmer_freq := round(shimmer_raw * TRACK_SECONDS) / TRACK_SECONDS
+	var segment_seconds := TRACK_SECONDS / 4.0
 	for i in frames:
 		var t: float = float(i) / SAMPLE_RATE
-		var step: int = int(t / (beat * 0.5))
-		var degree: int = scale[posmod(step + style * 2, scale.size())]
-		var octave: int = 12 if int(step / scale.size()) % 2 != 0 else 0
-		var freq: float = root * pow(2.0, float(degree + octave) / 12.0)
-		var envelope: float = 0.58 + 0.42 * exp(-fposmod(t, beat * 0.5) * 4.2)
-		var lead: float = sin(TAU * freq * t) * 0.11
-		var warm: float = sin(TAU * (freq * 0.5) * t + 0.7) * 0.075
-		var sparkle: float = sin(TAU * (freq * 2.0) * t + 1.4) * (0.025 if style != 0 else 0.012)
-		var pulse: float = 0.0
-		if style == 1:
-			pulse = sin(TAU * (root * 0.25) * t) * 0.035
-		elif style == 2:
-			pulse = sin(TAU * (root * 0.375) * t) * 0.028
-		if country == "br":
-			var phase: float = fposmod(t, beat)
-			if phase < 0.055 or absf(phase - beat * 0.62) < 0.045:
-				pulse += sin(TAU * 78.0 * t) * 0.045 * (1.0 - minf(phase / 0.055, 1.0))
-		var sample: float = clampf((lead + warm + sparkle) * envelope + pulse, -0.72, 0.72)
+		var segment: int = int(t / segment_seconds) % 4
+		var next_segment: int = (segment + 1) % 4
+		var phase: float = fposmod(t, segment_seconds) / segment_seconds
+		var blend: float = phase * phase * (3.0 - 2.0 * phase)
+		var current: Array = chord_freqs[segment]
+		var following: Array = chord_freqs[next_segment]
+		var pad_a := (sin(TAU * float(current[0]) * t) + sin(TAU * float(current[1]) * t + 0.65)) * 0.055
+		var pad_b := (sin(TAU * float(following[0]) * t) + sin(TAU * float(following[1]) * t + 0.65)) * 0.055
+		var breath := 0.82 + 0.18 * sin(TAU * (3.0 / TRACK_SECONDS) * t)
+		var bass := sin(TAU * bass_freq * t + 0.2) * 0.032
+		var shimmer := sin(TAU * shimmer_freq * t + 1.1) * 0.012
+		var sample: float = clampf(lerpf(pad_a, pad_b, blend) * breath + bass + shimmer, -0.62, 0.62)
 		var value: int = int(sample * 32767.0)
 		bytes.encode_s16(i * 4, value)
 		bytes.encode_s16(i * 4 + 2, value)
