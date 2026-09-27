@@ -550,11 +550,20 @@ func add_local_resident(title: String, at: Vector2, activity: String) -> void:
 	walker.wait_time = 12.0
 
 func integrate_regional_props() -> void:
+	# Regional identity is distributed through several neighbourhoods instead of
+	# living only beside the starting plaza.
 	match WorldManager.country.id:
 		"br":
-			add_asset("props/br/moto", Vector2(615, 376), Vector2(42, 36), Rect2(-16, -10, 32, 10))
+			for p in [Vector2(615, 376), Vector2(3180, 1090), Vector2(4210, 1875)]:
+				add_asset("props/br/moto", p, Vector2(42, 36), Rect2(-16, -10, 32, 10))
 		"it":
-			add_asset("props/it/scooter", Vector2(615, 376), Vector2(42, 36), Rect2(-16, -10, 32, 10))
+			for p in [Vector2(615, 376), Vector2(2450, 1880), Vector2(4140, 2650)]:
+				add_asset("props/it/scooter", p, Vector2(42, 36), Rect2(-16, -10, 32, 10))
 		"jp":
-			add_asset("props/jp/vending_machine", Vector2(772, 378), Vector2(30, 49), Rect2(-13, -12, 26, 12))
-			add_asset("props/jp/bicycle", Vector2(630, 376), Vector2(42, 30), Rect2(-16, -8, 32, 8))
+			for p in [Vector2(772, 378), Vector2(3130, 1100), Vector2(4070, 1880)]:
+				add_asset("props/jp/vending_machine", p, Vector2(30, 49), Rect2(-13, -12, 26, 12))
+			for p in [Vector2(630, 376), Vector2(3330, 1100), Vector2(4320, 2650)]:
+				add_asset("props/jp/bicycle", p, Vector2(42, 30), Rect2(-16, -8, 32, 8))
+		"us":
+			for p in [Vector2(3180, 1840), Vector2(4290, 2600)]:
+				add_asset("vehicles/pickup", p, Vector2(104, 67), Rect2(-40, -18, 80, 18), Color.WHITE, "east")
