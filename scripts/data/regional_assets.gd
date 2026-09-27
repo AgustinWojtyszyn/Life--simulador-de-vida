@@ -10,7 +10,7 @@ const COUNTRY_HOMES := {
 	"us": ["brick", "duplex", "modern", "premium_home", "apartments", "common", "restored"],
 }
 const FRONTAGES := {
-	"ar": ["cafe", "market", "panaderia", "kiosco"],
+	"ar": ["cafe", "almacen", "panaderia", "kiosco"],
 	"br": ["bakery_corner", "market", "padaria", "cafe"],
 	"jp": ["cafe", "market", "konbini", "office"],
 	"it": ["trattoria", "market", "pizzeria", "cafe"],
