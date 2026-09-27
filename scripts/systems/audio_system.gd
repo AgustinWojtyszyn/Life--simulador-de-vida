@@ -290,32 +290,40 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 		var tones_b: Array = chord_sets[next_chord_index]
 		for tone_index in tones_a.size():
 			var phase_offset := float(tone_index) * 0.41
-			pad_a += sin(TAU * float(tones_a[tone_index]) * t + phase_offset)
-			pad_b += sin(TAU * float(tones_b[tone_index]) * t + phase_offset)
+			# Warm pad: fundamental + soft 2nd harmonic only (no 3rd harmonic drone)
+			var freq_a := float(tones_a[tone_index])
+			var freq_b := float(tones_b[tone_index])
+			pad_a += sin(TAU * freq_a * t + phase_offset) * 0.85
+			pad_a += sin(TAU * freq_a * 2.0 * t + phase_offset * 1.3) * 0.15
+			pad_b += sin(TAU * freq_b * t + phase_offset) * 0.85
+			pad_b += sin(TAU * freq_b * 2.0 * t + phase_offset * 1.3) * 0.15
 		var pad := lerpf(pad_a, pad_b, blend) * 0.030
 		pad *= 0.88 + 0.12 * sin(TAU * (2.0 / TRACK_SECONDS) * t)
 
-		# Piano-style envelope: fast attack, exponential decay, gentle sustain
+		# Warm, gentle envelope: soft attack, long sustain, smooth release
 		var melody_step: int = int(t / melody_span) % melody_freqs.size()
 		var note_phase := fposmod(t, melody_span) / melody_span
+		# Smooth sine-based envelope for warmth (no harsh piano attack)
 		var melody_env := sin(PI * note_phase)
-		melody_env *= melody_env
-		var note_attack := clampf(note_phase * 12.0, 0.0, 1.0)  # 8% of note = attack
-		var note_decay := exp(-4.5 * maxf(0.0, note_phase - 0.08))
-		var piano_env := note_attack * (0.25 + 0.75 * note_decay)
+		melody_env = melody_env * melody_env * melody_env  # Softer curve
+		var note_attack := clampf(note_phase * 6.0, 0.0, 1.0)  # Gentle 16% attack
+		var note_decay := exp(-2.0 * maxf(0.0, note_phase - 0.16))  # Slower decay
+		var piano_env := note_attack * (0.35 + 0.65 * note_decay)
 		var melody_freq: float = float(melody_freqs[melody_step])
-		# Bright piano-like timbre: fundamental + 2nd + 3rd harmonics
+		# Warm, mellow timbre: fundamental + soft harmonics (no harsh overtones)
 		var lead := piano_env * melody_env * (
 			sin(TAU * melody_freq * t) * 0.022 +
-			sin(TAU * melody_freq * 2.0 * t + 0.3) * 0.010 +
-			sin(TAU * melody_freq * 3.0 * t + 0.7) * 0.005
+			sin(TAU * melody_freq * 2.0 * t + 0.3) * 0.008 +
+			sin(TAU * melody_freq * 0.5 * t + 0.2) * 0.004
 		)
 
 		var bass_a := sin(TAU * float(bass_freqs[chord_index]) * t + 0.18)
 		var bass_b := sin(TAU * float(bass_freqs[next_chord_index]) * t + 0.18)
-		# Add 2nd harmonic to bass for warmth
-		bass_a += sin(TAU * float(bass_freqs[chord_index]) * 2.0 * t) * 0.4
-		bass_b += sin(TAU * float(bass_freqs[next_chord_index]) * 2.0 * t) * 0.4
+		# Richer bass with multiple harmonics for warmth
+		bass_a += sin(TAU * float(bass_freqs[chord_index]) * 2.0 * t) * 0.35
+		bass_a += sin(TAU * float(bass_freqs[chord_index]) * 3.0 * t + 0.4) * 0.15
+		bass_b += sin(TAU * float(bass_freqs[next_chord_index]) * 2.0 * t) * 0.35
+		bass_b += sin(TAU * float(bass_freqs[next_chord_index]) * 3.0 * t + 0.4) * 0.15
 		var bass := lerpf(bass_a, bass_b, blend) * 0.018
 
 		var beat_phase := fposmod(t, beat)
@@ -323,8 +331,8 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 		if style in [2, 5] and beat_phase < 0.14:
 			var kick_env := 1.0 - beat_phase / 0.14
 			soft_kick = sin(TAU * (52.0 + 12.0 * kick_env) * t) * kick_env * 0.012
-		# Gentle stereo shimmer from high overtone
-		var shimmer := sin(TAU * shimmer_freq * t + 1.25) * 0.005
+		# Very subtle stereo width from low overtone (no high-frequency tension)
+		var shimmer := sin(TAU * shimmer_freq * 0.25 * t + 1.25) * 0.002
 		# Soft pad volume breathe for warmth
 		pad *= 0.85 + 0.15 * sin(TAU * (1.5 / TRACK_SECONDS) * t)
 		var left := clampf(pad + bass + lead * 0.88 + soft_kick + shimmer, -0.65, 0.65)

@@ -25,7 +25,9 @@ var blocked_time := 0.0
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = 4
-	collision_mask = 5 # world (1) + other residents (4)
+	# Only collide with world (1) and other residents (4), NOT player (2).
+	# This prevents the player from pushing NPCs around.
+	collision_mask = 5
 	var collider := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(12, 8)
@@ -60,7 +62,24 @@ func _physics_process(delta: float) -> void:
 		return
 	if wait_time > 0:
 		velocity = Vector2.ZERO
-		apply_crowd_separation(delta)
+		# Only apply separation if actually blocked by another NPC, not just
+		# to prevent idle jitter. Check if someone is very close.
+		var needs_separation := false
+		for other in get_tree().get_nodes_in_group("city_residents"):
+			if other == self or not is_instance_valid(other) or not other.visible:
+				continue
+			if position.distance_squared_to(other.position) < 20.0 * 20.0:
+				needs_separation = true
+				break
+		# Also check player proximity for separation
+		var world := WorldManager.active_world
+		if is_instance_valid(world):
+			var player := world.get_node_or_null("Player") as Node2D
+			if is_instance_valid(player) and player.visible:
+				if position.distance_squared_to(player.position) < 20.0 * 20.0:
+					needs_separation = true
+		if needs_separation:
+			apply_crowd_separation(delta)
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
@@ -82,7 +101,9 @@ func _physics_process(delta: float) -> void:
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	# Check for oncoming walkers and yield deterministically
+	# Check for oncoming walkers and yield deterministically.
+	# Only yield if we're the lower-priority walker AND the other walker
+	# is actually moving toward us (not just standing still).
 	for other in get_tree().get_nodes_in_group("city_residents"):
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
@@ -92,6 +113,22 @@ func _physics_process(delta: float) -> void:
 			visual.animate_motion(Vector2.ZERO, 0)
 			wait_time = maxf(wait_time, 0.4)
 			return
+	# Avoid player: if player is directly ahead, steer around them
+	var world := WorldManager.active_world
+	var player_avoid := Vector2.ZERO
+	if is_instance_valid(world):
+		var player := world.get_node_or_null("Player") as Node2D
+		if is_instance_valid(player) and player.visible:
+			var to_player: Vector2 = player.position - position
+			var dist_sq := to_player.length_squared()
+			if dist_sq < 80.0 * 80.0 and dist_sq > 0.01:
+				var dist := sqrt(dist_sq)
+				var dir_to_player := to_player / dist
+				var my_dir := velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
+				# If player is ahead, add lateral avoidance
+				if my_dir != Vector2.ZERO and my_dir.dot(dir_to_player) > 0.3:
+					var side := Vector2(-dir_to_player.y, dir_to_player.x)
+					player_avoid = side * (1.0 - dist / 80.0) * 60.0
 	var remaining := position.distance_to(goal)
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
 	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
@@ -99,7 +136,8 @@ func _physics_process(delta: float) -> void:
 	var separation := crowd_separation()
 	if separation.length_squared() > 0.001:
 		desired += separation * minf(48.0, desired_speed * 0.75)
-		desired = desired.limit_length(desired_speed)
+	desired += player_avoid
+	desired = desired.limit_length(desired_speed * 1.2)
 	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
 	var intended := velocity * delta
 	if intended.length() > remaining:
@@ -108,12 +146,26 @@ func _physics_process(delta: float) -> void:
 	var candidate := position + intended
 	var parent := get_parent()
 	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
-		# Blocked: wait briefly, then try to recalculate
+		# Blocked: try lateral nudge to find a way around the obstacle
 		velocity = Vector2.ZERO
 		crossing = false
 		blocked_time += delta
 		wait_time = maxf(wait_time, 0.3)
 		visual.animate_motion(Vector2.ZERO, 0)
+		# Try sliding along the obstacle instead of just waiting
+		var slide_dir := Vector2(-desired.y, desired.x).normalized()
+		var slide_candidate := position + slide_dir * 12.0
+		if parent.call("walker_position_clear", slide_candidate):
+			position = slide_candidate
+			visual.animate_motion(slide_dir * 12.0, 12.0)
+			blocked_time = maxf(0.0, blocked_time - delta)
+			return
+		var slide_candidate2 := position - slide_dir * 12.0
+		if parent.call("walker_position_clear", slide_candidate2):
+			position = slide_candidate2
+			visual.animate_motion(-slide_dir * 12.0, 12.0)
+			blocked_time = maxf(0.0, blocked_time - delta)
+			return
 		# If blocked for too long, skip to next destination
 		if blocked_time > 1.5:
 			destination = (destination + 1) % route.size()
@@ -208,8 +260,10 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, 1), 0, Vector2(1, 0.4))
 	draw_circle(Vector2.ZERO, 7, Color(0.1, 0.16, 0.2, 0.22))
 	draw_set_transform(Vector2.ZERO)
+	# Draw name labels BEHIND the character (lower y-sort) so they don't
+	# block the player when walking under them.
+	if has_meta("person_name"):
+		draw_string(ThemeDB.fallback_font, Vector2(-28, -55), str(get_meta("person_name")), HORIZONTAL_ALIGNMENT_CENTER, 56, 11, Color("fff0c5"))
 	if greeting_time > 0:
 		draw_rect(Rect2(-24, -48, 52, 17), Color("243c40"))
 		draw_string(ThemeDB.fallback_font, Vector2(-19, -36), "¡Buenas!", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f5ecd7"))
-	if has_meta("person_name"):
-		draw_string(ThemeDB.fallback_font, Vector2(-28, -55), str(get_meta("person_name")), HORIZONTAL_ALIGNMENT_CENTER, 56, 11, Color("fff0c5"))

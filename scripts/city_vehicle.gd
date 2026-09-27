@@ -253,10 +253,11 @@ func update_art() -> void:
 	sprite.region_enabled = true
 	sprite.region_rect = art_bounds[index]
 	sprite.scale = Vector2.ONE * visual_scale
-	# Keep the wheel contact point fixed while swapping directional PNGs. Sprite
-	# canvases may have different heights; offset makes their bottom edge share
-	# the same world-space anchor instead of appearing to slide while turning.
-	sprite.offset = Vector2(0, -art_bounds[index].size.y * 0.5)
+	# Keep the wheel contact point fixed while swapping directional PNGs.
+	# The offset centers the used-rect horizontally and anchors the bottom
+	# edge to the body so the car never appears to have a second car behind.
+	var bounds: Rect2 = art_bounds[index]
+	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -bounds.size.y)
 	sprite.position = Vector2(0, -body_height)
 
 func _draw() -> void:
