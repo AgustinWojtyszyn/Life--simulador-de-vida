@@ -33,6 +33,7 @@ const LABELS := {
 }
 
 static func descriptor(country: String, kind: String, index: int, facing: String = "south") -> Dictionary:
+	var mixed := kind == "mixed"
 	var residential := kind in ["home", "house"]
 	var homes: Array = COUNTRY_HOMES[country]
 	var asset: String = homes[posmod(index, homes.size())] if residential else kind
@@ -42,6 +43,9 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 	var type: String = TYPES.get(asset, "residential_house" if residential else asset)
 	var folder := "houses" if residential else "buildings"
 	var path := "res://assets/%s/%s/%s.png" % [folder, country, asset]
+	if mixed:
+		type = "residential_building"
+		path = "res://assets/buildings/ar/mixed_old.png" if country == "ar" else "res://assets/regions/%s.png" % country
 	# A regional café/diner is never a fallback for a clinic, office or house.
 	if asset in ["bakery_corner", "trattoria", "diner"]:
 		path = "res://assets/regions/%s.png" % country
@@ -52,6 +56,8 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 	if residential:
 		title = {"ar": "VIVIENDA", "br": "MORADIA", "jp": "RESIDENCE", "it": "CASA", "us": "HOME"}[country]
 		if type in ["residential_apartment", "residential_building"]: title = "APARTMENTS" if country in ["us", "jp"] else "DEPARTAMENTOS" if country == "ar" else "APPARTAMENTI" if country == "it" else "APARTAMENTOS"
+	if mixed:
+		title = {"ar": "EDIFICIO MIXTO", "br": "EDIFÍCIO MISTO", "jp": "MIXED BUILDING", "it": "EDIFICIO MISTO", "us": "MIXED USE"}[country]
 	var actual_facing := "south"
 	var family := ""
 	# Countries without a full residential asset library must never silently
