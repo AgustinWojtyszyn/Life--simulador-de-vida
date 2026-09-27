@@ -15,6 +15,8 @@ var bounds_cache := {}
 var last_art := ""
 var pose := "idle"
 var activity_phase := 0.0
+var base_sprite_position := Vector2.ZERO
+var base_sprite_scale := Vector2.ONE
 
 func _ready() -> void:
 	if profile == null:
@@ -45,6 +47,7 @@ func animate_motion(direction: Vector2, traveled: float) -> void:
 		set_art("walk", facing, int(distance_phase / 7.0) % 4)
 	else:
 		distance_phase = 0
+		reset_pose_transform()
 		if facing == "south" and ResourceLoader.exists("res://assets/characters/%s/idle_live/south_0.png" % profile.gender):
 			animate_activity("idle_live", get_process_delta_time())
 		else:
@@ -82,12 +85,36 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	var standing: Rect2 = bounds_cache[reference_path]
 	sprite.scale = Vector2.ONE * (44.0 / maxf(1, standing.size.y))
 	sprite.position = Vector2((texture.get_width() * 0.5 - rect.get_center().x) * sprite.scale.x, (texture.get_height() * 0.5 - rect.end.y) * sprite.scale.y)
+	sprite.rotation = 0.0
 	if state == "seated":
 		sprite.scale.y *= 0.82
 		sprite.position.y -= 6
+	base_sprite_position = sprite.position
+	base_sprite_scale = sprite.scale
 	palette.set_shader_parameter("bounds", Vector4(rect.position.x / texture.get_width(), rect.position.y / texture.get_height(), rect.size.x / texture.get_width(), rect.size.y / texture.get_height()))
 
 func animate_activity(state: String, delta: float) -> void:
 	activity_phase += delta
-	set_art(state, "south", int(activity_phase * 7.0) % 9)
-	if state == "idle_live": pose = "idle"
+	var authored := "res://assets/characters/%s/%s/south_0.png" % [profile.gender, state]
+	if ResourceLoader.exists(authored):
+		set_art(state, "south", int(activity_phase * 7.0) % 9)
+		return
+
+	# Procedural fallback for actions whose full sprite sheet has not been
+	# authored yet. This keeps cooking, TV, shopping, showering and football
+	# visibly active instead of freezing the character in place.
+	set_art("idle", "south", 0)
+	var bob := sin(activity_phase * 7.0)
+	var lean := sin(activity_phase * 4.2)
+	sprite.position = base_sprite_position + Vector2(lean * 1.4, -absf(bob) * 2.2)
+	sprite.rotation = lean * (0.06 if state in ["kick", "eat", "browse"] else 0.035)
+	if state == "kick":
+		sprite.scale = base_sprite_scale * (1.0 + Vector2(absf(bob) * 0.05, -absf(bob) * 0.03))
+	elif state in ["pc", "tv", "browse"]:
+		sprite.scale = base_sprite_scale * Vector2(1.0 + lean * 0.015, 1.0)
+	pose = state
+
+func reset_pose_transform() -> void:
+	sprite.position = base_sprite_position
+	sprite.scale = base_sprite_scale
+	sprite.rotation = 0.0
