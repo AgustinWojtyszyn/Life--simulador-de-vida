@@ -36,11 +36,12 @@ func _ready() -> void:
 		music_players.append(player)
 
 func start_world(country_id: String) -> void:
+	var country_changed := current_country != country_id
 	current_country = country_id
 	var chosen := int(WorldManager.settings.get("music_track", country_seed(country_id)))
 	chosen = posmod(chosen, TRACKS.size())
 	var current: AudioStreamPlayer = music_players[active_music]
-	if current.playing and chosen == track_index:
+	if current.playing and chosen == track_index and not country_changed:
 		reset_traffic_world()
 		return
 	track_index = chosen
