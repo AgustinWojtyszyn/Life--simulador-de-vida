@@ -1,61 +1,147 @@
 class_name DistrictBlocks
 extends RefCounted
 
-static func roads(district: DistrictData) -> Array[Rect2]:
-	return [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(district.side_street_x, 16, district.side_street_width, 1568)]
+# The original demo occupied only the north-west corner. These axes turn the
+# district into a real multi-block neighbourhood while preserving the first
+# avenue so existing traffic and saves still have a familiar starting area.
+const VERTICAL_SPECS := [
+	[852.0, 138.0],
+	[1810.0, 120.0],
+	[2780.0, 126.0],
+	[3760.0, 126.0],
+]
+const HORIZONTAL_SPECS := [
+	[394.0, 170.0],
+	[1130.0, 120.0],
+	[1900.0, 126.0],
+	[2660.0, 126.0],
+]
 
-# Reusable frontage: the street normal determines the view; spacing and seed
-# determine the order of compatible assets. No RNG or edits to landmark IDs.
+static func vertical_roads(district: DistrictData) -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	for spec in VERTICAL_SPECS:
+		var x: float = district.side_street_x if is_equal_approx(float(spec[0]), 1810.0) else float(spec[0])
+		var width: float = district.side_street_width if is_equal_approx(float(spec[0]), 1810.0) else float(spec[1])
+		if x < district.world_size.x - 80:
+			result.append(Rect2(x, 16, width, district.world_size.y - 32))
+	return result
+
+static func horizontal_roads(district: DistrictData) -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	for spec in HORIZONTAL_SPECS:
+		var y := float(spec[0])
+		var height := float(spec[1])
+		if y < district.world_size.y - 80:
+			result.append(Rect2(16, y, district.world_size.x - 32, height))
+	return result
+
+static func roads(district: DistrictData) -> Array[Rect2]:
+	var result := horizontal_roads(district)
+	result.append_array(vertical_roads(district))
+	return result
+
+static func vertical_centers(district: DistrictData) -> Array[float]:
+	var result: Array[float] = []
+	for road in vertical_roads(district):
+		result.append(road.get_center().x)
+	return result
+
+static func horizontal_centers(district: DistrictData) -> Array[float]:
+	var result: Array[float] = []
+	for road in horizontal_roads(district):
+		result.append(road.get_center().y)
+	return result
+
 static func frontage(origin: Vector2, along: Vector2, count: int, spacing: float, normal: Vector2, seed: int = 0) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
+	var facing := AssetOrientation.from_vector(normal)
 	for i in count:
-		result.append({"position": origin + along.normalized() * spacing * i, "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": seed + i, "facing": AssetOrientation.from_vector(normal), "street_normal": AssetOrientation.from_vector(normal)})
+		result.append({
+			"position": origin + along.normalized() * spacing * i,
+			"kind": "house",
+			"mode": "EXTERIOR_ONLY",
+			"asset_index": seed + i,
+			"facing": facing,
+			"street_normal": facing,
+		})
 	return result
 
 static func starter_slots(district: DistrictData) -> Array[Dictionary]:
-	var east := minf(district.side_street_x + district.side_street_width + 140, 2080)
-	var slots: Array[Dictionary] = [
-		{"position": district.home_position, "kind": "home", "mode": "ENTERABLE"},
-		{"position": Vector2(east, 330), "kind": "shop", "mode": "INTERACTABLE"},
-		{"position": Vector2(minf(east + 245, 2270), 335), "kind": "office", "mode": "EXTERIOR_ONLY"},
-		{"position": Vector2(1560, 780), "kind": "clinic", "mode": "INTERACTABLE"},
-		{"position": Vector2(east, 800), "kind": "shop", "mode": "INTERACTABLE"},
-		{"position": Vector2(minf(east + 225, 2270), 800), "kind": "house", "mode": "EXTERIOR_ONLY"},
-		{"position": Vector2(230, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-		{"position": Vector2(560, 1460), "kind": "shop", "mode": "INTERACTABLE"},
-		{"position": Vector2(1160, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-		{"position": Vector2(1530, 1460), "kind": "office", "mode": "EXTERIOR_ONLY"},
-		{"position": Vector2(east, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-	]
-	# Existing walkable blocks, with mixed frontages and distinct house silhouettes.
-	# Slots leave doors, sidewalks, the plaza and parking circulation clear.
-	var row := frontage(Vector2(150, 1060), Vector2.RIGHT, 3, 235, Vector2.DOWN)
-	var mixed_positions := [row[0].position, row[1].position, row[2].position,
-		Vector2(1160, 1060), Vector2(1370, 1060),
-		Vector2(1630, 1060), Vector2(east + 160, 1060),
-		Vector2(780, 1460), Vector2(2280, 1460)]
-	for i in mixed_positions.size():
-		var housing := i % 3 != 1
-		slots.append({"position": mixed_positions[i], "kind": "house" if housing else "office", "mode": "EXTERIOR_ONLY", "asset_index": i})
-	# Front-only clinics/shops/offices occupy the north side of a street.
-	# Houses with directional families take the opposite/side-facing lots.
-	slots[3].position = Vector2(1560, 1060)
-	slots[16].position = Vector2(1690, 780)
-	for pair in [[4, 17], [7, 13], [9, 11]]:
-		var previous: Vector2 = slots[pair[0]].position
-		slots[pair[0]].position = slots[pair[1]].position
-		slots[pair[1]].position = previous
-	var street_rects := roads(district)
-	for slot in slots:
-		slot["facing"] = AssetOrientation.street_facing(slot.position, street_rects)
-		slot["street_normal"] = AssetOrientation.street_facing(slot.position, street_rects, false)
-	var home_index := 0
-	var commercial_index := 2
-	for slot in slots:
-		if slot.kind in ["home", "house"]:
-			slot["asset_index"] = home_index
-			home_index += 1
-		else:
-			slot["asset_index"] = commercial_index
-			commercial_index += 1
+	var slots: Array[Dictionary] = []
+	var index := 0
+
+	# The player's home stays in the established starting quarter, facing the
+	# avenue consistently. Services are placed only on frontage directions for
+	# which their authored art actually exists.
+	slots.append({"position": district.home_position, "kind": "home", "mode": "ENTERABLE", "asset_index": index, "facing": "south", "street_normal": "south"})
+	index += 1
+	for service in [
+		[Vector2(1510, 1100), "clinic", "INTERACTABLE"],
+		[Vector2(2180, 1100), "office", "EXTERIOR_ONLY"],
+		[Vector2(3120, 1870), "shop", "ENTERABLE"],
+		[Vector2(4100, 2630), "shop", "ENTERABLE"],
+		[Vector2(3320, 1100), "office", "EXTERIOR_ONLY"],
+	]:
+		if service[0].x < district.world_size.x - 120 and service[0].y < district.world_size.y - 120:
+			slots.append({"position": service[0], "kind": service[1], "mode": service[2], "asset_index": index, "facing": "south", "street_normal": "south"})
+			index += 1
+
+	# South-facing rows use the broadest set of regional architecture. This is
+	# where shops and unique façades live, avoiding sideways storefront signs.
+	var row_x := [180.0, 430.0, 680.0, 1120.0, 1430.0, 1650.0, 2070.0, 2350.0, 2530.0, 3020.0, 3280.0, 3500.0, 4010.0, 4270.0, 4560.0]
+	for road in horizontal_roads(district):
+		var y := road.position.y - 26.0
+		for column in row_x.size():
+			var x := row_x[column]
+			if x > district.world_size.x - 100:
+				continue
+			if y < 500 and x < 1380:
+				# The first four authored regional storefronts already occupy it.
+				continue
+			if x > 1410 and x < 1690 and y < 500:
+				# Leave breathing room around the starter home.
+				continue
+			var kind := "house"
+			var mode := "EXTERIOR_ONLY"
+			if y > 600 and column % 7 == 3:
+				kind = "shop"
+				mode = "ENTERABLE"
+			elif y > 600 and column % 11 == 7:
+				kind = "office"
+			slots.append({"position": Vector2(x, y), "kind": kind, "mode": mode, "asset_index": index, "facing": "south", "street_normal": "south"})
+			index += 1
+
+	# Opposite sides of the avenues receive real north-facing residential art.
+	# The large block between the third and fourth avenues remains open for a
+	# country-specific civic/sports landmark instead of being filled blindly.
+	var north_row_x := [240.0, 560.0, 1180.0, 1510.0, 2150.0, 2460.0, 3090.0, 3380.0, 4080.0, 4380.0]
+	for road in horizontal_roads(district):
+		var y := road.end.y + 248.0
+		if y > district.world_size.y - 60:
+			continue
+		for x in north_row_x:
+			if x > district.world_size.x - 100:
+				continue
+			if road.position.y > 1800 and road.position.y < 2100 and x > 1930 and x < 2770:
+				continue
+			slots.append({"position": Vector2(x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "north", "street_normal": "north"})
+			index += 1
+
+	# Side streets no longer rotate arbitrary storefront PNGs. Only the
+	# directional residential family is used here, so doors/windows truly face
+	# the road rather than looking sideways into another building.
+	var side_y := [820.0, 1530.0, 2290.0, 3040.0]
+	for road in vertical_roads(district):
+		for y in side_y:
+			if y > district.world_size.y - 80:
+				continue
+			var left_x := road.position.x - 122.0
+			var right_x := road.end.x + 122.0
+			if left_x > 120:
+				slots.append({"position": Vector2(left_x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "east", "street_normal": "east"})
+				index += 1
+			if right_x < district.world_size.x - 120:
+				slots.append({"position": Vector2(right_x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "west", "street_normal": "west"})
+				index += 1
+
 	return slots
