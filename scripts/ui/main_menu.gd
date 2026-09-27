@@ -215,13 +215,34 @@ func delete_screen(path: String) -> void:
 	button("Conservar y volver", saves_screen)
 
 func options_screen() -> void:
-	shell("OPCIONES", "Tiempo del mundo")
+	shell("OPCIONES", "Tiempo, sonido y controles")
 	var speed := OptionButton.new()
 	for title in ["Rápido · 30 s por hora", "Normal · 60 s por hora", "Tranquilo · 120 s por hora"]:
 		speed.add_item(title)
 	speed.selected = 1
 	speed.item_selected.connect(func(i: int): GameClock.minutes_per_second = [2.0, 1.0, 0.5][i])
 	panel.add_child(speed)
+
+	var sound := CheckButton.new()
+	sound.text = "Música y sonidos"
+	sound.button_pressed = bool(WorldManager.settings.get("audio_enabled", true))
+	sound.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 16)
+	sound.toggled.connect(func(value: bool):
+		WorldManager.settings["audio_enabled"] = value
+		AudioSystem.set_enabled(value))
+	panel.add_child(sound)
+
+	label("Volumen de música", 14 if not InputManager.touch_enabled else 17, Color("c8d2cb"))
+	var volume := HSlider.new()
+	volume.min_value = 0.0
+	volume.max_value = 1.0
+	volume.step = 0.05
+	volume.value = float(WorldManager.settings.get("music_volume", 0.65))
+	volume.custom_minimum_size.y = 44 if InputManager.touch_enabled else 32
+	volume.value_changed.connect(func(value: float):
+		WorldManager.settings["music_volume"] = value
+		AudioSystem.set_music_volume(value))
+	panel.add_child(volume)
 	button("Volver", main_screen)
 
 func credits_screen() -> void:
