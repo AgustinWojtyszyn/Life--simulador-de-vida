@@ -36,7 +36,7 @@ func refresh_target() -> void:
 	if is_instance_valid(seated_bench):
 		prompt = "" if player.transitioning else "E · Levantarte"
 		return
-	var nearest := 49.0
+	var nearest := 68.0 if InputManager.touch_enabled else 52.0
 	for group in ["interactables", "city_benches", "city_residents", "city_fountain"]:
 		for node in get_tree().get_nodes_in_group(group):
 			if not node.is_visible_in_tree():
@@ -69,6 +69,7 @@ func interact() -> void:
 	if not is_instance_valid(target):
 		return
 	LifeEvents.interacted.emit(kind, str(target.get_meta("id", target.name)))
+	AudioSystem.play_sfx("interact", player.global_position)
 	match kind:
 		"interactables":
 			if target.get_script() == InteractionTargetScript:
