@@ -356,7 +356,11 @@ func _process(delta: float) -> void:
 	occlusion_clock = 0.0
 	var player: Node2D = $Player
 	for sprite in occluders:
+		if not is_instance_valid(sprite):
+			continue
 		var parent := sprite.get_parent() as Node2D
+		if parent == null:
+			continue
 		var nearby := player.position.distance_squared_to(parent.position) < 1050.0 * 1050.0
 		parent.visible = nearby
 		if not nearby:
