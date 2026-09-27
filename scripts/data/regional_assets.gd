@@ -66,13 +66,13 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 		if ResourceLoader.exists(alt_path):
 			path = alt_path
 		else:
-			var catalog_family := {
+			var catalog_family: String = str({
 				"clinic": "clinic", "office": "office", "workshop": "workshop",
 				"market": "store", "almacen": "store", "konbini": "store", "kiosco": "store",
 				"cafe": "cafe", "coffee_shop": "cafe",
 				"panaderia": "bakery", "padaria": "bakery",
 				"parrilla": "restaurant", "pizzeria": "restaurant", "trattoria": "restaurant",
-			}.get(asset, "store")
+			}.get(asset, "store"))
 			var catalog_path := "res://assets/catalog/%s/%s.tres" % [country, catalog_family]
 			if ResourceLoader.exists(catalog_path):
 				path = catalog_path
