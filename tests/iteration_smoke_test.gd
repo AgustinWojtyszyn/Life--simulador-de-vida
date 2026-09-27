@@ -32,7 +32,7 @@ func run() -> void:
 	var first_signal = get_nodes_in_group("traffic_signals")[0]
 	first_signal.horizontal_state = "red"
 	first_signal.vertical_state = "green"
-	var signal_probe := first_signal.global_position + Vector2(-first_signal.vertical_half - 120.0, 0)
+	var signal_probe: Vector2 = first_signal.global_position + Vector2(-float(first_signal.vertical_half) - 120.0, 0)
 	check(first_signal.blocking_distance(signal_probe, Vector2.RIGHT) < 220.0, "Red signal must stop approaching horizontal traffic")
 	first_signal.horizontal_state = "green"
 	check(first_signal.blocking_distance(signal_probe, Vector2.RIGHT) == INF, "Green signal must release horizontal traffic")
