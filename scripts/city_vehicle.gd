@@ -47,6 +47,10 @@ const CATEGORIES := {
 static func profile_for(vehicle_model: String) -> Dictionary:
 	return CATEGORIES.get(vehicle_model, {"speed": 198.0, "acceleration": 82.0, "braking": 260.0, "half_length": 35.0})
 
+static func display_width_for(vehicle_model: String) -> float:
+	# Visual footprint follows the physical family, not each PNG canvas.
+	return float(profile_for(vehicle_model).half_length) * 2.0
+
 static func source_direction(vehicle_model: String, facing: String) -> String:
 	# Reviewed corrections for mislabeled legacy source files; never mirror text.
 	if vehicle_model == "compact" and facing in ["east", "west"]:
@@ -79,8 +83,11 @@ func _ready() -> void:
 	braking = driving.braking
 	half_width = driving.half_length
 	cruise_speed = minf(cruise_speed, driving.speed)
-	if model == "colectivo" and not art_bounds.is_empty():
-		visual_scale = 120.0 / art_bounds[0].size.x
+	if not art_bounds.is_empty():
+		var reference_width := 1.0
+		for bounds in art_bounds:
+			reference_width = maxf(reference_width, bounds.size.x)
+		visual_scale = display_width_for(model) / reference_width
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(half_width * 2.0, 20)
 	collider.shape = shape
@@ -232,8 +239,10 @@ func update_art() -> void:
 	sprite.region_enabled = true
 	sprite.region_rect = art_bounds[index]
 	sprite.scale = Vector2.ONE * visual_scale
-	# One projected ground-centre for every view: turning does not shift the
-	# vehicle by half a sprite's changing height.
+	# Keep the wheel contact point fixed while swapping directional PNGs. Sprite
+	# canvases may have different heights; offset makes their bottom edge share
+	# the same world-space anchor instead of appearing to slide while turning.
+	sprite.offset = Vector2(0, -art_bounds[index].size.y * 0.5)
 	sprite.position = Vector2(0, -body_height)
 
 func _draw() -> void:
