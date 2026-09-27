@@ -2,6 +2,8 @@ extends Control
 
 var interaction_prompt := ""
 var interaction_message := ""
+var world: Node2D
+var minimap: Control
 
 func set_interaction(prompt: String, message: String) -> void:
 	if prompt != interaction_prompt or message != interaction_message:
@@ -14,6 +16,10 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(queue_redraw)
 	GameClock.changed.connect(queue_redraw)
 	WeatherSystem.changed.connect(queue_redraw)
+	if is_instance_valid(world):
+		minimap = preload("res://scripts/minimap.gd").new()
+		minimap.world = world
+		add_child(minimap)
 
 func ui_scale() -> float:
 	var viewport := get_viewport_rect().size
@@ -47,7 +53,7 @@ func _draw() -> void:
 	if not InputManager.touch_enabled:
 		var hint := Rect2(safe.position.x + margin, safe.end.y - margin - 29 * s, 340 * s, 29 * s)
 		draw_style_box(panel(), hint)
-		draw_string(font, hint.position + Vector2(13, 20) * s, "WASD / Flechas · Caminar      E · Interactuar", HORIZONTAL_ALIGNMENT_LEFT, -1, int(10 * s), Color("d8d4bf"))
+		draw_string(font, hint.position + Vector2(13, 20) * s, "WASD / Flechas · Caminar   E · Interactuar   M · Mapa", HORIZONTAL_ALIGNMENT_LEFT, -1, int(10 * s), Color("d8d4bf"))
 
 	if not interaction_prompt.is_empty():
 		var prompt_width := 300.0 * s
