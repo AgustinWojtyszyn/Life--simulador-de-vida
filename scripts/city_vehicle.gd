@@ -23,6 +23,27 @@ var progress := 0.0
 var directional_art: Array[Texture2D] = []
 var collider := CollisionShape2D.new()
 var facing_index := -1
+var motion_vector := Vector2.ZERO
+var body_height := 14.0
+var visual_scale := 1.0
+var braking := BRAKING
+
+const CATEGORIES := {
+	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0},
+	"van": {"speed": 174.0, "acceleration": 58.0, "braking": 220.0, "half_length": 43.0},
+	"pickup": {"speed": 188.0, "acceleration": 68.0, "braking": 240.0, "half_length": 38.0},
+}
+
+static func profile_for(vehicle_model: String) -> Dictionary:
+	return CATEGORIES.get(vehicle_model, {"speed": 198.0, "acceleration": 82.0, "braking": 260.0, "half_length": 35.0})
+
+static func source_direction(vehicle_model: String, facing: String) -> String:
+	# Reviewed corrections for mislabeled legacy source files; never mirror text.
+	if vehicle_model == "compact" and facing in ["east", "west"]:
+		return "west" if facing == "east" else "east"
+	if vehicle_model == "taxi" and facing in ["south-east", "south-west", "north-east", "north-west"]:
+		return facing.replace("east", "TEMP").replace("west", "east").replace("TEMP", "west")
+	return facing
 
 static func has_directional_art(vehicle_model: String) -> bool:
 	for facing in DIRECTIONS:
@@ -39,20 +60,17 @@ func _ready() -> void:
 	add_child(sprite)
 	if has_directional_art(model):
 		for facing in DIRECTIONS:
-			# PixelLab's compact side labels were reversed; taxi diagonals were mirrored.
-			var source: String = facing
-			if model == "compact" and facing in ["east", "west"]:
-				source = "west" if facing == "east" else "east"
-			if model == "taxi" and facing in ["south-east", "south-west", "north-east", "north-west"]:
-				source = facing.replace("east", "TEMP").replace("west", "east").replace("TEMP", "west")
+			var source := source_direction(model, facing)
 			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [model, source])
 			directional_art.append(texture)
 			art_bounds.append(texture.get_image().get_used_rect())
-	driver_acceleration = 72.0 + float(get_index() % 5) * 7.0
-	if model == "colectivo":
-		half_width = 62.0
-	if model == "van":
-		half_width = 43.0
+	var driving := profile_for(model)
+	driver_acceleration = driving.acceleration + float(get_index() % 3) * 3.0
+	braking = driving.braking
+	half_width = driving.half_length
+	cruise_speed = minf(cruise_speed, driving.speed)
+	if model == "colectivo" and not art_bounds.is_empty():
+		visual_scale = 120.0 / art_bounds[0].size.x
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(half_width * 2.0, 20)
 	collider.shape = shape
@@ -121,16 +139,21 @@ func _physics_process(delta: float) -> void:
 		# Brake before the arc instead of rotating the artwork after a hard turn.
 		var turn := absf(forward_vector().angle_to(tangent(progress + 48.0)))
 		desired *= lerpf(1.0, 0.42, clampf(turn / (PI / 2.0), 0, 1))
-	var safe_speed := minf(desired, sqrt(2.0 * BRAKING * gap))
-	current_speed = move_toward(current_speed, safe_speed, (BRAKING if current_speed > safe_speed else driver_acceleration) * delta)
+	var safe_speed := minf(desired, sqrt(2.0 * braking * gap))
+	current_speed = move_toward(current_speed, safe_speed, (braking if current_speed > safe_speed else driver_acceleration) * delta)
 	var step := minf(current_speed * delta, gap)
+	var previous := position
 	if route_points.is_empty():
 		position.x = ROUTE_LEFT + fposmod(position.x + direction * step - ROUTE_LEFT, ROUTE_LENGTH)
 	else:
 		progress = fposmod(progress + step, curve.get_baked_length())
 		position = curve.sample_baked(progress)
-		heading = tangent(progress).angle()
-		collider.rotation = heading
+	# Use actual displacement through the curve, not its next waypoint or a
+	# stale heading. Recycling is excluded from the movement vector.
+	motion_vector = Vector2(direction * step, 0) if route_points.is_empty() else position - previous
+	if motion_vector.length_squared() > 0.000001:
+		heading = motion_vector.angle()
+	collider.rotation = heading
 	update_art()
 	queue_redraw()
 
@@ -140,13 +163,6 @@ func update_art() -> void:
 		return
 	facing_index = index
 	# Directional textures stay upright; only the collision footprint follows the road.
-	if model == "colectivo" and route_points.is_empty() and direction > 0:
-		sprite.texture = load("res://assets/vehicles/colectivo/east.png")
-		sprite.region_enabled = true
-		sprite.region_rect = sprite.texture.get_image().get_used_rect()
-		sprite.scale = Vector2.ONE * (128.0 / sprite.region_rect.size.x)
-		sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
-		return
 	if directional_art.size() != 8:
 		push_error("Missing directional vehicle family: " + model)
 		set_physics_process(false)
@@ -155,7 +171,10 @@ func update_art() -> void:
 	sprite.flip_h = model == "suv" and DIRECTIONS[index] == "west"
 	sprite.region_enabled = true
 	sprite.region_rect = art_bounds[index]
-	sprite.position = Vector2(0, -sprite.region_rect.size.y / 2.0)
+	sprite.scale = Vector2.ONE * visual_scale
+	# One projected ground-centre for every view: turning does not shift the
+	# vehicle by half a sprite's changing height.
+	sprite.position = Vector2(0, -body_height)
 
 func _draw() -> void:
 	var forward := forward_vector()

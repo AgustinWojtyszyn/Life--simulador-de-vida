@@ -31,37 +31,7 @@ static func countries() -> Array[CountryData]:
 		district.side_street_width = row[6]
 		district.population = 18 if country.id in ["jp", "br"] else 14
 		var east := minf(district.side_street_x + district.side_street_width + 140, 2080)
-		district.building_slots = [
-			{"position": district.home_position, "kind": "home", "mode": "ENTERABLE"},
-			{"position": Vector2(east, 330), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(minf(east + 245, 2270), 335), "kind": "office", "mode": "EXTERIOR_ONLY"},
-			{"position": Vector2(1560, 780), "kind": "clinic", "mode": "INTERACTABLE"},
-			{"position": Vector2(east, 800), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(minf(east + 225, 2270), 800), "kind": "house", "mode": "EXTERIOR_ONLY"},
-			{"position": Vector2(230, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-			{"position": Vector2(560, 1460), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(1160, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-			{"position": Vector2(1530, 1460), "kind": "office", "mode": "EXTERIOR_ONLY"},
-			{"position": Vector2(east, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
-		]
-		# Nine walkable blocks, with mixed frontages and distinct house silhouettes.
-		# Slots leave doors, sidewalks, the plaza and parking circulation clear.
-		var mixed_positions := [Vector2(150, 1060), Vector2(380, 1060), Vector2(620, 1060),
-			Vector2(1160, 1060), Vector2(1370, 1060),
-			Vector2(1630, 1060), Vector2(east + 160, 1060),
-			Vector2(780, 1460), Vector2(2280, 1460)]
-		for i in mixed_positions.size():
-			var housing := i % 3 != 1
-			district.building_slots.append({"position": mixed_positions[i], "kind": "house" if housing else "office", "mode": "EXTERIOR_ONLY", "asset_index": i})
-		var home_index := 0
-		var commercial_index := 2
-		for slot in district.building_slots:
-			if slot.kind in ["home", "house"]:
-				slot["asset_index"] = home_index
-				home_index += 1
-			else:
-				slot["asset_index"] = commercial_index
-				commercial_index += 1
+		district.building_slots = preload("res://scripts/data/district_blocks.gd").starter_slots(district)
 		city.districts.append(district)
 		country.cities.append(city)
 		result.append(country)

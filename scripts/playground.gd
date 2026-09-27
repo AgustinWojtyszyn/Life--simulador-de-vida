@@ -58,7 +58,7 @@ func _ready() -> void:
 	var parked_models := ["car", "van", "coupe", "taxi"]
 	for i in parked_positions.size():
 		var size := Vector2(98, 70) if parked_models[i] == "van" else Vector2(90, 60)
-		add_asset("vehicles/" + parked_models[i], parked_positions[i], size, Rect2(-37, -19, 74, 18))
+		add_asset("vehicles/" + parked_models[i], parked_positions[i], size, Rect2(-37, -19, 74, 18), Color.WHITE, "east" if i % 2 else "west")
 	var regional_models: Array = {"ar": ["compact", "taxi", "van", "sedan"], "jp": ["hatchback", "compact", "van", "sedan"], "us": ["pickup", "suv", "sedan", "van"], "it": ["compact", "hatchback", "sedan", "van"], "br": ["compact", "pickup", "sedan", "suv"]}[WorldManager.country.id]
 	for lane_index in TRAFFIC_LANES.size():
 		var lane: Dictionary = TRAFFIC_LANES[lane_index]
@@ -69,7 +69,7 @@ func _ready() -> void:
 			vehicle.model = regional_models[(i + lane_index * 2) % regional_models.size()]
 			vehicle.position = Vector2(100 + i * 560 + lane_index * 200, lane.from.y)
 			vehicle.direction = lane.direction.x
-			vehicle.cruise_speed = 185.0 + i * 8.0
+			vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - i * 3.0
 			vehicle.player = $Player
 			add_child(vehicle)
 	# A second circuit turns through both intersections and the southern street.
@@ -87,7 +87,7 @@ func _ready() -> void:
 		vehicle.route_points = circuit
 		vehicle.route_index = 1 if i == 0 else 7
 		vehicle.position = Vector2(958, 680) if i == 0 else Vector2(east_lane, 950)
-		vehicle.cruise_speed = 170.0 if i == 0 else 160.0
+		vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 12.0
 		vehicle.player = $Player
 		add_child(vehicle)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
@@ -106,6 +106,10 @@ func _ready() -> void:
 	add_prop("sign", Vector2(499, 354), Rect2(-7, -5, 14, 6))
 	decorate_expansion()
 	integrate_regional_props()
+	# Perpendicular benches face the open plaza. Existing south-facing seats
+	# retain their interactions and authored seated character poses.
+	add_asset("props/bench", Vector2(360, 670), Vector2(58, 43), Rect2(-12, -18, 24, 18), Color.WHITE, "east")
+	add_asset("props/bench", Vector2(600, 870), Vector2(58, 43), Rect2(-12, -18, 24, 18), Color.WHITE, "west")
 	populate()
 	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
 	var layer := CanvasLayer.new()
@@ -151,7 +155,8 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	building.position = pos
 	building.country_id = WorldManager.country.id
 	building.variant = BuildingVariants.make(building.country_id, "shop", index + 13)
-	var spec := Regional.descriptor(building.country_id, asset, index)
+	var spec := Regional.descriptor(building.country_id, asset, index, AssetOrientation.street_facing(pos, roads()))
+	building.orientation = spec.facing
 	building.building_type = spec.type
 	building.title = spec.title
 	building.access = CityBuilding.Access.EXTERIOR_ONLY if spec.type == "office" else CityBuilding.Access.ENTERABLE
@@ -164,19 +169,31 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	occluders.append(building.get_child(0))
 	add_building_solid(building)
 
-func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tint := Color.WHITE) -> void:
-	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
-	if not pos.is_finite(): return
+func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tint := Color.WHITE, facing: String = "south") -> void:
 	var prop := Node2D.new()
 	prop.name = asset.get_file().capitalize()
-	prop.position = pos
 	var sprite := Sprite2D.new()
 	var path := "res://assets/city/%s.png" % asset
 	if asset.begins_with("buildings/") and WorldManager.country.id != "ar":
 		path = WorldManager.country.facade
 	elif asset == "vegetation/tree":
 		path = WorldManager.country.greenery
-	sprite.texture = load(path)
+	if asset == "props/bench":
+		path = AssetOrientation.family_path("res://assets/oriented/props/bench", facing)
+	if asset.begins_with("vehicles/"):
+		var model: String = {"car": "compact", "coupe": "sedan"}.get(asset.get_file(), asset.get_file())
+		path = "res://assets/vehicles/%s/%s.png" % [model, Vehicle.source_direction(model, facing)]
+	var texture: Texture2D = load(path)
+	var used := Vector2(texture.get_image().get_used_rect().size)
+	size = used * minf(size.x / used.x, size.y / used.y)
+	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
+	if not pos.is_finite():
+		prop.free()
+		sprite.free()
+		return
+	prop.position = pos
+	prop.set_meta("orientation", facing)
+	sprite.texture = texture
 	sprite.region_enabled = true
 	sprite.region_rect = sprite.texture.get_image().get_used_rect()
 	sprite.position = Vector2(0, -size.y / 2)
@@ -187,7 +204,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		add_prop("tree_bed", pos + Vector2(0, 3), Rect2())
 	if asset == "props/fountain":
 		prop.set_script(Water)
-	if asset == "props/bench":
+	if asset == "props/bench" and facing == "south":
 		prop.add_to_group("city_benches")
 	if asset.begins_with("vehicles/"):
 		prop.add_to_group("parked_vehicles")
@@ -240,7 +257,8 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
-		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)))
+		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing)
+		building.orientation = spec.facing
 		building.building_type = spec.type
 		building.title = spec.title
 		building.country_id = country.id
@@ -336,15 +354,23 @@ func fit_building(building: CityBuilding) -> void:
 		max_height = minf(max_height, 130)
 	var factor := minf(max_width / used.x, max_height / used.y)
 	building.size = building.facade.get_size() * factor
+	var normal := AssetOrientation.vector(building.orientation)
+	var width := used.x * factor
+	var depth := minf(64.0, used.y * factor * 0.32)
+	building.footprint = Rect2(Vector2(-width * 0.46, -depth), Vector2(width * 0.92, depth - 4))
+	if normal.y > 0.3:
+		building.door_offset = Vector2(normal.x * width * 0.22, 16)
+	elif normal.y < -0.3:
+		building.door_offset = Vector2(normal.x * width * 0.22, -depth - 16)
+	else:
+		building.door_offset = Vector2(normal.x * (width * 0.46 + 16), -depth * 0.5)
 	building_bounds.append(Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
 
 func add_building_solid(building: CityBuilding) -> void:
-	var bounds: Rect2 = building_bounds.back()
-	var depth := minf(64.0, bounds.size.y * 0.32)
-	add_solid(Rect2(building.position + Vector2(-bounds.size.x * 0.46, -depth), Vector2(bounds.size.x * 0.92, depth - 4)))
+	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
 
 func roads() -> Array[Rect2]:
-	return [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(WorldManager.district.side_street_x, 16, WorldManager.district.side_street_width, 1568)]
+	return DistrictBlocks.roads(WorldManager.district)
 
 func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Vector2:
 	# Reserve the entire facade envelope, not just its collision strip. This
@@ -381,6 +407,7 @@ func integrate_argentina() -> void:
 	stop.kind = "transport_stop"
 	stop.position = Vector2(360, 600)
 	stop.set_meta("building_type", "transport_stop")
+	stop.set_meta("orientation", AssetOrientation.street_facing(stop.position, roads(), false))
 	add_child(stop)
 	add_solid(Rect2(357, 592, 6, 8))
 	var pitch := Node2D.new()
@@ -398,14 +425,16 @@ func integrate_argentina() -> void:
 		target.label = "Comprar choripán" if food_name == "Choripan Stand" else "Comer en la parrilla"
 		target.action = "buy_food"
 		stand.add_child(target)
-	# Existing east art is used only on the eastbound avenue; no invented turns.
+	# Eight authored views let buses follow the same rounded road circuit.
 	for i in 2:
 		var bus := Vehicle.new()
 		bus.name = "Colectivo" if i == 0 else "Colectivo2"
 		bus.model = "colectivo"
-		bus.position = Vector2(1780 + i * 460, 512)
+		var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
+		bus.route_points.assign([Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)])
+		bus.position = Vector2(1450, 512) if i == 0 else Vector2(1300, 1160)
 		bus.direction = 1.0
-		bus.cruise_speed = 180.0
+		bus.cruise_speed = Vehicle.profile_for("colectivo").speed
 		bus.player = $Player
 		add_child(bus)
 	add_local_resident("Tito", Vector2(150, 830), "eat")

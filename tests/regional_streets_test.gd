@@ -39,7 +39,10 @@ func run() -> void:
 			for road in world.roads():
 				check(not bounds.intersects(road), country.id + ": facade extends into road")
 		var special: String = {"ar": "panaderia", "br": "padaria", "jp": "konbini", "it": "pizzeria", "us": "coffee_shop"}[country.id]
-		check(facades.has("res://assets/buildings/%s/%s.png" % [country.id, special]), "Regional landmark must be visible: " + special)
+		var landmark_present := facades.has("res://assets/buildings/%s/%s.png" % [country.id, special])
+		if country.id == "it":
+			landmark_present = facades.keys().any(func(path): return path.contains("/oriented/it/pizzeria/"))
+		check(landmark_present, "Regional landmark must be visible: " + special)
 		for prop in {"ar": [], "br": ["Moto"], "jp": ["Vending Machine", "Bicycle"], "it": ["Scooter"], "us": []}[country.id]:
 			check(world.has_node(NodePath(prop)), "Regional prop must be placed: " + prop)
 		if country.id == "ar":

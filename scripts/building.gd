@@ -14,6 +14,9 @@ var is_home := false
 var variant: Dictionary = {}
 var country_id := "ar"
 var interior_type := ""
+var orientation := "south"
+var door_offset := Vector2(0, 16)
+var footprint := Rect2()
 
 func _ready() -> void:
 	var sprite := Sprite2D.new()
@@ -25,9 +28,10 @@ func _ready() -> void:
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
 	set_meta("building_type", building_type)
+	set_meta("orientation", orientation)
 	if access != Access.EXTERIOR_ONLY:
 		var door := InteractionTargetScript.new()
-		door.position = Vector2(0, 16)
+		door.position = door_offset
 		door.label = "Entrar a tu vivienda" if is_home else "Entrar a " + title if interior_type != "" else "Consultar " + title
 		door.action = "enter_home" if is_home else "enter_" + interior_type if interior_type != "" else "shop"
 		door.detail = title

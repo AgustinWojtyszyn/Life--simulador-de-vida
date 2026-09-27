@@ -1,0 +1,364 @@
+{
+  "generator": "PixelLab create_object_pro_flash, 8 authored views",
+  "families": [
+    {
+      "name": "colectivo",
+      "path": "assets/vehicles/colectivo",
+      "id": "5f038bcf-2377-44b9-b6fb-173283b78650",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5f038bcf-2377-44b9-b6fb-173283b78650/rotations/south-west.png"
+        }
+      ],
+      "description": "Detailed crisp pixel art Buenos Aires city bus, yellow roof and deep navy lower body with a thin red trim, rectangular full size bus with flat windshield front, rear engine panel, dark side windows and two axles. Maintain VIDA game warm sunlight upper left, muted palette, neat pixel clusters. Low top down orthographic camera, fixed camera looking down 30 degrees. FIRST VIEW MUST FACE STRAIGHT SOUTH: front windshield and bumper centered horizontally, bus longitudinal axis exactly vertical in image, roof extends straight up behind windshield; no diagonal yaw. Eight rotations must align bus longitudinal axis to each actual screen travel vector (east points horizontally right, north points straight up). No text or logos. Entire bus isolated on transparent background, no ground tile. Same bus in all directions.",
+      "width": 128,
+      "height": 128,
+      "n_directions": 8,
+      "view": "low top-down",
+      "style_image": {
+        "url": "https://raw.githubusercontent.com/AgustinWojtyszyn/Life--simulador-de-vida/3b902e6/assets/vehicles/colectivo/east.png"
+      }
+    },
+    {
+      "name": "pizzeria",
+      "path": "assets/oriented/it/pizzeria",
+      "description": "Complete freestanding two-storey Italian neighbourhood pizzeria building for VIDA game, warm ochre stucco, terracotta tiled pitched roof visibly covering the WHOLE building, chimney, upstairs green shutters, solid side and rear walls, ground floor timber door and two windows under small green canvas awnings. One small correctly readable sign PIZZERIA over entrance. A solid enclosed architectural volume, never a hollow cutaway, never a wall slice, no transparent holes in roof or walls, no interior visible. Crisp detailed pixel art warm upper-left sunlight, muted cream terracotta olive palette, low top-down orthographic camera. First south view is a STRAIGHT ON frontal elevation with visible roof depth behind it, vertical edges vertical, front baseline horizontal. Entrance faces direction of each rotation. Isolated on transparent background, no pavement slab, no surroundings, no trees or people. Clear narrow contact shadow, entire building within frame.",
+      "width": 192,
+      "height": 224,
+      "n_directions": 8,
+      "view": "low top-down",
+      "id": "7cf720c0-589f-490b-9d44-08c3eaeefbfe",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/7cf720c0-589f-490b-9d44-08c3eaeefbfe/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "bench",
+      "path": "assets/oriented/props/bench",
+      "description": "VIDA neighbourhood park bench, honey-brown wooden horizontal slats and dark teal cast iron feet and armrests. Match detailed restrained pixel art of existing bench, warm upper-left lighting, low top-down orthographic view. First south view faces straight toward camera: backrest horizontal across image, seat in front, legs visibly resting on one ground plane. Generate views where seating direction matches each screen compass direction; east bench faces right and west bench faces left. No labels, no logos, no people, no ground tile, isolated transparent background.",
+      "width": 64,
+      "height": 64,
+      "n_directions": 8,
+      "view": "low top-down",
+      "style_image": {
+        "url": "https://raw.githubusercontent.com/AgustinWojtyszyn/Life--simulador-de-vida/main/assets/city/props/bench.png",
+        "usage_description": "Keep materials and pixel art lighting, render genuinely different directions."
+      },
+      "id": "76842512-6d46-4403-93b5-89bea70d0b6b",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/76842512-6d46-4403-93b5-89bea70d0b6b/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "VIDA ar oriented house",
+      "path": "assets/oriented/ar/house",
+      "id": "5c4b7aea-75ef-4db4-90c3-4cb4beb2571b",
+      "description": "Argentine Buenos Aires neighbourhood two-storey family house, cream plaster over masonry, low flat roof and water tank, green metal shutters, small timber front door, restrained brick plinth and simple lintels. Not a shop. Detailed pixel art for VIDA 2.5D life simulator, restrained warm palette, crisp pixel clusters, warm upper-left sunlight and cool shadows. Complete solid freestanding building with roof, front, side and rear walls, door visibly connects to base. FIXED low top-down orthographic camera. First SOUTH view: entrance wall exactly frontal facing down screen, horizontal baseline, symmetrical vertical sides; visible roof depth behind, NO diagonal yaw in south. In EAST/WEST rotations entrance faces precisely screen right/left. No lettering, logos, pavement tile, trees or people. Transparent background, entire building fits canvas with small margin. Consistent scale and silhouette between eight views.",
+      "width": 160,
+      "height": 192,
+      "n_directions": 8,
+      "view": "low top-down",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/5c4b7aea-75ef-4db4-90c3-4cb4beb2571b/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "VIDA br oriented house",
+      "path": "assets/oriented/br/house",
+      "id": "758539d6-c6e1-412d-b820-935684c45c10",
+      "description": "Brazilian two-storey neighbourhood family house, coral stucco lower storey, cream upper storey, broad shaded veranda with simple blue railings, shallow terracotta roof and generous rectangular windows. Not a shop. Detailed pixel art for VIDA 2.5D life simulator, restrained warm palette, crisp pixel clusters, warm upper-left sunlight and cool shadows. Complete solid freestanding building with roof, front, side and rear walls, door visibly connects to base. FIXED low top-down orthographic camera. First SOUTH view: entrance wall exactly frontal facing down screen, horizontal baseline, symmetrical vertical sides; visible roof depth behind, NO diagonal yaw in south. In EAST/WEST rotations entrance faces precisely screen right/left. No lettering, logos, pavement tile, trees or people. Transparent background, entire building fits canvas with small margin. Consistent scale and silhouette between eight views.",
+      "width": 160,
+      "height": 192,
+      "n_directions": 8,
+      "view": "low top-down",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/758539d6-c6e1-412d-b820-935684c45c10/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "VIDA jp oriented house",
+      "path": "assets/oriented/jp/house",
+      "description": "Japanese compact two-storey family house, cream siding and dark timber entry frame, dark grey ceramic pitched roof, slim rectangular windows and a small wall-mounted air conditioner. Everyday Japanese neighbourhood, no shrine or fantasy architecture. Not a shop. Detailed pixel art for VIDA 2.5D life simulator, restrained warm palette, crisp pixel clusters, warm upper-left sunlight and cool shadows. Complete solid freestanding building with roof, front, side and rear walls, door visibly connects to base. FIXED low top-down orthographic camera. First SOUTH view: entrance wall exactly frontal facing down screen, horizontal baseline, symmetrical vertical sides; visible roof depth behind, NO diagonal yaw in south. In EAST/WEST rotations entrance faces precisely screen right/left. No lettering, logos, pavement tile, trees or people. Transparent background, entire building fits canvas with small margin. Consistent scale and silhouette between eight views.",
+      "width": 160,
+      "height": 192,
+      "n_directions": 8,
+      "view": "low top-down",
+      "id": "aac6d802-38dc-46f2-b15c-4894c6918e72",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/aac6d802-38dc-46f2-b15c-4894c6918e72/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "VIDA it oriented house",
+      "path": "assets/oriented/it/house",
+      "description": "Italian two-storey village townhouse, warm worn ochre masonry, complete terracotta pitched roof, green shutters, arched timber entrance, small wrought iron window railings. Not a shop. Detailed pixel art for VIDA 2.5D life simulator, restrained warm palette, crisp pixel clusters, warm upper-left sunlight and cool shadows. Complete solid freestanding building with roof, front, side and rear walls, door visibly connects to base. FIXED low top-down orthographic camera. First SOUTH view: entrance wall exactly frontal facing down screen, horizontal baseline, symmetrical vertical sides; visible roof depth behind, NO diagonal yaw in south. In EAST/WEST rotations entrance faces precisely screen right/left. No lettering, logos, pavement tile, trees or people. Transparent background, entire building fits canvas with small margin. Consistent scale and silhouette between eight views.",
+      "width": 160,
+      "height": 192,
+      "n_directions": 8,
+      "view": "low top-down",
+      "id": "c87c9d97-2b13-48eb-9ecb-fec83d781749",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/c87c9d97-2b13-48eb-9ecb-fec83d781749/rotations/south-west.png"
+        }
+      ]
+    },
+    {
+      "name": "VIDA us oriented house",
+      "path": "assets/oriented/us/house",
+      "description": "American two-storey neighbourhood red brick townhouse, slate grey pitched roof, front porch with two simple posts, cream window frames and bay window, solid side walls. Not a shop. Detailed pixel art for VIDA 2.5D life simulator, restrained warm palette, crisp pixel clusters, warm upper-left sunlight and cool shadows. Complete solid freestanding building with roof, front, side and rear walls, door visibly connects to base. FIXED low top-down orthographic camera. First SOUTH view: entrance wall exactly frontal facing down screen, horizontal baseline, symmetrical vertical sides; visible roof depth behind, NO diagonal yaw in south. In EAST/WEST rotations entrance faces precisely screen right/left. No lettering, logos, pavement tile, trees or people. Transparent background, entire building fits canvas with small margin. Consistent scale and silhouette between eight views.",
+      "width": 160,
+      "height": 192,
+      "n_directions": 8,
+      "view": "low top-down",
+      "id": "2b2928e8-06b7-49fc-a8c9-ea34faaae312",
+      "images": [
+        {
+          "direction": "east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/east.png"
+        },
+        {
+          "direction": "west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/west.png"
+        },
+        {
+          "direction": "north",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/north.png"
+        },
+        {
+          "direction": "south",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/south.png"
+        },
+        {
+          "direction": "north-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/north-east.png"
+        },
+        {
+          "direction": "north-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/north-west.png"
+        },
+        {
+          "direction": "south-east",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/south-east.png"
+        },
+        {
+          "direction": "south-west",
+          "url": "https://backblaze.pixellab.ai/file/pixellab-characters/objects/fac7108f-2711-4891-80a9-6185395c5b13/2b2928e8-06b7-49fc-a8c9-ea34faaae312/rotations/south-west.png"
+        }
+      ]
+    }
+  ]
+}

@@ -32,7 +32,7 @@ const LABELS := {
 	"us": {"market": "GROCERY", "cafe": "COFFEE SHOP", "diner": "DINER", "clinic": "CLINIC", "office": "OFFICES", "workshop": "REPAIR SHOP"},
 }
 
-static func descriptor(country: String, kind: String, index: int) -> Dictionary:
+static func descriptor(country: String, kind: String, index: int, facing: String = "south") -> Dictionary:
 	var residential := kind in ["home", "house"]
 	var homes: Array = COUNTRY_HOMES[country]
 	var asset: String = homes[posmod(index, homes.size())] if residential else kind
@@ -52,7 +52,21 @@ static func descriptor(country: String, kind: String, index: int) -> Dictionary:
 	if residential:
 		title = {"ar": "VIVIENDA", "br": "MORADIA", "jp": "RESIDENCE", "it": "CASA", "us": "HOME"}[country]
 		if type in ["residential_apartment", "residential_building"]: title = "APARTMENTS" if country in ["us", "jp"] else "DEPARTAMENTOS" if country == "ar" else "APPARTAMENTI" if country == "it" else "APARTAMENTOS"
-	return {"path": path, "type": type, "title": title, "residential": residential}
+	var actual_facing := "south"
+	var family := ""
+	if residential and (facing != "south" or index % 3 == 0):
+		family = "res://assets/oriented/%s/house" % country
+	elif country == "it" and asset == "pizzeria":
+		family = "res://assets/oriented/it/pizzeria"
+	if family != "":
+		var oriented := AssetOrientation.family_path(family, facing)
+		if oriented != "":
+			path = oriented
+			actual_facing = facing
+			if residential:
+				type = "residential_house"
+				title = {"ar": "VIVIENDA", "br": "MORADIA", "jp": "RESIDENCE", "it": "CASA", "us": "HOME"}[country]
+	return {"path": path, "type": type, "title": title, "residential": residential, "facing": actual_facing, "requested_facing": facing}
 
 static func facade(country: String, residential: bool, index: int) -> String:
 	return descriptor(country, "house" if residential else "shop", index).path
