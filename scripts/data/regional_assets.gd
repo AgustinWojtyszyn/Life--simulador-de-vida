@@ -54,7 +54,10 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 		if type in ["residential_apartment", "residential_building"]: title = "APARTMENTS" if country in ["us", "jp"] else "DEPARTAMENTOS" if country == "ar" else "APPARTAMENTI" if country == "it" else "APARTAMENTOS"
 	var actual_facing := "south"
 	var family := ""
-	if residential and (facing != "south" or index % 3 == 0):
+	# Countries without a full residential asset library must never silently
+	# fall back to Argentine houses. Their authored directional family is used
+	# for every residence, which keeps each city regionally coherent.
+	if residential and (country != "ar" or facing != "south" or index % 3 == 0):
 		family = "res://assets/oriented/%s/house" % country
 	elif country == "it" and asset == "pizzeria":
 		family = "res://assets/oriented/it/pizzeria"
