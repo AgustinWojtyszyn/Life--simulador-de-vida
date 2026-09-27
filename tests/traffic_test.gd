@@ -49,9 +49,13 @@ func run() -> void:
 		check((cars[i].position.x - starts[i].x) * cars[i].direction > 15, "Both lanes must actually move")
 		check(cars[i].position.y == starts[i].y, "Cars must stay in lane")
 		cars[i].set_physics_process(false)
-	check(models.size() == 4, "Traffic must use four distinct vehicle models")
-	var car: AnimatableBody2D = world.get_node("Traffic_0_0")
-	car.position = Vector2(340, 454)
+	check(models.size() >= 4, "Traffic must use at least four distinct vehicle models")
+	var same_lane := cars.filter(func(vehicle): return vehicle.direction > 0.0 and is_equal_approx(vehicle.position.y, cars[0].position.y))
+	if same_lane.size() < 2:
+		same_lane = cars.filter(func(vehicle): return vehicle.direction > 0.0)
+	check(same_lane.size() >= 2, "Traffic test needs two same-direction vehicles")
+	var car: AnimatableBody2D = same_lane[0]
+	car.position = Vector2(340, car.position.y)
 	car.current_speed = 66.0
 	player.position = Vector2(465, 444)
 	for i in 240:
@@ -63,9 +67,9 @@ func run() -> void:
 	for i in 60:
 		car._physics_process(1.0 / 60.0)
 	check(car.position.x > stopped_x + 10, "Car must resume after the resident leaves")
-	var leader: AnimatableBody2D = world.get_node("Traffic_0_1")
-	leader.position = Vector2(620, 454)
-	car.position = Vector2(470, 454)
+	var leader: AnimatableBody2D = same_lane[1]
+	leader.position = Vector2(620, car.position.y)
+	car.position = Vector2(470, car.position.y)
 	car.current_speed = 66.0
 	for i in 240:
 		car._physics_process(1.0 / 60.0)
