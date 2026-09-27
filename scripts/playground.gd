@@ -484,13 +484,13 @@ func integrate_argentina() -> void:
 	var pitch := Node2D.new()
 	pitch.name = "Cancha Municipal"
 	pitch.set_script(preload("res://scripts/regional_content.gd"))
-	pitch.position = Vector2(1985, 2110)
+	pitch.position = Vector2(1945, 2050)
 	pitch.z_index = -2
 	pitch.set_meta("building_type", "sports")
 	add_child(pitch)
-	protected_content.append(Rect2(1965, 2085, 770, 475))
+	protected_content.append(Rect2(1935, 2038, 820, 600))
 	var football_target := preload("res://scripts/interaction_target.gd").new()
-	football_target.position = Vector2(360, 430)
+	football_target.position = Vector2(400, 548)
 	football_target.label = "Jugar un rato a la pelota"
 	football_target.action = "play_football"
 	football_target.target_id = "cancha_barrio_del_sol"
@@ -528,9 +528,9 @@ func integrate_argentina() -> void:
 	for i in 4:
 		var walker := Walker.new()
 		walker.route.assign([
-			Vector2(2070 + i * 120, 2300),
-			Vector2(2200 + i * 105, 2420),
-			Vector2(2120 + i * 115, 2480),
+			Vector2(2060 + i * 135, 2290),
+			Vector2(2210 + i * 110, 2440),
+			Vector2(2130 + i * 120, 2550),
 		])
 		walker.position = walker.route[0]
 		walker.speed = 50 + i * 5
