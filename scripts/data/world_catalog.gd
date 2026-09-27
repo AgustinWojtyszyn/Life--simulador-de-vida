@@ -5,7 +5,7 @@ static func countries() -> Array[CountryData]:
 	var rows := [
 		["ar", "Argentina", "Barrio del Sol", "Veredas amplias, cafés y plazas arboladas.", "d3b17b", 1810, 120, "Casa", ["ALMACÉN", "CAFÉ", "CLÍNICA", "KIOSCO", "OFICINAS"]],
 		["us", "Estados Unidos", "Maple Junction", "Diners, ladrillo y un barrio de casas junto al centro.", "8ca8b5", 1810, 180, "Casa", ["GROCERY", "DINER", "CLINIC", "MARKET", "OFFICES"]],
-		["jp", "Japón", "Aoba", "Comercios compactos, callejones y viviendas tranquilas.", "9fb8a5", 1780, 88, "Departamento", ["AOBA MART", "KISSA", "CLINIC", "KONBINI", "STATION"]],
+		["jp", "Japón", "Aoba", "Comercios compactos, callejones y viviendas tranquilas.", "9fb8a5", 1780, 88, "Departamento", ["AOBA MART", "KISSA", "CLINIC", "KONBINI", "OFFICES"]],
 		["it", "Italia", "Borgo Luce", "Balcones, pequeñas plazas y cafés mediterráneos.", "d8b58a", 1850, 96, "Departamento", ["ALIMENTARI", "CAFFÈ", "CLINICA", "TRATTORIA", "UFFICI"]],
 		["br", "Brasil", "Jardim Aurora", "Comercios abiertos, fachadas cálidas y vegetación tropical.", "dca58f", 1790, 140, "Casa", ["MERCADO", "PADARIA", "CLÍNICA", "CAFÉ", "ESCRITÓRIOS"]],
 	]

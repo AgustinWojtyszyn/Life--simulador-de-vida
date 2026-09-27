@@ -147,11 +147,13 @@ func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, 
 	building.size = size
 	building.country_id = WorldManager.country.id
 	building.variant = BuildingVariants.make(building.country_id, "shop", index + 13)
+	var spec := Regional.descriptor(building.country_id, asset, index)
+	building.building_type = spec.type
+	building.title = spec.title
 	building.access = CityBuilding.Access.ENTERABLE
-	building.interior_type = "cafe" if asset == "cafe" else "shop"
-	building.title = WorldManager.country.shop_names[1 if asset == "cafe" else 0]
+	building.interior_type = "cafe" if spec.type in ["cafe", "diner", "pizzeria", "bakery"] else "shop"
 	building.building_id = "%s_front_%d" % [building.country_id, index]
-	building.facade = load(Regional.facade(building.country_id, index == 2, index if index < 2 else 2 if index == 2 else 8))
+	building.facade = load(spec.path)
 	building.size = building.facade.get_size() * 1.25
 	add_child(building)
 	city_objects.append(building)
@@ -225,13 +227,14 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
-		building.interior_type = ("cafe" if index % 2 else "shop") if slot.kind == "shop" else ""
-		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
-		building.title = country.shop_names[2] if slot.kind == "clinic" else country.shop_names[4] if slot.kind == "office" else country.home_kind.to_upper() if slot.kind == "house" else country.shop_names[index % 2]
+		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)))
+		building.building_type = spec.type
+		building.title = spec.title
 		building.country_id = country.id
 		building.variant = BuildingVariants.make(country.id, slot.kind, index)
-		var use_house: bool = slot.kind in ["home", "house"]
-		building.facade = load(Regional.facade(country.id, use_house, int(slot.get("asset_index", index))))
+		building.interior_type = ("cafe" if spec.type in ["cafe", "bakery", "pizzeria", "diner"] else "shop") if slot.kind == "shop" else ""
+		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
+		building.facade = load(spec.path)
 		building.size = building.facade.get_size() * 1.15
 		add_child(building)
 		city_objects.append(building)

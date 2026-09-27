@@ -7,6 +7,7 @@ enum Access { EXTERIOR_ONLY, INTERACTABLE, ENTERABLE }
 var access := Access.EXTERIOR_ONLY
 var building_id := ""
 var title := ""
+var building_type := "residential_house"
 var facade: Texture2D
 var size := Vector2(208, 236)
 var is_home := false
@@ -21,9 +22,9 @@ func _ready() -> void:
 	sprite.region_rect = facade.get_image().get_used_rect()
 	sprite.scale = size / facade.get_size()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
-	sprite.z_index = -1
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
+	set_meta("building_type", building_type)
 	if access != Access.EXTERIOR_ONLY:
 		var door := InteractionTargetScript.new()
 		door.position = Vector2(0, 16)
