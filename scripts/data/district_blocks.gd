@@ -89,11 +89,11 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 
 	# South-facing rows use the broadest set of regional architecture. This is
 	# where shops and unique façades live, avoiding sideways storefront signs.
-	var row_x := [180.0, 430.0, 680.0, 1120.0, 1430.0, 1650.0, 2070.0, 2350.0, 2530.0, 3020.0, 3280.0, 3500.0, 4010.0, 4270.0, 4560.0]
+	var row_x: Array[float] = [180.0, 430.0, 680.0, 1120.0, 1430.0, 1650.0, 2070.0, 2350.0, 2530.0, 3020.0, 3280.0, 3500.0, 4010.0, 4270.0, 4560.0]
 	for road in horizontal_roads(district):
-		var y := road.position.y - 26.0
+		var y: float = road.position.y - 26.0
 		for column in row_x.size():
-			var x := row_x[column]
+			var x: float = row_x[column]
 			if x > district.world_size.x - 100:
 				continue
 			if reserved_for_side_facade(x, district):
@@ -125,9 +125,9 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	# Opposite sides of the avenues receive real north-facing residential art.
 	# The large block between the third and fourth avenues remains open for a
 	# country-specific civic/sports landmark instead of being filled blindly.
-	var north_row_x := [240.0, 560.0, 1180.0, 1510.0, 2150.0, 2460.0, 3090.0, 3380.0, 4080.0, 4380.0]
+	var north_row_x: Array[float] = [240.0, 560.0, 1180.0, 1510.0, 2150.0, 2460.0, 3090.0, 3380.0, 4080.0, 4380.0]
 	for road in horizontal_roads(district):
-		var y := road.end.y + 248.0
+		var y: float = road.end.y + 248.0
 		if y > district.world_size.y - 60:
 			continue
 		for x in north_row_x:
@@ -143,7 +143,7 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	# Side streets no longer rotate arbitrary storefront PNGs. Only the
 	# directional residential family is used here, so doors/windows truly face
 	# the road rather than looking sideways into another building.
-	var side_y := [820.0, 1530.0, 2290.0, 3040.0]
+	var side_y: Array[float] = [820.0, 1530.0, 2290.0, 3040.0]
 	for road in vertical_roads(district):
 		for y in side_y:
 			if y > district.world_size.y - 80:
