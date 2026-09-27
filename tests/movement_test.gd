@@ -30,6 +30,27 @@ func run() -> void:
 	check(player.velocity.is_zero_approx(), "Release stops promptly")
 	check(player.position.distance_to(stop_start) < 10, "Stopping does not visibly slide")
 	check(player.visual.pose == "idle", "Displacement controls animation")
+	# Regression: diagonal and cardinal input must cover the same distance.
+	player.position = Vector2(550, 500)
+	player.velocity = Vector2.ZERO
+	var cardinal_start := player.position
+	Input.action_press("move_right")
+	for i in 45: player._physics_process(1.0 / 60.0)
+	Input.action_release("move_right")
+	var cardinal_distance := player.position.distance_to(cardinal_start)
+	player.position = Vector2(550, 500)
+	player.velocity = Vector2.ZERO
+	var diagonal_start := player.position
+	Input.action_press("move_right")
+	Input.action_press("move_down")
+	for i in 45: player._physics_process(1.0 / 60.0)
+	Input.action_release("move_right")
+	Input.action_release("move_down")
+	var diagonal_distance := player.position.distance_to(diagonal_start)
+	check(absf(cardinal_distance - diagonal_distance) < 1.0, "Diagonal and cardinal travel must have equal speed")
+	check(player.velocity.length() <= 140.01, "Diagonal input must never exceed walking speed")
+	for i in 8: player._physics_process(1.0 / 60.0)
+	check(player.velocity.is_zero_approx(), "Player must stop cleanly after diagonal input")
 	var walker: Node2D = load("res://scripts/city_walker.gd").new()
 	walker.route.assign([Vector2(100, 100), Vector2(300, 100)])
 	walker.position = walker.route[0]
