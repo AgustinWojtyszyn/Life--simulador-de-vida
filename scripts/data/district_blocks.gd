@@ -81,7 +81,7 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	index += 1
 	for service in [
 		[Vector2(1510, 1100), "clinic", "ENTERABLE"],
-		[Vector2(2180, 1100), "office", "ENTERABLE"],
+		[Vector2(2070, 1100), "office", "ENTERABLE"],
 		[Vector2(3120, 1870), "shop", "ENTERABLE"],
 		[Vector2(4100, 2630), "shop", "ENTERABLE"],
 		[Vector2(3320, 1100), "office", "ENTERABLE"],
