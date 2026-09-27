@@ -27,6 +27,15 @@ func run() -> void:
 	check(world.map_size == Vector2(4800, 3200), "Playground must use district world size")
 	check(world.city_objects.size() > 70, "Expanded district must contain substantial street content")
 	check(get_nodes_in_group("city_traffic").size() >= 8, "Expanded district must retain active traffic")
+	check(get_nodes_in_group("traffic_signals").size() == 16, "Every 4x4 road grid intersection must have a traffic signal")
+	check(get_nodes_in_group("city_minimap").size() >= 1, "Street HUD must include a lightweight minimap")
+	var first_signal = get_nodes_in_group("traffic_signals")[0]
+	first_signal.horizontal_state = "red"
+	first_signal.vertical_state = "green"
+	var signal_probe := first_signal.global_position + Vector2(-first_signal.vertical_half - 120.0, 0)
+	check(first_signal.blocking_distance(signal_probe, Vector2.RIGHT) < 220.0, "Red signal must stop approaching horizontal traffic")
+	first_signal.horizontal_state = "green"
+	check(first_signal.blocking_distance(signal_probe, Vector2.RIGHT) == INF, "Green signal must release horizontal traffic")
 	check(world.has_node("Colectivo") and world.has_node("Colectivo2"), "Argentina must retain both bus lines")
 	check(world.has_node("Cancha Municipal"), "Argentina must contain the large municipal football ground")
 
@@ -80,6 +89,8 @@ func run() -> void:
 	touch.queue_free()
 
 	check(root.has_node("AudioSystem"), "Original audio system must be registered")
+	check(root.get_node("AudioSystem").track_count() == 5, "Soundtrack must expose five selectable songs")
+	check(not root.get_node("AudioSystem").track_name().is_empty(), "Selectable soundtrack must expose a track name")
 	check(root.get_node("AudioSystem").country_scale("jp").size() == 5, "Japan soundtrack must keep its pentatonic colour")
 	check(root.get_node("AudioSystem").country_scale("br").size() >= 6, "Brazil soundtrack must keep its own harmonic palette")
 
