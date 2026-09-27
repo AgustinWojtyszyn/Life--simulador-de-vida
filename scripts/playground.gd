@@ -503,9 +503,10 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false, bench
 		if bench and not bench_zone().any(func(zone: Rect2): return zone.encloses(base.grow(12))):
 			continue
 		var valid := true
-		for bounds in entrance_clearance:
-			if base.grow(12).intersects(bounds):
-				valid = false
+		if not parked:
+			for bounds in entrance_clearance:
+				if base.grow(12).intersects(bounds):
+					valid = false
 		for bounds in building_bounds:
 			if visual.intersects(bounds.grow(8)):
 				valid = false
