@@ -120,7 +120,16 @@ func wave() -> void:
 	sprite.texture = WAVE
 
 func perform_activity(action: String) -> void:
-	action_pose = {"coffee": "drink", "fridge": "eat", "cook": "eat", "buy_food": "browse", "rest": "idle_live"}.get(action, action)
-	if not ResourceLoader.exists("res://assets/characters/%s/%s/south_0.png" % [visual.profile.gender, action_pose]): return
+	action_pose = {
+		"coffee": "drink",
+		"fridge": "eat",
+		"cook": "eat",
+		"buy_food": "browse",
+		"rest": "idle_live",
+		"play_football": "kick",
+	}.get(action, action)
+	# Missing bespoke frames no longer make an interaction visually inert.
+	# CharacterVisual supplies a lightweight procedural fallback until a full
+	# authored animation family exists for that activity.
 	action_time = 2.6
 	visual.activity_phase = 0.0
