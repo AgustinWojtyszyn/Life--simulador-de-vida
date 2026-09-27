@@ -2,7 +2,7 @@ name: VIDA checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'stability/**']
   workflow_dispatch:
 
 concurrency:
