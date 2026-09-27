@@ -83,7 +83,7 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	if not bounds_cache.has(reference_path):
 		bounds_cache[reference_path] = load(reference_path).get_image().get_used_rect()
 	var standing: Rect2 = bounds_cache[reference_path]
-	sprite.scale = Vector2.ONE * (44.0 / maxf(1, standing.size.y))
+	sprite.scale = Vector2.ONE * (52.0 / maxf(1, standing.size.y))
 	sprite.position = Vector2((texture.get_width() * 0.5 - rect.get_center().x) * sprite.scale.x, (texture.get_height() * 0.5 - rect.end.y) * sprite.scale.y)
 	sprite.rotation = 0.0
 	if state == "seated":
