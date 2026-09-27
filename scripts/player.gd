@@ -21,8 +21,13 @@ var visual: CharacterVisual
 func _ready() -> void:
 	# Top-down movement: treat every collision as a wall, not as a floor/slope.
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	collision_layer = 1
-	collision_mask = 7 # world + traffic + residents
+	# Collision layers:
+	#   Layer 1 (bit 0): PLAYER
+	#   Layer 2 (bit 1): TRAFFIC
+	#   Layer 3 (bit 2): NPC
+	#   Layer 4 (bit 3): WORLD
+	collision_layer = 1 # PLAYER
+	collision_mask = 2 + 4 + 8 # TRAFFIC + NPC + WORLD = 14
 	visual = CharacterVisual.new()
 	visual.profile = WorldManager.profile
 	add_child(visual)
@@ -115,7 +120,7 @@ func stand(at: Vector2) -> void:
 	if not is_inside_tree():
 		return
 	collision_layer = 1
-	collision_mask = 7
+	collision_mask = 14
 	facing = Vector2.DOWN
 	sprite.texture = SOUTH
 	sprite.position.y = -14

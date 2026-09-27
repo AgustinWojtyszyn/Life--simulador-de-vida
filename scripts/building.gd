@@ -74,9 +74,9 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func add_destination_label() -> void:
-	# Labels must NEVER cover characters. A dedicated CanvasLayer with
-	# negative layer renders below the world (and its characters) while
-	# keeping the plate visible as decoration on the facade.
+	# World-space label that renders BELOW characters (z_index = -1).
+	# The label follows the building's transform, camera, and y-sort correctly.
+	# It never covers the player or NPCs because it has a negative z_index.
 	var width: float = 118.0 if is_home else 112.0
 	var plate := Label.new()
 	plate.text = "TU HOGAR" if is_home else title
@@ -84,6 +84,7 @@ func add_destination_label() -> void:
 		plate.text += "  •"
 	plate.position = Vector2(-width * 0.5, -10)
 	plate.size = Vector2(width, 18)
+	plate.z_index = -1
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	plate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -95,9 +96,4 @@ func add_destination_label() -> void:
 	style.content_margin_left = 3
 	style.content_margin_right = 3
 	plate.add_theme_stylebox_override("normal", style)
-	# Move label to a CanvasLayer below the world so it never covers characters
-	var label_layer := CanvasLayer.new()
-	label_layer.name = "LabelLayer"
-	label_layer.layer = -1
-	add_child(label_layer)
-	label_layer.add_child(plate)
+	add_child(plate)

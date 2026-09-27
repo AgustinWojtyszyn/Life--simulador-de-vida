@@ -135,13 +135,24 @@ func free_distance() -> float:
 			continue
 		var relative: Vector2 = other.position - position
 		var ahead := relative.dot(forward)
+		# When both vehicles have route_points, use direct distance calculation
+		# to avoid incorrect fposmod wrapping on curves
 		if route_points.is_empty() and other.route_points.is_empty() and other.direction == direction:
 			ahead = fposmod(ahead, route_length())
+		elif not route_points.is_empty() and not other.route_points.is_empty():
+			# Both on curves: ensure ahead is always positive if other is ahead
+			# by checking if other is in front along the curve direction
+			var to_other: Vector2 = other.position - position
+			if to_other.dot(forward) > 0:
+				ahead = to_other.length()
+			else:
+				ahead = -1.0
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
 			# Increased minimum gap for better separation and progressive braking
 			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
 			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
 			gap = minf(gap, ahead - min_gap)
+
 	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
 	if is_instance_valid(player):
 		pedestrians.append(player)
@@ -211,6 +222,15 @@ func _physics_process(delta: float) -> void:
 	# Additional smoothing for very close distances
 	if gap < 30.0:
 		safe_speed = minf(safe_speed, gap * 2.0)
+	# Prevent acceleration when a stopped vehicle is close ahead
+	if gap < 50.0 and safe_speed > current_speed:
+		safe_speed = current_speed
+	# Full stop when very close to a stopped vehicle ahead
+	if gap < 20.0 and current_speed < 30.0:
+		safe_speed = 0.0
+	# Additional smoothing for very close distances
+	if gap < 30.0:
+		safe_speed = minf(safe_speed, gap * 2.0)
 	var braking_now := safe_speed < current_speed - 24.0 and current_speed > 55.0
 	if braking_now and not braking_sound_active:
 		AudioSystem.play_sfx("brake", position)
@@ -253,15 +273,21 @@ func update_art() -> void:
 	sprite.region_enabled = true
 	sprite.region_rect = art_bounds[index]
 	sprite.scale = Vector2.ONE * visual_scale
-	# Keep the wheel contact point fixed while swapping directional PNGs.
-	# The offset centers the used-rect horizontally and anchors the bottom
-	# edge to the body so the car never appears to have a second car behind.
+	# Coherent pivot: the wheel contact point must be identical for all 8
+	# orientations. We anchor the bottom-center of the used-rect to a fixed
+	# ground point, so the car never floats or jumps when turning.
 	var bounds: Rect2 = art_bounds[index]
-	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -bounds.size.y)
-	sprite.position = Vector2(0, -body_height)
+	# Horizontal center of the used-rect, relative to the sprite origin
+	var center_x := bounds.position.x + bounds.size.x * 0.5
+	# The sprite is drawn with its bottom edge at y=0 (ground level).
+	# offset shifts the sprite so that:
+	#   - horizontally: the center of the used-rect aligns with x=0
+	#   - vertically: the bottom of the used-rect sits at y=0
+	sprite.offset = Vector2(-center_x, -bounds.size.y)
+	sprite.position = Vector2.ZERO
 
 func _draw() -> void:
-	var forward := forward_vector()
-	draw_set_transform(Vector2(1, -6), 0, Vector2(lerpf(0.42, 1.0, absf(forward.x)), lerpf(0.66, 0.24, absf(forward.x))))
-	draw_circle(Vector2.ZERO, half_width, Color(0.08, 0.13, 0.18, 0.26))
-	draw_set_transform(Vector2.ZERO)
+	# Shadow disabled: the procedural shadow was displaced and made vehicles
+	# appear to float. A contact shadow below the car is preferable to a
+	# floating one, but the current implementation hurts more than it helps.
+	pass

@@ -25,6 +25,9 @@ var occluders: Array[Sprite2D] = []
 var texture_used_cache: Dictionary = {}
 var road_cache: Array[Rect2] = []
 var occlusion_clock := 0.0
+# Waypoint network for pedestrian navigation
+var waypoints: Array[Vector2] = []
+var waypoint_connections: Array[Array] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
 	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
@@ -427,18 +430,98 @@ func decorate_expansion() -> void:
 	for p in [Vector2(east + 70, 1044), Vector2(3030, 980), Vector2(4440, 1700), Vector2(820, 3050)]:
 		add_asset("props/planter", p, Vector2(48, 36), Rect2(-18, -10, 36, 12))
 
+func generate_waypoints() -> void:
+	# Generate a waypoint network based on actual street layout.
+	# Waypoints are placed on sidewalks/plazas, never inside buildings.
+	waypoints.clear()
+	waypoint_connections.clear()
+	
+	# Get all roads and building footprints
+	var roads := roads()
+	var buildings := building_bounds
+	
+	# Generate waypoints along road edges (sidewalks)
+	for road in roads:
+		if road.size.x > 1000:  # Horizontal road
+			# Top sidewalk
+			for x in range(int(road.position.x), int(road.end.x), 80):
+				var wp := Vector2(x, road.position.y - 20)
+				if not _point_inside_buildings(wp):
+					waypoints.append(wp)
+			# Bottom sidewalk
+			for x in range(int(road.position.x), int(road.end.x), 80):
+				var wp := Vector2(x, road.end.y + 20)
+				if not _point_inside_buildings(wp):
+					waypoints.append(wp)
+		elif road.size.y > 1000:  # Vertical road
+			# Left sidewalk
+			for y in range(int(road.position.y), int(road.end.y), 80):
+				var wp := Vector2(road.position.x - 20, y)
+				if not _point_inside_buildings(wp):
+					waypoints.append(wp)
+			# Right sidewalk
+			for y in range(int(road.position.y), int(road.end.y), 80):
+				var wp := Vector2(road.end.x + 20, y)
+				if not _point_inside_buildings(wp):
+					waypoints.append(wp)
+	
+	# Connect waypoints if the segment is clear
+	for i in waypoints.size():
+		waypoint_connections.append([])
+		for j in waypoints.size():
+			if i == j:
+				continue
+			var dist: float = waypoints[i].distance_to(waypoints[j])
+			if dist < 120.0 and _segment_clear(waypoints[i], waypoints[j]):
+				waypoint_connections[i].append(j)
+
+func _point_inside_buildings(point: Vector2) -> bool:
+	for building in building_bounds:
+		if building.grow(10).has_point(point):
+			return true
+	return false
+
+func _segment_clear(from: Vector2, to: Vector2) -> bool:
+	# Check if the segment between two waypoints crosses any building
+	var steps := int(from.distance_to(to) / 10.0) + 1
+	for i in steps + 1:
+		var t := float(i) / float(steps)
+		var point: Vector2 = from.lerp(to, t)
+		if _point_inside_buildings(point):
+			return false
+	return true
+
 func populate() -> void:
 	var system := Node.new()
 	system.name = "PopulationSystem"
 	system.set_script(preload("res://scripts/population_system.gd"))
 	add_child(system)
-	var routes: Array = [
-		[Vector2(340, 373), Vector2(462, 373), Vector2(462, 355), Vector2(340, 355)],
-		[Vector2(200, 608), Vector2(490, 608), Vector2(490, 626), Vector2(200, 626)],
-		[Vector2(1120, 370), Vector2(1300, 370), Vector2(1300, 350), Vector2(1120, 350)],
-		[Vector2(1490, 362), Vector2(1640, 362), Vector2(1640, 382), Vector2(1490, 382)],
-		[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
-	]
+	
+	# Generate waypoint network
+	generate_waypoints()
+	
+	# Create routes from waypoints
+	var routes: Array = []
+	if waypoints.size() >= 4:
+		# Create routes by connecting nearby waypoints
+		for i in range(0, min(waypoints.size(), 20), 4):
+			var route: Array[Vector2] = []
+			for j in range(4):
+				if i + j < waypoints.size():
+					route.append(waypoints[i + j])
+			if route.size() >= 2:
+				routes.append(route)
+	
+	# Fallback to original routes if waypoints failed
+	if routes.is_empty():
+		routes = [
+			[Vector2(340, 373), Vector2(462, 373), Vector2(462, 355), Vector2(340, 355)],
+			[Vector2(200, 608), Vector2(490, 608), Vector2(490, 626), Vector2(200, 626)],
+			[Vector2(1120, 370), Vector2(1300, 370), Vector2(1300, 350), Vector2(1120, 350)],
+			[Vector2(1490, 362), Vector2(1640, 362), Vector2(1640, 382), Vector2(1490, 382)],
+			[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
+		]
+	
 	# Populate every quarter of the expanded city. Routes are deliberately
 	# short local loops so residents look like they belong to a block instead
 	# of marching across the whole map in straight lines.

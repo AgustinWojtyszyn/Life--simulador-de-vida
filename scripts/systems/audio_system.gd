@@ -99,22 +99,20 @@ func play_track(index: int, crossfade: bool = true) -> void:
 		return
 	track_index = posmod(index, TRACKS.size())
 	WorldManager.settings["music_track"] = track_index
-	var key := "%s_%d" % [current_country, track_index]
-	if not music_cache.has(key):
-		music_cache[key] = make_music(track_index, current_country)
+	var stream := _get_track_stream(current_country, track_index)
 	var current: AudioStreamPlayer = music_players[active_music]
 	if not current.playing or not crossfade:
 		for player in music_players:
 			player.stop()
 			player.volume_db = -40.0
-		current.stream = music_cache[key]
+		current.stream = stream
 		current.volume_db = target_music_db()
 		current.play()
 		return
 	var next_slot := 1 - active_music
 	var incoming: AudioStreamPlayer = music_players[next_slot]
 	incoming.stop()
-	incoming.stream = music_cache[key]
+	incoming.stream = stream
 	incoming.volume_db = -40.0
 	incoming.play()
 	active_music = next_slot
@@ -122,6 +120,20 @@ func play_track(index: int, crossfade: bool = true) -> void:
 	tween.tween_property(current, "volume_db", -40.0, 1.25).set_trans(Tween.TRANS_SINE)
 	tween.parallel().tween_property(incoming, "volume_db", target_music_db(), 1.25).set_trans(Tween.TRANS_SINE)
 	tween.tween_callback(current.stop)
+
+func _get_track_stream(country: String, track: int) -> AudioStream:
+	# Try to load a real audio file first (ogg preferred)
+	var real_path := "res://assets/audio/music/%s_%d.ogg" % [country, track]
+	if ResourceLoader.exists(real_path):
+		var real_stream: AudioStream = load(real_path)
+		if real_stream is AudioStreamOggVorbis:
+			real_stream.loop = true
+		return real_stream
+	# Fallback: procedural generation (only if no real file exists)
+	var key := "%s_%d" % [country, track]
+	if not music_cache.has(key):
+		music_cache[key] = make_music(track, country)
+	return music_cache[key]
 
 func play_sfx(kind: String, at := Vector2.ZERO) -> void:
 	if not enabled or not is_instance_valid(WorldManager.active_world):

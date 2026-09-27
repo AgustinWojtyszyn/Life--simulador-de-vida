@@ -66,8 +66,8 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 		if ResourceLoader.exists(alt_path):
 			path = alt_path
 		elif asset == "almacen" and country == "ar":
-			# Use the warehouse asset for almacén - it has clean signage
-			path = "res://assets/buildings/ar/warehouse.png"
+			# Use the new Argentine neighborhood store asset (no pseudo-text)
+			path = "res://assets/buildings/ar/almacen_new.png"
 		else:
 			var catalog_family: String = str({
 				"clinic": "clinic", "office": "office", "workshop": "workshop",

@@ -46,7 +46,7 @@ func run() -> void:
 	check(player.position == seat_position, "Resting must hold the seated position")
 	await activate()
 	await frames(30)
-	check(not player.seated and player.collision_mask == 3 and player.collision_layer == 1, "E must restore movement and collisions")
+	check(not player.seated and player.collision_mask == 14 and player.collision_layer == 1, "E must restore movement and collisions")
 	check(not player.test_move(player.transform, Vector2(0, 1)), "Standing spot must be clear")
 	await frames(20)
 	await activate()

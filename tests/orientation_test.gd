@@ -44,8 +44,17 @@ func run() -> void:
 		if country.id == "ar":
 			var bus: Node2D = world.get_node("Colectivo")
 			check(bus.directional_art.size() == 8 and not bus.route_points.is_empty(), "Bus has eight real views and a turning route")
-			check(bus.cruise_speed < world.get_node("Traffic_0_0").cruise_speed, "Bus cruises slower than a compact car")
-			check(bus.driver_acceleration < world.get_node("Traffic_0_0").driver_acceleration, "Bus gains speed more gradually")
+			var traffic_node = world.get_node_or_null("Traffic_0_0")
+			if traffic_node == null:
+				# Find any traffic node for comparison
+				for child in world.get_children():
+					if child.is_in_group("city_traffic") and child.route_points.is_empty():
+						traffic_node = child
+						break
+			check(traffic_node != null, "Must have a traffic node for comparison")
+			if traffic_node:
+				check(bus.cruise_speed < traffic_node.cruise_speed, "Bus cruises slower than a compact car")
+				check(bus.driver_acceleration < traffic_node.driver_acceleration, "Bus gains speed more gradually")
 		for car in get_nodes_in_group("city_traffic"):
 			car.set_physics_process(false)
 			if car.route_points.is_empty(): continue
@@ -65,9 +74,9 @@ func run() -> void:
 				seen[facing] = true
 				check(orientation.vector(facing).dot(car.motion_vector.normalized()) >= 0.923, "Vehicle frame agrees with actual displacement within 22.5 degrees")
 				check(car.sprite.rotation == 0, "No rotated vehicle PNGs")
-				check(car.sprite.position == Vector2(0, -car.body_height), "Turning keeps the same ground centre")
+				check(car.sprite.position == Vector2.ZERO, "Turning keeps the same ground centre")
 				var frame_bounds: Rect2 = car.art_bounds[car.facing_index]
-				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y * 0.5), "Directional frames share one wheel/ground anchor")
+				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y), "Directional frames share one wheel/ground anchor")
 			check(seen.size() == 8, "Rounded circuit exercises all eight views")
 		print("ORIENTATION: ", country.id, " ", views.keys())
 		world.queue_free()

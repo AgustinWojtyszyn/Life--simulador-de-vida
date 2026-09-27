@@ -61,25 +61,10 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 	if wait_time > 0:
+		# STATIONARY STATE: velocity is ZERO and NO movement is applied.
+		# No crowd separation, no nudges, no lateral displacement.
+		# The NPC must remain completely still while waiting.
 		velocity = Vector2.ZERO
-		# Only apply separation if actually blocked by another NPC, not just
-		# to prevent idle jitter. Check if someone is very close.
-		var needs_separation := false
-		for other in get_tree().get_nodes_in_group("city_residents"):
-			if other == self or not is_instance_valid(other) or not other.visible:
-				continue
-			if position.distance_squared_to(other.position) < 20.0 * 20.0:
-				needs_separation = true
-				break
-		# Also check player proximity for separation
-		var world := WorldManager.active_world
-		if is_instance_valid(world):
-			var player := world.get_node_or_null("Player") as Node2D
-			if is_instance_valid(player) and player.visible:
-				if position.distance_squared_to(player.position) < 20.0 * 20.0:
-					needs_separation = true
-		if needs_separation:
-			apply_crowd_separation(delta)
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
@@ -146,27 +131,14 @@ func _physics_process(delta: float) -> void:
 	var candidate := position + intended
 	var parent := get_parent()
 	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
-		# Blocked: try lateral nudge to find a way around the obstacle
+		# Blocked: stop and wait. NO teleporting, NO lateral displacement.
+		# The NPC waits briefly, then picks a different destination.
 		velocity = Vector2.ZERO
 		crossing = false
 		blocked_time += delta
 		wait_time = maxf(wait_time, 0.3)
 		visual.animate_motion(Vector2.ZERO, 0)
-		# Try sliding along the obstacle instead of just waiting
-		var slide_dir := Vector2(-desired.y, desired.x).normalized()
-		var slide_candidate := position + slide_dir * 12.0
-		if parent.call("walker_position_clear", slide_candidate):
-			position = slide_candidate
-			visual.animate_motion(slide_dir * 12.0, 12.0)
-			blocked_time = maxf(0.0, blocked_time - delta)
-			return
-		var slide_candidate2 := position - slide_dir * 12.0
-		if parent.call("walker_position_clear", slide_candidate2):
-			position = slide_candidate2
-			visual.animate_motion(-slide_dir * 12.0, 12.0)
-			blocked_time = maxf(0.0, blocked_time - delta)
-			return
-		# If blocked for too long, skip to next destination
+		# If blocked for too long, skip to next destination (coherent navigation)
 		if blocked_time > 1.5:
 			destination = (destination + 1) % route.size()
 			blocked_time = 0.0
@@ -191,7 +163,15 @@ func _physics_process(delta: float) -> void:
 func crowd_separation() -> Vector2:
 	var push := Vector2.ZERO
 	const PERSONAL_SPACE := 24.0
-	for other in get_tree().get_nodes_in_group("city_residents"):
+	# Use spatial grid for O(1) neighbor queries instead of O(n) scan
+	var nearby: Array = []
+	var pop_system := get_tree().get_nodes_in_group("population_system")
+	if not pop_system.is_empty():
+		nearby = pop_system[0].call("get_nearby_npcs", position, PERSONAL_SPACE)
+	else:
+		# Fallback to full scan if population system not available
+		nearby = get_tree().get_nodes_in_group("city_residents")
+	for other in nearby:
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		var away: Vector2 = position - other.position

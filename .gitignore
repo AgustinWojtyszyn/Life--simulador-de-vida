@@ -16,3 +16,6 @@ exports/
 Thumbs.db
 *.tmp
 *.log
+
+# Local tool configuration (machine-specific paths)
+opencode.json
