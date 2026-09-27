@@ -23,8 +23,8 @@ jobs:
       - name: Import project
         run: godot --headless --path . --editor --quit-after 2
       - name: Expanded city + mobile smoke
-        run: godot --headless --path . -s tests/iteration_smoke_test.gd
+        run: timeout 75s godot --headless --path . -s tests/iteration_smoke_test.gd
       - name: Interactions
-        run: godot --headless --path . -s tests/interactions_test.gd
+        run: timeout 75s godot --headless --path . -s tests/interactions_test.gd
       - name: Movement
-        run: godot --headless --path . -s tests/movement_test.gd
+        run: timeout 75s godot --headless --path . -s tests/movement_test.gd
