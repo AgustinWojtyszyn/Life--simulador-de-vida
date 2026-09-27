@@ -12,7 +12,7 @@ var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
 var settings := {"touch_controls": false}
-const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner"]
+const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini"]
 
 func _ready() -> void:
 	countries = preload("res://scripts/data/world_catalog.gd").countries()
