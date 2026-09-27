@@ -32,6 +32,9 @@ func run() -> void:
 				var bounds: Rect2 = object.get_meta("placement_bounds")
 				for building in world.building_bounds:
 					check(not bounds.intersects(building), country.id + ": prop intersects facade")
+		for i in world.building_bounds.size():
+			for j in range(i + 1, world.building_bounds.size()):
+				check(not world.building_bounds[i].intersects(world.building_bounds[j]), country.id + ": facade overlaps another facade")
 		for bounds in world.building_bounds:
 			for road in world.roads():
 				check(not bounds.intersects(road), country.id + ": facade extends into road")
@@ -44,7 +47,11 @@ func run() -> void:
 				check(facades.has("res://assets/buildings/ar/" + asset + ".png"), "Argentina must integrate " + asset)
 			for prop in ["Choripan Stand", "Parrilla"]:
 				check(world.has_node(prop), "Argentina street food must be placed: " + prop)
-			check(world.has_node("Colectivo"), "Argentina must have a circulating bus")
+			check(world.has_node("Colectivo") and world.has_node("Colectivo2"), "Argentina must have circulating buses")
+			var types := []
+			for node in world.get_children():
+				if node.has_meta("building_type"): types.append(node.get_meta("building_type"))
+			check("sports" in types and "transport_stop" in types, "Argentina needs a pitch and bus stop")
 		check(facades.size() >= 10, country.id + ": diverse residential and commercial facades")
 		check(get_nodes_in_group("parked_vehicles").size() == 4, "Four valid parking spaces")
 		print("REGIONAL STREET: ", country.id, " facades=", facades.size(), " objects=", world.city_objects.size())

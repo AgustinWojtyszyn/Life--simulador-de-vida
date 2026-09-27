@@ -22,7 +22,7 @@ func run() -> void:
 	var all_cars := get_nodes_in_group("city_traffic")
 	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty() and vehicle.model != "colectivo")
 	var player: CharacterBody2D = world.get_node("Player")
-	check(all_cars.size() == 9, "Two circuit vehicles and the Argentine bus must join six cars")
+	check(all_cars.size() == 10, "Two circuit vehicles and two Argentine buses must join six cars")
 	check(cars.size() == 6, "Six moving vehicles must spawn")
 	var circuit_cars := all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty())
 	for turning in circuit_cars:

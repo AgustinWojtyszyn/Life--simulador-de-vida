@@ -58,11 +58,16 @@ func run() -> void:
 	await frames(30)
 	check(not player.seated, "Movement must also stand up")
 	await frames(30)
-	var resident: Node2D = get_nodes_in_group("city_residents")[0]
+	var walkers := get_nodes_in_group("city_residents").filter(func(npc): return not npc.has_meta("person_name") and npc.route_kind == "walk")
+	var resident: Node2D = walkers[0]
+	resident.position = resident.route[0]
+	resident.destination = 1
+	resident.wait_time = 0
+	resident.indoor_time = 0
 	player.position = resident.position + Vector2(0, 22)
 	player.velocity = Vector2.ZERO
 	await frames(2)
-	check(actions.prompt.contains("Saludar"), "Nearby resident must advertise greeting")
+	check(actions.prompt.contains("Hablar"), "Nearby resident must advertise greeting")
 	await activate()
 	check(resident.greeting_time > 0 and player.wave_time > 0, "Both residents must visibly greet")
 	var paused := resident.position

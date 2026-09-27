@@ -18,6 +18,13 @@ func run() -> void:
 		for i in 20: await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://build/previews/" + country.id + "_street.png")
+		world.set_process(false)
+		for sprite in world.occluders: sprite.get_parent().show()
+		camera.zoom = Vector2(0.28, 0.28)
+		world.get_node("Player").position = Vector2(1200, 800)
+		for i in 3: await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://build/previews/" + country.id + "_overview.png")
 		world.queue_free()
 		await process_frame
 	quit()

@@ -399,14 +399,15 @@ func integrate_argentina() -> void:
 		target.action = "buy_food"
 		stand.add_child(target)
 	# Existing east art is used only on the eastbound avenue; no invented turns.
-	var bus := Vehicle.new()
-	bus.name = "Colectivo"
-	bus.model = "colectivo"
-	bus.position = Vector2(1900, 512)
-	bus.direction = 1.0
-	bus.cruise_speed = 180.0
-	bus.player = $Player
-	add_child(bus)
+	for i in 2:
+		var bus := Vehicle.new()
+		bus.name = "Colectivo" if i == 0 else "Colectivo2"
+		bus.model = "colectivo"
+		bus.position = Vector2(1780 + i * 460, 512)
+		bus.direction = 1.0
+		bus.cruise_speed = 180.0
+		bus.player = $Player
+		add_child(bus)
 	add_local_resident("Tito", Vector2(150, 830), "eat")
 	add_local_resident("Luli", Vector2(395, 601), "phone")
 	for i in 2:
