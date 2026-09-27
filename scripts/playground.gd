@@ -76,9 +76,9 @@ func _ready() -> void:
 	# so cars are visually separated and less likely to form single-file jams.
 	for lane_index in TRAFFIC_LANES.size():
 		var lane: Dictionary = TRAFFIC_LANES[lane_index]
-		var sub_lane_offsets := [-11.0, 11.0]  # px perpendicular to travel
+		var sub_lane_offsets: Array[float] = [-11.0, 11.0]  # px perpendicular to travel
 		for sub_lane in 2:
-			var y_offset := sub_lane_offsets[sub_lane]
+			var y_offset: float = sub_lane_offsets[sub_lane]
 			var models_in_lane := regional_models.size()
 			var vehicles_per_sub := 3
 			for i in vehicles_per_sub:
