@@ -5,8 +5,15 @@ var touch_interaction := false
 var touch_enabled := false
 
 func _ready() -> void:
-	touch_enabled = OS.has_feature("android") or "--touch-test" in OS.get_cmdline_user_args()
-	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "pause_game": [KEY_ESCAPE]}
+	refresh_device_mode()
+	var bindings := {
+		"move_left": [KEY_A, KEY_LEFT],
+		"move_right": [KEY_D, KEY_RIGHT],
+		"move_up": [KEY_W, KEY_UP],
+		"move_down": [KEY_S, KEY_DOWN],
+		"interact": [KEY_E],
+		"pause_game": [KEY_ESCAPE],
+	}
 	for action in bindings:
 		if InputMap.has_action(action):
 			continue
@@ -15,6 +22,19 @@ func _ready() -> void:
 			var event := InputEventKey.new()
 			event.physical_keycode = code
 			InputMap.action_add_event(action, event)
+
+func refresh_device_mode() -> void:
+	# Android exported builds and Android/iOS browsers must both receive the
+	# touch HUD. OS.has_feature("android") alone misses the web build.
+	touch_enabled = (
+		OS.has_feature("android")
+		or OS.has_feature("ios")
+		or OS.has_feature("mobile")
+		or DisplayServer.is_touchscreen_available()
+		or "--touch-test" in OS.get_cmdline_user_args()
+	)
+	if touch_enabled:
+		WorldManager.settings["touch_controls"] = true
 
 func movement() -> Vector2:
 	return (Input.get_vector("move_left", "move_right", "move_up", "move_down") + touch_vector).limit_length()
