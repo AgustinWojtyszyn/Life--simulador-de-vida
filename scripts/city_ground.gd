@@ -119,7 +119,7 @@ func draw_parking(area: Rect2) -> void:
 func draw_plaza(area: Rect2) -> void:
 	draw_rect(area.grow(5), Color("ded4b6"))
 	draw_rect(area, Color("b9b49f"))
-	var beds := [
+	var beds: Array[Rect2] = [
 		Rect2(area.position + Vector2(16, 18), Vector2(250, 92)),
 		Rect2(area.position + Vector2(445, 18), Vector2(250, 92)),
 		Rect2(area.position + Vector2(16, 218), Vector2(250, 92)),
@@ -131,7 +131,7 @@ func draw_plaza(area: Rect2) -> void:
 		draw_rect(bed.grow(3), Color("ddd3b4"))
 		draw_rect(bed, Color("748568"))
 		for i in 160:
-			var p := bed.position + Vector2(rng.randf_range(3, bed.size.x - 3), rng.randf_range(3, bed.size.y - 3))
+			var p: Vector2 = bed.position + Vector2(rng.randf_range(3, bed.size.x - 3), rng.randf_range(3, bed.size.y - 3))
 			draw_line(p, p + Vector2(2, -1), Color("8d9b72") if i % 2 else Color("627c62"))
 	var path := PackedVector2Array([
 		area.position + Vector2(280, 8),
@@ -149,7 +149,7 @@ func draw_park(area: Rect2, seed: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
 	for i in 300:
-		var p := area.position + Vector2(rng.randf_range(3, area.size.x - 3), rng.randf_range(3, area.size.y - 3))
+		var p: Vector2 = area.position + Vector2(rng.randf_range(3, area.size.x - 3), rng.randf_range(3, area.size.y - 3))
 		draw_line(p, p + Vector2(2, -1), Color("8fa076") if i % 3 else Color("667b62"))
 	var mid := area.get_center()
 	draw_rect(Rect2(area.position.x + 14, mid.y - 8, area.size.x - 28, 16), Color("d8cdae"))
