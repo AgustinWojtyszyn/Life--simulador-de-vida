@@ -11,7 +11,7 @@ var return_position := Vector2.ZERO
 var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
-var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65}
+var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0}
 const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini"]
 
 func _ready() -> void:
