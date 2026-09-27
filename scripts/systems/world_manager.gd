@@ -12,6 +12,7 @@ var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
 var settings := {"touch_controls": false}
+const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner"]
 
 func _ready() -> void:
 	countries = preload("res://scripts/data/world_catalog.gd").countries()
@@ -66,12 +67,19 @@ func continue_game() -> bool:
 	return true
 
 func travel(destination: String) -> void:
-	if destination not in ["home", "street", "shop", "cafe"]:
+	if destination not in ["home", "street"] + PUBLIC_INTERIORS:
 		return
 	var previous := location
 	location = destination
 	var home := HomeSystem.starter_home(country)
-	spawn_position = home.interior_spawn if destination == "home" else Vector2(390, 330) if destination in ["shop", "cafe"] else return_position if previous in ["shop", "cafe"] and return_position != Vector2.ZERO else home.street_spawn
+	if destination == "home":
+		spawn_position = home.interior_spawn
+	elif destination in PUBLIC_INTERIORS:
+		spawn_position = Vector2(390, 330)
+	elif previous in PUBLIC_INTERIORS and return_position != Vector2.ZERO:
+		spawn_position = return_position
+	else:
+		spawn_position = home.street_spawn
 	travel_requested.emit()
 	LifeEvents.location_changed.emit(country.id, district.id, location)
 
