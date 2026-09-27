@@ -37,6 +37,8 @@ func _ready() -> void:
 		var warmth := float(posmod(seed * 5, 9)) / 100.0
 		sprite.modulate = Color(1.0, 0.98 + warmth * 0.25, 0.95 + warmth * 0.35)
 	add_child(sprite)
+	if not (building_type.begins_with("residential") and not is_home):
+		add_destination_label()
 	set_meta("building_mode", Access.keys()[access])
 	set_meta("building_type", building_type)
 	set_meta("orientation", orientation)
@@ -64,14 +66,26 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, shadow_radius, Color(0.08, 0.12, 0.15, 0.18))
 	draw_set_transform(Vector2.ZERO)
 
-	# Ordinary residences no longer carry a debug-like VIVIENDA/MORADIA label.
-	# Keep labels for the player's home and actual destinations only.
-	if building_type.begins_with("residential") and not is_home:
-		return
-	var width: float = 112.0 if is_home else 106.0
-	draw_rect(Rect2(-width / 2.0, -7, width, 15), Color("263d40"))
-	draw_string(ThemeDB.fallback_font, Vector2(-width / 2.0 + 3, 4), "TU HOGAR" if is_home else title, HORIZONTAL_ALIGNMENT_CENTER, width - 6, 9, Color("f0d5a0"))
+func add_destination_label() -> void:
+	# A child Control with explicit Z ordering cannot be hidden by the facade
+	# Sprite2D, unlike parent _draw() labels which render before child sprites.
+	var width: float = 118.0 if is_home else 112.0
+	var plate := Label.new()
+	plate.text = "TU HOGAR" if is_home else title
 	if access == Access.ENTERABLE and not is_home:
-		draw_circle(Vector2(width / 2.0 - 7, 0), 2.5, Color("efce8a"))
-	if is_home:
-		draw_colored_polygon(PackedVector2Array([Vector2(-6, 10), Vector2(6, 10), Vector2(0, 15)]), Color("efce8a"))
+		plate.text += "  •"
+	plate.position = Vector2(-width * 0.5, -10)
+	plate.size = Vector2(width, 18)
+	plate.z_index = 20
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	plate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	plate.add_theme_font_size_override("font_size", 9)
+	plate.add_theme_color_override("font_color", Color("f0d5a0"))
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("263d40")
+	style.set_corner_radius_all(2)
+	style.content_margin_left = 3
+	style.content_margin_right = 3
+	plate.add_theme_stylebox_override("normal", style)
+	add_child(plate)
