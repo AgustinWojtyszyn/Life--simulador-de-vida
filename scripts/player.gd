@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 const SPEED := 140.0
-const ACCELERATION := 650.0
-const DECELERATION := 1200.0
+const ACCELERATION := 900.0
+const DECELERATION := 1800.0
 const SOUTH := preload("res://assets/characters/resident/south.png")
 const NORTH := preload("res://assets/characters/resident/north.png")
 const EAST := preload("res://assets/characters/resident/east.png")
@@ -19,6 +19,8 @@ var facing := Vector2.DOWN
 var visual: CharacterVisual
 
 func _ready() -> void:
+	# Top-down movement: treat every collision as a wall, not as a floor/slope.
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	visual = CharacterVisual.new()
 	visual.profile = WorldManager.profile
 	add_child(visual)
@@ -47,8 +49,10 @@ func _physics_process(delta: float) -> void:
 		target_speed = SPEED * clampf(raw_direction.length(), 0.0, 1.0)
 	var rate := ACCELERATION if direction != Vector2.ZERO else DECELERATION
 	if direction.dot(velocity.normalized()) < -0.2:
-		rate = 950.0  # quick direction reversal
+		rate = 1600.0  # direction changes should feel deliberate, not icy
 	velocity = velocity.move_toward(direction * target_speed, rate * delta)
+	if direction == Vector2.ZERO and velocity.length_squared() < 4.0:
+		velocity = Vector2.ZERO
 	if direction != Vector2.ZERO:
 		facing = direction
 	var before := position
