@@ -20,6 +20,7 @@ var sprite: Sprite2D
 var route_kind := "walk"
 var activity := "walk"
 var activity_time := 0.0
+var blocked_time := 0.0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -81,6 +82,16 @@ func _physics_process(delta: float) -> void:
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
+	# Check for oncoming walkers and yield deterministically
+	for other in get_tree().get_nodes_in_group("city_residents"):
+		if other == self or not is_instance_valid(other) or not other.visible:
+			continue
+		if is_facing_oncoming(other) and should_yield_to(other):
+			# Yield: stop briefly and let the other pass
+			velocity = Vector2.ZERO
+			visual.animate_motion(Vector2.ZERO, 0)
+			wait_time = maxf(wait_time, 0.4)
+			return
 	var remaining := position.distance_to(goal)
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
 	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
@@ -97,12 +108,19 @@ func _physics_process(delta: float) -> void:
 	var candidate := position + intended
 	var parent := get_parent()
 	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
+		# Blocked: wait briefly, then try to recalculate
 		velocity = Vector2.ZERO
 		crossing = false
-		destination = (destination + 1) % route.size()
-		wait_time = 0.35
+		blocked_time += delta
+		wait_time = maxf(wait_time, 0.3)
 		visual.animate_motion(Vector2.ZERO, 0)
+		# If blocked for too long, skip to next destination
+		if blocked_time > 1.5:
+			destination = (destination + 1) % route.size()
+			blocked_time = 0.0
+			wait_time = 0.35
 		return
+	blocked_time = maxf(0.0, blocked_time - delta * 2.0)
 	var before := position
 	move_and_slide()
 	var movement := position - before
@@ -132,8 +150,29 @@ func crowd_separation() -> Vector2:
 			var side := -1.0 if get_instance_id() < other.get_instance_id() else 1.0
 			away = Vector2(side, 0.35)
 		var distance := maxf(1.0, away.length())
-		push += away / distance * (1.0 - distance / PERSONAL_SPACE)
+		# Deterministic priority: lower instance_id yields to higher one.
+		# This prevents two NPCs from endlessly trying to dodge each other.
+		var priority_factor := 1.0 if get_instance_id() > other.get_instance_id() else 0.3
+		push += away / distance * (1.0 - distance / PERSONAL_SPACE) * priority_factor
 	return push
+
+func is_facing_oncoming(other: Node2D) -> bool:
+	# Check if another walker is approaching head-on
+	if not is_instance_valid(other) or not other.visible:
+		return false
+	var to_other: Vector2 = other.position - position
+	if to_other.length_squared() > 90.0 * 90.0:
+		return false
+	# Both must be moving toward each other
+	var my_dir: Vector2 = velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
+	var other_dir: Vector2 = (other.velocity as Vector2).normalized() if other.velocity.length_squared() > 0.01 else Vector2.ZERO
+	if my_dir == Vector2.ZERO or other_dir == Vector2.ZERO:
+		return false
+	return my_dir.dot(other_dir) < -0.5
+
+func should_yield_to(other: Node2D) -> bool:
+	# Deterministic priority: lower instance_id yields
+	return get_instance_id() < other.get_instance_id()
 
 func apply_crowd_separation(delta: float) -> void:
 	var push := crowd_separation()

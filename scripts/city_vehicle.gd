@@ -138,7 +138,10 @@ func free_distance() -> float:
 		if route_points.is_empty() and other.route_points.is_empty() and other.direction == direction:
 			ahead = fposmod(ahead, route_length())
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
-			gap = minf(gap, ahead - half_width - other.half_width - 22.0)
+			# Increased minimum gap for better separation and progressive braking
+			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
+			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
+			gap = minf(gap, ahead - min_gap)
 	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
 	if is_instance_valid(player):
 		pedestrians.append(player)
@@ -148,7 +151,7 @@ func free_distance() -> float:
 		var relative: Vector2 = pedestrian.position - (position - Vector2(0, 10))
 		var ahead := relative.dot(forward)
 		if ahead >= -half_width - 6.0 and absf(relative.cross(forward)) < 24.0:
-			gap = minf(gap, ahead - half_width - 18.0)
+			gap = minf(gap, ahead - half_width - 20.0)
 	# Signals participate in the same cached proximity pass as cars and
 	# pedestrians, so red lights do not add per-frame work.
 	for traffic_signal in get_tree().get_nodes_in_group("traffic_signals"):
@@ -201,14 +204,20 @@ func _physics_process(delta: float) -> void:
 		# Brake before the arc instead of rotating the artwork after a hard turn.
 		var turn := absf(forward_vector().angle_to(tangent(progress + 48.0)))
 		desired *= lerpf(1.0, 0.42, clampf(turn / (PI / 2.0), 0, 1))
-	var safe_speed := minf(desired, sqrt(2.0 * braking * gap))
+	# Progressive braking: account for vehicle speed to avoid sudden stops
+	var speed_ratio := current_speed / maxf(cruise_speed, 1.0)
+	var effective_braking := braking * (0.7 + 0.6 * speed_ratio)
+	var safe_speed := minf(desired, sqrt(2.0 * effective_braking * gap))
+	# Additional smoothing for very close distances
+	if gap < 30.0:
+		safe_speed = minf(safe_speed, gap * 2.0)
 	var braking_now := safe_speed < current_speed - 24.0 and current_speed > 55.0
 	if braking_now and not braking_sound_active:
 		AudioSystem.play_sfx("brake", position)
 	braking_sound_active = braking_now
 	# Do not spawn periodic per-car engine clips. A cluster of nearby vehicles
 	# used to create a machine-gun-like audio pattern and unnecessary audio nodes.
-	current_speed = move_toward(current_speed, safe_speed, (braking if current_speed > safe_speed else driver_acceleration) * delta)
+	current_speed = move_toward(current_speed, safe_speed, (effective_braking if current_speed > safe_speed else driver_acceleration) * delta)
 	# Waiting at a red light or behind a pedestrian is valid. Never teleport
 	# through a queue after a timeout: the same rules apply to every model.
 	var step := minf(current_speed * delta, gap)

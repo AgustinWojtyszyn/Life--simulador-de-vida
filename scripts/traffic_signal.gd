@@ -60,42 +60,44 @@ func blocking_distance(vehicle_position: Vector2, forward: Vector2) -> float:
 	if horizontal:
 		if absf(vehicle_position.y - global_position.y) > horizontal_half + 38.0:
 			return INF
-		stop_point.x = global_position.x - vertical_half - 20.0 if forward.x > 0.0 else global_position.x + vertical_half + 20.0
+		stop_point.x = global_position.x - vertical_half - 24.0 if forward.x > 0.0 else global_position.x + vertical_half + 24.0
 	else:
 		if absf(vehicle_position.x - global_position.x) > vertical_half + 38.0:
 			return INF
-		stop_point.y = global_position.y - horizontal_half - 20.0 if forward.y > 0.0 else global_position.y + horizontal_half + 20.0
+		stop_point.y = global_position.y - horizontal_half - 24.0 if forward.y > 0.0 else global_position.y + horizontal_half + 24.0
 	var ahead := (stop_point - vehicle_position).dot(forward.normalized())
-	if ahead < -8.0 or ahead > 240.0:
+	if ahead < -8.0 or ahead > 260.0:
 		return INF
-	# A car already committed to a yellow light should clear the junction rather
-	# than panic-brake inside it.
-	if state == "amber" and ahead < 58.0:
-		return INF
-	return maxf(0.0, ahead - 12.0)
+	# Decision logic: if the vehicle can stop before the intersection, it must.
+	# If it's too close to stop safely, it should clear the junction.
+	if state == "amber":
+		# Can the vehicle stop? Assume braking distance = speed^2 / (2 * 260)
+		# For simplicity, use a fixed threshold that works for most speeds
+		if ahead < 70.0:
+			return INF  # Too close to stop, must clear
+	return maxf(0.0, ahead - 14.0)
 
 func signal_positions() -> Array[Vector2]:
-	var margin := 24.0
+	var margin := 28.0
+	# Only 2 signals per intersection: one for each direction
+	# This reduces visual clutter while maintaining functionality
 	return [
 		Vector2(-vertical_half - margin, -horizontal_half - margin),
-		Vector2(vertical_half + margin, -horizontal_half - margin),
 		Vector2(vertical_half + margin, horizontal_half + margin),
-		Vector2(-vertical_half - margin, horizontal_half + margin),
 	]
 
 func _draw() -> void:
 	var positions := signal_positions()
 	draw_head(positions[0], horizontal_state)
-	draw_head(positions[2], horizontal_state)
 	draw_head(positions[1], vertical_state)
-	draw_head(positions[3], vertical_state)
 
 func draw_head(at: Vector2, state: String) -> void:
-	draw_line(at + Vector2(0, 8), at + Vector2(0, 28), Color("36454a"), 3.0)
-	draw_rect(Rect2(at - Vector2(6, 14), Vector2(12, 25)), Color("172428"))
+	# Larger, more visible signal head
+	draw_line(at + Vector2(0, 10), at + Vector2(0, 36), Color("36454a"), 4.0)
+	draw_rect(Rect2(at - Vector2(9, 18), Vector2(18, 34)), Color("172428"))
 	var red := Color("e05a52") if state == "red" else Color(0.28, 0.20, 0.19)
 	var amber := Color("e6b95e") if state == "amber" else Color(0.28, 0.24, 0.17)
 	var green := Color("68b878") if state == "green" else Color(0.18, 0.28, 0.20)
-	draw_circle(at + Vector2(0, -9), 3.2, red)
-	draw_circle(at + Vector2(0, -1), 3.2, amber)
-	draw_circle(at + Vector2(0, 7), 3.2, green)
+	draw_circle(at + Vector2(0, -12), 4.5, red)
+	draw_circle(at + Vector2(0, -2), 4.5, amber)
+	draw_circle(at + Vector2(0, 8), 4.5, green)
