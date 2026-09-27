@@ -184,6 +184,7 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	building.building_id = "%s_front_%d" % [building.country_id, index]
 	building.facade = load(spec.path)
 	fit_building(building)
+	building_bounds.append(building.get_meta("visual_bounds"))
 	add_child(building)
 	city_objects.append(building)
 	occluders.append(building.get_child(0))
@@ -287,6 +288,11 @@ func build_expansion() -> void:
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" and not building.interior_type.is_empty() else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
 		fit_building(building)
+		if not building_visual_valid(building):
+			building.free()
+			index += 1
+			continue
+		building_bounds.append(building.get_meta("visual_bounds"))
 		add_child(building)
 		city_objects.append(building)
 		occluders.append(building.get_child(0))
@@ -411,7 +417,19 @@ func fit_building(building: CityBuilding) -> void:
 		building.door_offset = Vector2(normal.x * width * 0.22, -depth - 16)
 	else:
 		building.door_offset = Vector2(normal.x * (width * 0.46 + 16), -depth * 0.5)
-	building_bounds.append(Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
+	building.set_meta("visual_bounds", Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
+
+func building_visual_valid(building: CityBuilding) -> bool:
+	var bounds: Rect2 = building.get_meta("visual_bounds")
+	if not Rect2(Vector2(18, 18), map_size - Vector2(36, 36)).encloses(bounds):
+		return false
+	for existing in building_bounds:
+		if bounds.intersects(existing.grow(5)):
+			return false
+	for road in roads():
+		if bounds.intersects(road.grow(2)):
+			return false
+	return true
 
 func add_building_solid(building: CityBuilding) -> void:
 	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
