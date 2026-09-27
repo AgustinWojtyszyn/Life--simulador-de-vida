@@ -1,9 +1,8 @@
 class_name TrafficVehicle
 extends AnimatableBody2D
 
-const ROUTE_LEFT := -140.0
-const ROUTE_RIGHT := 2540.0
-const ROUTE_LENGTH := ROUTE_RIGHT - ROUTE_LEFT
+var route_left := -140.0
+var route_right := 2540.0
 const BRAKING := 260.0
 const DIRECTIONS := ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]
 var model := "compact"
@@ -107,11 +106,14 @@ func tangent(at: float) -> Vector2:
 	var length := curve.get_baked_length()
 	return (curve.sample_baked(fposmod(at + 2.0, length)) - curve.sample_baked(fposmod(at, length))).normalized()
 
+func route_length() -> float:
+	return maxf(1.0, route_right - route_left)
+
 func forward_vector() -> Vector2:
 	return Vector2(direction, 0) if route_points.is_empty() else tangent(progress)
 
 func free_distance() -> float:
-	var gap := ROUTE_LENGTH
+	var gap := route_length()
 	var forward := forward_vector()
 	for other in get_tree().get_nodes_in_group("city_traffic"):
 		if other == self:
@@ -119,7 +121,7 @@ func free_distance() -> float:
 		var relative: Vector2 = other.position - position
 		var ahead := relative.dot(forward)
 		if route_points.is_empty() and other.route_points.is_empty() and other.direction == direction:
-			ahead = fposmod(ahead, ROUTE_LENGTH)
+			ahead = fposmod(ahead, route_length())
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
 			gap = minf(gap, ahead - half_width - other.half_width - 22.0)
 	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
@@ -154,7 +156,7 @@ func _physics_process(delta: float) -> void:
 	var step := minf(current_speed * delta, gap)
 	var previous := position
 	if route_points.is_empty():
-		position.x = ROUTE_LEFT + fposmod(position.x + direction * step - ROUTE_LEFT, ROUTE_LENGTH)
+		position.x = route_left + fposmod(position.x + direction * step - route_left, route_length())
 	else:
 		progress = fposmod(progress + step, curve.get_baked_length())
 		position = curve.sample_baked(progress)
