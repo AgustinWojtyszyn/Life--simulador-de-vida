@@ -4,13 +4,13 @@ extends AnimatableBody2D
 const ROUTE_LEFT := -140.0
 const ROUTE_RIGHT := 2540.0
 const ROUTE_LENGTH := ROUTE_RIGHT - ROUTE_LEFT
-const BRAKING := 150.0
+const BRAKING := 260.0
 const DIRECTIONS := ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]
 var model := "compact"
 var art_bounds: Array[Rect2] = []
-var driver_acceleration := 40.0
+var driver_acceleration := 80.0
 var direction := 1.0
-var cruise_speed := 66.0
+var cruise_speed := 190.0
 var current_speed := 0.0
 var half_width := 35.0
 var player: CharacterBody2D
@@ -48,7 +48,7 @@ func _ready() -> void:
 			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [model, source])
 			directional_art.append(texture)
 			art_bounds.append(texture.get_image().get_used_rect())
-	driver_acceleration = 30.0 + float(get_index() % 5) * 4.0
+	driver_acceleration = 72.0 + float(get_index() % 5) * 7.0
 	if model == "colectivo":
 		half_width = 62.0
 	if model == "van":

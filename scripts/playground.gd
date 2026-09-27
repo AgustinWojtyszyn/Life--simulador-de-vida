@@ -69,7 +69,7 @@ func _ready() -> void:
 			vehicle.model = regional_models[(i + lane_index * 2) % regional_models.size()]
 			vehicle.position = Vector2(100 + i * 560 + lane_index * 200, lane.from.y)
 			vehicle.direction = lane.direction.x
-			vehicle.cruise_speed = 62.0 + i * 5.0
+			vehicle.cruise_speed = 185.0 + i * 8.0
 			vehicle.player = $Player
 			add_child(vehicle)
 	# A second circuit turns through both intersections and the southern street.
@@ -87,13 +87,12 @@ func _ready() -> void:
 		vehicle.route_points = circuit
 		vehicle.route_index = 1 if i == 0 else 7
 		vehicle.position = Vector2(958, 680) if i == 0 else Vector2(east_lane, 950)
-		vehicle.cruise_speed = 47.0 if i == 0 else 38.0
+		vehicle.cruise_speed = 170.0 if i == 0 else 160.0
 		vehicle.player = $Player
 		add_child(vehicle)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
-		add_prop("tree_bed", p + Vector2(0, 3), Rect2())
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
 	for p in [Vector2(365, 880), Vector2(621, 782), Vector2(716, 610), Vector2(1045, 601)]:
 		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
@@ -184,6 +183,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	sprite.scale = size / sprite.region_rect.size
 	sprite.modulate = tint
 	prop.add_child(sprite)
+	if asset == "vegetation/tree":
+		add_prop("tree_bed", pos + Vector2(0, 3), Rect2())
 	if asset == "props/fountain":
 		prop.set_script(Water)
 	if asset == "props/bench":
@@ -202,6 +203,9 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	add_solid(Rect2(pos + footprint.position, footprint.size))
 
 func add_prop(kind: String, pos: Vector2, footprint: Rect2) -> void:
+	if kind != "tree_bed":
+		pos = valid_prop_position(pos, Vector2(22, 28))
+		if not pos.is_finite(): return
 	var prop := Node2D.new()
 	prop.set_script(CityProp)
 	prop.kind = kind
@@ -257,7 +261,6 @@ func decorate_expansion() -> void:
 	add_asset("props/bench", Vector2(east - 80, 1080), Vector2(58, 43), Rect2(-23, -12, 46, 12))
 	add_asset("props/planter", Vector2(east + 70, 1044), Vector2(48, 36), Rect2(-18, -10, 36, 12))
 	for p in [Vector2(1435, 354), Vector2(1710, 352), Vector2(1990, 580), Vector2(2340, 590), Vector2(1480, 1020), Vector2(1720, 950), Vector2(110, 1280), Vector2(760, 1280), Vector2(1040, 1280), Vector2(1720, 1280), Vector2(2340, 1280)]:
-		add_prop("tree_bed", p + Vector2(0, 3), Rect2())
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
 	for p in [Vector2(1460, 600), Vector2(1650, 930), Vector2(530, 1285), Vector2(2170, 1030)]:
 		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
@@ -287,12 +290,16 @@ func populate() -> void:
 		[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
 		[Vector2(1430, 1030), Vector2(1520, 1072), Vector2(1615, 1088), Vector2(1700, 1050), Vector2(1615, 1088), Vector2(1520, 1072)],
 	]
+	var benches := get_tree().get_nodes_in_group("city_benches")
+	if not benches.is_empty():
+		var seat: Vector2 = benches[0].position + Vector2(0, 2)
+		routes[8] = [seat, seat + Vector2(0, 26), seat + Vector2(65, 26), seat + Vector2(0, 26)]
 	for i in WorldManager.district.population:
 		var walker := Node2D.new()
 		walker.set_script(Walker)
 		walker.route.assign(routes[i % routes.size()])
 		walker.position = walker.route[0] + Vector2((i / routes.size()) * 25, 0)
-		walker.speed = 22.0 + (i % 4) * 3
+		walker.speed = 60.0 + (i % 5) * 6
 		walker.profile = PlayerProfile.new()
 		walker.profile.gender = "female" if i % 2 else "male"
 		walker.profile.skin = i % 3
@@ -400,8 +407,8 @@ func integrate_argentina() -> void:
 	bus.cruise_speed = 180.0
 	bus.player = $Player
 	add_child(bus)
-	add_local_resident("Don Tito · choripán", Vector2(150, 830), "eat")
-	add_local_resident("Vecina · colectivo 60", Vector2(395, 601), "phone")
+	add_local_resident("Tito", Vector2(150, 830), "eat")
+	add_local_resident("Luli", Vector2(395, 601), "phone")
 	for i in 2:
 		var walker := Walker.new()
 		walker.route.assign([Vector2(240 + i * 135, 760), Vector2(265 + i * 130, 800)])

@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 const SPEED := 140.0
-const ACCELERATION := 1800.0
-const DECELERATION := 2200.0
+const ACCELERATION := 650.0
+const DECELERATION := 1200.0
 const SOUTH := preload("res://assets/characters/resident/south.png")
 const NORTH := preload("res://assets/characters/resident/north.png")
 const EAST := preload("res://assets/characters/resident/east.png")
@@ -42,6 +42,7 @@ func _physics_process(delta: float) -> void:
 		sprite.texture = (EAST if facing.x > 0 else WEST) if absf(facing.x) > absf(facing.y) else (SOUTH if facing.y >= 0 else NORTH)
 	var direction := InputManager.movement()
 	var rate := ACCELERATION if direction != Vector2.ZERO else DECELERATION
+	if direction.dot(velocity) < 0: rate = 950.0
 	velocity = velocity.move_toward(direction * SPEED, rate * delta)
 	if direction != Vector2.ZERO:
 		facing = direction
@@ -56,7 +57,7 @@ func _physics_process(delta: float) -> void:
 	if wave_time > 0:
 		visual.set_art("wave", "south", 0)
 	else:
-		visual.animate_motion(direction, position.distance_to(before))
+		visual.animate_motion(position - before, position.distance_to(before))
 
 
 func _draw() -> void:

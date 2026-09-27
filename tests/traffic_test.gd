@@ -20,9 +20,9 @@ func run() -> void:
 	root.add_child(world)
 	await frames(3)
 	var all_cars := get_nodes_in_group("city_traffic")
-	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty())
+	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty() and vehicle.model != "colectivo")
 	var player: CharacterBody2D = world.get_node("Player")
-	check(all_cars.size() == 8, "The turning street circuit must add two moving vehicles")
+	check(all_cars.size() == 9, "Two circuit vehicles and the Argentine bus must join six cars")
 	check(cars.size() == 6, "Six moving vehicles must spawn")
 	var circuit_cars := all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty())
 	for turning in circuit_cars:
@@ -33,6 +33,8 @@ func run() -> void:
 			seen[turning.facing_index] = true
 			check(is_zero_approx(turning.sprite.rotation), "Cornering must change frames without rotating artwork")
 		check(seen.size() == 8, "Circuit must use all eight directions through continuous arcs")
+	for vehicle in all_cars:
+		check(vehicle.cruise_speed > 140.0, "Traffic cruise speed must exceed pedestrian speed")
 	var models := {}
 	var starts: Array[Vector2] = []
 	for car in cars:

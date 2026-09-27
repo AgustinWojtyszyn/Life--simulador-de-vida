@@ -8,7 +8,8 @@ var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var route: Array[Vector2] = []
 var destination := 1
-var speed := 25.0
+var speed := 65.0
+var velocity := Vector2.ZERO
 var greeting_time := 0.0
 var wait_time := 0.0
 var indoor_time := 0.0
@@ -43,11 +44,13 @@ func _process(delta: float) -> void:
 			state = State.EXIT_BUILDING
 		return
 	if greeting_time > 0:
+		velocity = Vector2.ZERO
 		greeting_time = maxf(0, greeting_time - delta)
 		visual.set_art("wave", "south", 0)
 		queue_redraw()
 		return
 	if wait_time > 0:
+		velocity = Vector2.ZERO
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
@@ -64,15 +67,22 @@ func _process(delta: float) -> void:
 	if route_kind == "crossing" and not crossing and absf(goal.y - position.y) > 80:
 		for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 			if absf(vehicle.position.x - position.x) < 170:
+				velocity = Vector2.ZERO
 				state = State.WAIT_CROSSING
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	var step := position.move_toward(goal, speed * (1.3 if WeatherSystem.state == "rain" else 1.0) * delta)
-	var movement := step - position
-	position = step
+	var remaining := position.distance_to(goal)
+	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
+	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
+	var desired := position.direction_to(goal) * desired_speed
+	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
+	var movement := velocity * delta
+	if movement.length() > remaining: movement = goal - position
+	position += movement
 	visual.animate_motion(movement, movement.length())
 	if position.distance_to(goal) < 1:
+		velocity = Vector2.ZERO
 		crossing = false
 		visits += 1
 		destination = (destination + 1) % route.size()
