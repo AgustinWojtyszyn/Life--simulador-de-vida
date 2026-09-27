@@ -52,20 +52,33 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 	var path := "res://assets/%s/%s/%s.png" % [folder, country, asset]
 	if mixed:
 		type = "residential_building"
-		path = "res://assets/buildings/ar/mixed_old.png" if country == "ar" else "res://assets/regions/%s.png" % country
-	# A regional café/diner is never a fallback for a clinic, office or house.
-	if asset in ["bakery_corner", "diner"]:
-		path = "res://assets/regions/%s.png" % country
-	if asset == "trattoria" and not ResourceLoader.exists(path):
-		path = "res://assets/regions/%s.png" % country
-	if asset == "mixed_old": path = "res://assets/buildings/%s/mixed_old.png" % country
+		path = "res://assets/buildings/ar/mixed_old.png" if country == "ar" else "res://assets/catalog/%s/low_apartments.tres" % country
+	# Country atlases are sliced through AtlasTexture resources. Never render an
+	# entire regional atlas as one facade and never borrow another country.
+	if asset == "bakery_corner":
+		path = "res://assets/catalog/%s/bakery.tres" % country
+	elif asset == "diner":
+		path = "res://assets/catalog/%s/restaurant.tres" % country
+	if asset == "mixed_old":
+		path = "res://assets/buildings/%s/mixed_old.png" % country
 	if not ResourceLoader.exists(path):
-		# Try buildings/ as second option for named assets
 		var alt_path := "res://assets/buildings/%s/%s.png" % [country, asset]
 		if ResourceLoader.exists(alt_path):
 			path = alt_path
 		else:
-			path = "res://assets/houses/ar/%s.png" % asset
+			var catalog_family := {
+				"clinic": "clinic", "office": "office", "workshop": "workshop",
+				"market": "store", "almacen": "store", "konbini": "store", "kiosco": "store",
+				"cafe": "cafe", "coffee_shop": "cafe",
+				"panaderia": "bakery", "padaria": "bakery",
+				"parrilla": "restaurant", "pizzeria": "restaurant", "trattoria": "restaurant",
+			}.get(asset, "store")
+			var catalog_path := "res://assets/catalog/%s/%s.tres" % [country, catalog_family]
+			if ResourceLoader.exists(catalog_path):
+				path = catalog_path
+			else:
+				push_error("Missing regional facade: %s/%s" % [country, asset])
+				path = "res://assets/catalog/%s/store.tres" % country
 	var title: String = LABELS[country].get(type, type.to_upper())
 	if residential:
 		title = {"ar": "VIVIENDA", "br": "MORADIA", "jp": "RESIDENCE", "it": "CASA", "us": "HOME"}[country]
