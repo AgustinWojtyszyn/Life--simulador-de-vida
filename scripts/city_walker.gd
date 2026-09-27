@@ -51,6 +51,7 @@ func _process(delta: float) -> void:
 		return
 	if wait_time > 0:
 		velocity = Vector2.ZERO
+		apply_crowd_separation(delta)
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
@@ -76,10 +77,25 @@ func _process(delta: float) -> void:
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
 	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
 	var desired := position.direction_to(goal) * desired_speed
+	var separation := crowd_separation()
+	if separation.length_squared() > 0.001:
+		desired += separation * minf(48.0, desired_speed * 0.75)
+		desired = desired.limit_length(desired_speed)
 	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
 	var movement := velocity * delta
 	if movement.length() > remaining: movement = goal - position
-	position += movement
+	var candidate := position + movement
+	var parent := get_parent()
+	if parent.has_method("walker_position_clear") and not parent.walker_position_clear(candidate):
+		# Do not ghost through a facade or prop. Skip the blocked local waypoint
+		# and let the short route choose another approach on the next update.
+		velocity = Vector2.ZERO
+		crossing = false
+		destination = (destination + 1) % route.size()
+		wait_time = 0.35
+		visual.animate_motion(Vector2.ZERO, 0)
+		return
+	position = candidate
 	visual.animate_motion(movement, movement.length())
 	if position.distance_to(goal) < 1:
 		velocity = Vector2.ZERO
@@ -91,6 +107,32 @@ func _process(delta: float) -> void:
 			state = State.ENTER_BUILDING
 			indoor_time = 12.0 + personality * 4.0
 			visible = false
+
+func crowd_separation() -> Vector2:
+	var push := Vector2.ZERO
+	const PERSONAL_SPACE := 24.0
+	for other in get_tree().get_nodes_in_group("city_residents"):
+		if other == self or not is_instance_valid(other) or not other.visible:
+			continue
+		var away: Vector2 = position - other.position
+		var distance_sq := away.length_squared()
+		if distance_sq >= PERSONAL_SPACE * PERSONAL_SPACE:
+			continue
+		if distance_sq < 0.01:
+			var side := -1.0 if get_instance_id() < other.get_instance_id() else 1.0
+			away = Vector2(side, 0.35)
+		var distance := maxf(1.0, away.length())
+		push += away / distance * (1.0 - distance / PERSONAL_SPACE)
+	return push
+
+func apply_crowd_separation(delta: float) -> void:
+	var push := crowd_separation()
+	if push.length_squared() < 0.001:
+		return
+	var candidate := position + push.normalized() * minf(20.0 * delta, 1.5)
+	var parent := get_parent()
+	if not parent.has_method("walker_position_clear") or parent.walker_position_clear(candidate):
+		position = candidate
 
 func choose_activity() -> void:
 	if route_kind == "football":
