@@ -89,10 +89,10 @@ func paving(rect: Rect2, base: Color) -> void:
 	var dark := base.darkened(0.035)
 	for y in range(int(rect.position.y), int(rect.end.y), 24):
 		for x in range(int(rect.position.x), int(rect.end.x), 48):
-			var offset := 24 if (y / 24) as int % 2 else 0
+			var offset := 24 if int(y / 24) % 2 else 0
 			var tile := Rect2(x + offset, y, 47, 23).intersection(rect)
 			if tile.has_area():
-				draw_rect(tile, light if (x / 48 + y / 24) as int % 5 else dark)
+				draw_rect(tile, light if int(x / 48 + y / 24) % 5 else dark)
 				draw_line(tile.position, tile.position + Vector2(tile.size.x, 0), base.lightened(0.09))
 
 func draw_parking(area: Rect2) -> void:
