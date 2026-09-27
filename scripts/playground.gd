@@ -377,8 +377,6 @@ func build_expansion() -> void:
 				building.interior_type = spec.type
 			elif spec.type in ["store", "supermarket"]:
 				building.interior_type = "shop"
-			elif spec.type in ["bakery", "restaurant", "cafe"]:
-				building.interior_type = "cafe"
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" and not building.interior_type.is_empty() else CityBuilding.Access.INTERACTABLE if slot.mode in ["ENTERABLE", "INTERACTABLE"] else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
 		fit_building(building)
@@ -484,8 +482,29 @@ func add_neighbor(id: String, title: String, at: Vector2) -> void:
 func fit_building(building: CityBuilding) -> void:
 	var used := TextureBoundsScript.used(building.facade).size
 	var catalog := building.variant.has("family")
-	var max_width := 170.0 if catalog else 190.0
-	var max_height := float(building.variant.get("height", 238.0)) if catalog else 238.0
+	var max_width := 190.0
+	var max_height := 238.0
+	if catalog:
+		var family := str(building.variant.get("family", ""))
+		max_width = float({
+			"small_home": 148.0,
+			"medium_home": 162.0,
+			"modern_home": 174.0,
+			"low_apartments": 188.0,
+			"apartments": 205.0,
+			"tower": 232.0,
+			"store": 172.0,
+			"bakery": 176.0,
+			"restaurant": 184.0,
+			"cafe": 174.0,
+			"supermarket": 212.0,
+			"workshop": 196.0,
+			"service": 184.0,
+			"office": 210.0,
+			"public": 218.0,
+			"clinic": 196.0,
+		}.get(family, 190.0))
+		max_height = float(building.variant.get("height", 238.0))
 	if building.building_type == "kiosk":
 		max_width = 132.0
 		max_height = 170.0
@@ -676,7 +695,7 @@ func integrate_regional_props() -> void:
 				add_asset("props/br/moto", p, Vector2(42, 36), Rect2(-16, -10, 32, 10))
 		"it":
 			for p in [Vector2(615, 376), Vector2(2450, 1880), Vector2(4140, 2650)]:
-				add_asset("props/it/scooter", p, Vector2(42, 36), Rect2(-16, -10, 32, 10))
+				add_asset("props/it/scooter", p, Vector2(70, 58), Rect2(-25, -13, 50, 13))
 		"jp":
 			for p in [Vector2(772, 378), Vector2(3130, 1100), Vector2(4070, 1880)]:
 				add_asset("props/jp/vending_machine", p, Vector2(30, 49), Rect2(-13, -12, 26, 12))
