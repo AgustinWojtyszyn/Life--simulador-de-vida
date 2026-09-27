@@ -9,42 +9,41 @@ var journal_center := Vector2.ZERO
 var radius := 72.0
 var action_radius := 50.0
 var context_available := false
+var was_paused := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = InputManager.touch_enabled
-	get_viewport().size_changed.connect(layout_controls)
+	resized.connect(layout_controls)
 	layout_controls()
 
 func layout_controls() -> void:
-	var safe := DisplayServer.get_display_safe_area()
-	var screen := Vector2(DisplayServer.window_get_size())
-	var logical := get_viewport_rect().size
+	stick_finger = -1
+	action_finger = -1
+	journal_finger = -1
+	InputManager.reset()
+	var logical := size
+	var safe := InputManager.safe_rect(logical)
 	var scale_factor := clampf(minf(logical.x / 800.0, logical.y / 450.0), 1.0, 1.35)
 	radius = 72.0 * scale_factor
 	action_radius = 50.0 * scale_factor
-	var inset := Vector2(24, 24)
-	if screen.x > 0 and screen.y > 0 and safe.size != Vector2i.ZERO:
-		inset = Vector2(
-			maxf(24, safe.position.x * logical.x / screen.x),
-			maxf(24, (screen.y - safe.end.y) * logical.y / screen.y)
-		)
-	stick_center = Vector2(inset.x + radius + 18, logical.y - inset.y - radius - 14)
-	var right_inset := maxf(24, (screen.x - safe.end.x) * logical.x / maxf(screen.x, 1)) if safe.size != Vector2i.ZERO else 24.0
-	action_center = Vector2(logical.x - right_inset - action_radius - 18, logical.y - inset.y - action_radius - 18)
+	stick_center = Vector2(safe.position.x + radius + 24, safe.end.y - radius - 24)
+	action_center = Vector2(safe.end.x - action_radius - 24, safe.end.y - action_radius - 28)
 	journal_center = action_center + Vector2(0, -(action_radius * 2.0 + 28.0))
 	queue_redraw()
 
 func _process(_delta: float) -> void:
 	if not visible:
 		return
+	if was_paused != get_tree().paused:
+		was_paused = get_tree().paused
+		queue_redraw()
 	if get_tree().paused:
 		stick_finger = -1
 		action_finger = -1
 		journal_finger = -1
 		InputManager.reset()
-		queue_redraw()
 		return
 	var world: Node2D = WorldManager.active_world
 	var available := false
@@ -55,22 +54,22 @@ func _process(_delta: float) -> void:
 		queue_redraw()
 
 func _input(event: InputEvent) -> void:
-	if not visible:
+	if not visible or get_tree().paused:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if get_tree().paused:
-				return
 			if stick_finger == -1 and event.position.distance_to(stick_center) < radius * 1.55:
 				stick_finger = event.index
 				update_stick(event.position)
+				get_viewport().set_input_as_handled()
 			elif action_finger == -1 and event.position.distance_to(action_center) < action_radius * 1.25:
 				action_finger = event.index
-				if context_available:
-					InputManager.touch_interaction = true
+				InputManager.touch_interaction = context_available
+				get_viewport().set_input_as_handled()
 			elif journal_finger == -1 and event.position.distance_to(journal_center) < action_radius:
 				journal_finger = event.index
 				open_journal()
+				get_viewport().set_input_as_handled()
 		else:
 			if event.index == stick_finger:
 				stick_finger = -1
@@ -82,10 +81,11 @@ func _input(event: InputEvent) -> void:
 			queue_redraw()
 	elif event is InputEventScreenDrag and event.index == stick_finger:
 		update_stick(event.position)
+		get_viewport().set_input_as_handled()
 
 func update_stick(at: Vector2) -> void:
 	var axis := (at - stick_center) / radius
-	InputManager.touch_vector = Vector2.ZERO if axis.length() < 0.12 else axis.limit_length()
+	InputManager.touch_vector = Vector2.ZERO if axis.length() < 0.15 else axis.normalized() * clampf((axis.length() - 0.15) / 0.85, 0.0, 1.0)
 	queue_redraw()
 
 func open_journal() -> void:
@@ -97,7 +97,7 @@ func open_journal() -> void:
 		life_panel.show_journal()
 
 func _draw() -> void:
-	if not visible:
+	if not visible or get_tree().paused:
 		return
 	var font := ThemeDB.fallback_font
 	draw_circle(stick_center, radius, Color(0.06, 0.12, 0.15, 0.42))
@@ -112,7 +112,7 @@ func _draw() -> void:
 	draw_string(font, journal_center + Vector2(-34, 5), "VIDA", HORIZONTAL_ALIGNMENT_CENTER, 68, 14, Color("eee3ca"))
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		stick_finger = -1
 		action_finger = -1
 		journal_finger = -1

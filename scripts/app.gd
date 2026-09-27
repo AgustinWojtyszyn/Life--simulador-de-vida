@@ -74,22 +74,21 @@ func setup_overlay() -> void:
 	root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.add_child(root_control)
+
 	var pause_button := Button.new()
 	pause_button.text = "Menú"
 	pause_button.add_theme_font_size_override("font_size", 17 if InputManager.touch_enabled else 14)
-	pause_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	pause_button.position = Vector2(-118, 76) if InputManager.touch_enabled else Vector2(-94, 72)
 	pause_button.size = Vector2(98, 52) if InputManager.touch_enabled else Vector2(76, 44)
 	pause_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	pause_button.pressed.connect(func():
 		AudioSystem.play_ui()
 		toggle_pause())
 	root_control.add_child(pause_button)
+
 	pause_panel = PanelContainer.new()
-	pause_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	var panel_size := Vector2(380, 280) if InputManager.touch_enabled else Vector2(330, 235)
-	pause_panel.position = -panel_size / 2.0
 	pause_panel.custom_minimum_size = panel_size
+	pause_panel.size = panel_size
 	root_control.add_child(pause_panel)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 14)
@@ -101,16 +100,29 @@ func setup_overlay() -> void:
 	for entry in [["Seguir jugando", func(): toggle_pause()], ["Guardar partida", func(): info.text = "Partida guardada" if WorldManager.save_game() else SaveSystem.last_error], ["Guardar y volver al menú", func():
 		if WorldManager.save_game(): show_menu()
 		else: info.text = SaveSystem.last_error]]:
-		var b := Button.new()
-		b.text = entry[0]
-		b.custom_minimum_size.y = 54 if InputManager.touch_enabled else 44
-		b.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 15)
+		var button := Button.new()
+		button.text = entry[0]
+		button.custom_minimum_size.y = 54 if InputManager.touch_enabled else 44
+		button.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 15)
 		var callback: Callable = entry[1]
-		b.pressed.connect(func():
+		button.pressed.connect(func():
 			AudioSystem.play_ui()
 			callback.call())
-		list.add_child(b)
+		list.add_child(button)
+
+	var layout_overlay := func():
+		var safe := InputManager.safe_rect(root_control.size)
+		pause_button.position = Vector2(safe.end.x - pause_button.size.x - 18, safe.position.y + 18)
+		var target := Vector2(
+			minf(panel_size.x, maxf(280.0, safe.size.x - 40.0)),
+			minf(panel_size.y, maxf(210.0, safe.size.y - 40.0))
+		)
+		pause_panel.size = target
+		pause_panel.position = safe.get_center() - target / 2.0
+	root_control.resized.connect(layout_overlay)
+	layout_overlay.call()
 	pause_panel.hide()
+
 	var fade := ColorRect.new()
 	fade.color = Color("112329")
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -134,6 +146,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_pause()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(world):
+		toggle_pause()
+	if what == NOTIFICATION_APPLICATION_PAUSED and WorldManager.playing:
+		if not get_tree().paused:
+			toggle_pause()
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		if WorldManager.playing:
 			WorldManager.save_game()

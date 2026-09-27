@@ -36,6 +36,10 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=0
 
+[input_devices]
+
+pointing/emulate_mouse_from_touch=true
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

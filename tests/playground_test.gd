@@ -92,9 +92,9 @@ func run() -> void:
 	check(world.occluders[0].modulate.a > 0.99, "Buildings must restore opacity")
 	# All four world edges and a parked car must block the player.
 	for probe in [
-		{"start": Vector2(2358, 480), "action": "move_right", "axis": "x", "expected": 2378.0},
+		{"start": Vector2(world.map_size.x - 40, 480), "action": "move_right", "axis": "x", "expected": world.map_size.x - 22},
 		{"start": Vector2(910, 40), "action": "move_up", "axis": "y", "expected": 22.0},
-		{"start": Vector2(910, 1560), "action": "move_down", "axis": "y", "expected": 1578.0},
+		{"start": Vector2(910, world.map_size.y - 40), "action": "move_down", "axis": "y", "expected": world.map_size.y - 22},
 		{"start": Vector2(1060, 720), "action": "move_right", "axis": "x", "expected": 1083.0},
 	]:
 		player.position = probe.start

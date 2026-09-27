@@ -49,3 +49,12 @@ func reset() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		reset()
+
+# Canvas-space safe area shared by every mobile surface, including menus.
+func safe_rect(canvas_size: Vector2) -> Rect2:
+	var screen := Vector2(DisplayServer.window_get_size())
+	var safe := Rect2(DisplayServer.get_display_safe_area())
+	if not touch_enabled or screen.x <= 0 or screen.y <= 0 or not safe.has_area():
+		return Rect2(Vector2.ZERO, canvas_size)
+	var ratio := canvas_size / screen
+	return Rect2(safe.position * ratio, safe.size * ratio).intersection(Rect2(Vector2.ZERO, canvas_size))

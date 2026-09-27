@@ -24,7 +24,7 @@ func run() -> void:
 			if object.has_meta("building_type"):
 				views[object.orientation] = true
 				var normal: String = orientation.street_facing(object.position, world.roads(), false)
-				check(orientation.vector(object.orientation).dot(orientation.vector(normal)) >= 0.7, country.id + ": facade faces its own street")
+				check(orientation.vector(object.orientation).dot(orientation.vector(normal)) >= 0.7, country.id + ": facade faces its own street: " + object.building_id + " at " + str(object.position) + " facing " + object.orientation + " expected " + normal)
 				check(object.rotation == 0 and not object.get_child(0).flip_h, "Building views must not rotate or mirror signs")
 				if object.facade.resource_path.contains("/oriented/"):
 					check(object.facade.resource_path.get_file() == object.orientation + ".png", "Declared view must use authored frame")

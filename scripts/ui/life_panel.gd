@@ -9,7 +9,6 @@ func _ready() -> void:
 	layer = 24
 	journal_button = Button.new()
 	journal_button.text = "Mi vida"
-	journal_button.position = Vector2(20, 96)
 	journal_button.custom_minimum_size = Vector2(118, 48) if InputManager.touch_enabled else Vector2(104, 40)
 	journal_button.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 15)
 	journal_button.pressed.connect(func():
@@ -18,24 +17,31 @@ func _ready() -> void:
 	add_child(journal_button)
 
 	panel = PanelContainer.new()
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.add_theme_stylebox_override("panel", panel_style())
 	add_child(panel)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel.add_child(scroll)
 	body = VBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 14)
-	panel.add_child(body)
+	scroll.add_child(body)
 	panel.hide()
 	get_viewport().size_changed.connect(layout_panel)
 	layout_panel()
 
 func layout_panel() -> void:
 	var viewport := get_viewport().get_visible_rect().size
-	var width := minf(640.0, viewport.x - 48.0)
-	var height := minf(330.0, viewport.y - 72.0)
+	var safe := InputManager.safe_rect(viewport)
+	var width := minf(640.0, safe.size.x - 40.0)
+	var height := minf(330.0, safe.size.y - 56.0)
 	if InputManager.touch_enabled:
-		width = minf(690.0, viewport.x - 36.0)
-		height = minf(360.0, viewport.y - 56.0)
-	panel.custom_minimum_size = Vector2(maxf(300, width), maxf(190, height))
-	panel.position = -panel.custom_minimum_size / 2.0
+		width = minf(690.0, safe.size.x - 32.0)
+		height = minf(360.0, safe.size.y - 40.0)
+	panel.custom_minimum_size = Vector2(maxf(280.0, width), maxf(190.0, height))
+	panel.size = panel.custom_minimum_size
+	panel.position = safe.get_center() - panel.size / 2.0
+	journal_button.position = safe.position + Vector2(20, 96)
 	journal_button.visible = not InputManager.touch_enabled
 
 func clear_panel() -> void:
@@ -50,7 +56,7 @@ func clear_panel() -> void:
 func text_line(text: String) -> void:
 	var label := Label.new()
 	label.text = text
-	label.custom_minimum_size.x = maxf(280, panel.custom_minimum_size.x - 36)
+	label.custom_minimum_size.x = maxf(240.0, panel.size.x - 48.0)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 16)
 	body.add_child(label)
@@ -92,3 +98,15 @@ func talk(person: String) -> void:
 				var message := MissionSystem.choose(option[1])
 				WorldManager.active_world.get_node("Interactions").say(message)
 			close())
+
+static func panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("192e34")
+	style.border_color = Color("a48b62")
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 16
+	style.content_margin_bottom = 16
+	return style

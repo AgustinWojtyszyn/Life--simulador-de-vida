@@ -11,10 +11,13 @@ const Water := preload("res://scripts/fountain_water.gd")
 const Hud := preload("res://scripts/city_hud.gd")
 const BuildingVariants := preload("res://scripts/data/building_variant.gd")
 const CityBuildingScript := preload("res://scripts/building.gd")
+const CountryCatalogScript := preload("res://scripts/data/country_catalog.gd")
+const TextureBoundsScript := preload("res://scripts/data/texture_bounds.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var building_bounds: Array[Rect2] = []
 var protected_content: Array[Rect2] = []
+var entrance_clearance: Array[Rect2] = []
 var placed_prop_bounds: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
@@ -230,9 +233,9 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		var model: String = {"car": "compact", "coupe": "sedan"}.get(asset.get_file(), asset.get_file())
 		path = "res://assets/vehicles/%s/%s.png" % [model, Vehicle.source_direction(model, facing)]
 	var texture: Texture2D = load(path)
-	var used := Vector2(texture_used_rect(texture).size)
+	var used := Vector2(TextureBoundsScript.used(texture).size)
 	size = used * minf(size.x / used.x, size.y / used.y)
-	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
+	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"), asset == "props/bench")
 	if not pos.is_finite():
 		prop.free()
 		sprite.free()
@@ -241,7 +244,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	prop.set_meta("orientation", facing)
 	sprite.texture = texture
 	sprite.region_enabled = true
-	sprite.region_rect = texture_used_rect(sprite.texture)
+	sprite.region_rect = TextureBoundsScript.used(sprite.texture)
 	sprite.position = Vector2(0, -size.y / 2)
 	sprite.scale = size / sprite.region_rect.size
 	sprite.modulate = tint
@@ -250,6 +253,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		add_prop("tree_bed", pos + Vector2(0, 3), Rect2())
 	if asset == "props/fountain":
 		prop.set_script(Water)
+	if asset == "props/bench":
+		prop.add_to_group("public_benches")
 	if asset == "props/bench" and facing == "south":
 		prop.add_to_group("city_benches")
 	if asset.begins_with("vehicles/"):
@@ -303,14 +308,28 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
-		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing)
+		var spec: Dictionary
+		if slot.has("catalog_index"):
+			spec = CountryCatalogScript.descriptor(country.id, int(slot.get("catalog_index", 0)))
+		else:
+			spec = Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing)
 		building.orientation = spec.facing
 		building.building_type = spec.type
 		building.title = spec.title
 		building.country_id = country.id
 		building.variant = BuildingVariants.make(country.id, slot.kind, index)
-		building.interior_type = spec.type if spec.type in WorldManager.PUBLIC_INTERIORS and slot.mode == "ENTERABLE" else ""
-		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" and not building.interior_type.is_empty() else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
+		if spec.has("family"):
+			building.variant["family"] = spec.family
+			building.variant["height"] = spec.height
+		building.interior_type = ""
+		if slot.mode == "ENTERABLE":
+			if spec.type in WorldManager.PUBLIC_INTERIORS:
+				building.interior_type = spec.type
+			elif spec.type in ["store", "supermarket"]:
+				building.interior_type = "shop"
+			elif spec.type in ["bakery", "restaurant", "cafe"]:
+				building.interior_type = "cafe"
+		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" and not building.interior_type.is_empty() else CityBuilding.Access.INTERACTABLE if slot.mode in ["ENTERABLE", "INTERACTABLE"] else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
 		fit_building(building)
 		if not building_visual_valid(building):
@@ -413,12 +432,11 @@ func add_neighbor(id: String, title: String, at: Vector2) -> void:
 	add_child(walker)
 
 func fit_building(building: CityBuilding) -> void:
-	var used := texture_used_rect(building.facade).size
-	var max_width := 190.0
-	var max_height := 238.0
+	var used := TextureBoundsScript.used(building.facade).size
+	var catalog := building.variant.has("family")
+	var max_width := 170.0 if catalog else 190.0
+	var max_height := float(building.variant.get("height", 238.0)) if catalog else 238.0
 	if building.building_type == "kiosk":
-		# The kiosk is intentionally a compact street kiosk. Keeping its source
-		# close to native scale avoids the chunky upscaling seen in the old build.
 		max_width = 132.0
 		max_height = 170.0
 	for road in roads():
@@ -427,13 +445,10 @@ func fit_building(building: CityBuilding) -> void:
 		if road.size.y > 1000:
 			var clearance := road.position.x - building.position.x if building.position.x < road.position.x else building.position.x - road.end.x
 			max_width = minf(max_width, (clearance - 14) * 2)
-	# The southern parking bays remain unobstructed by the next frontage.
 	if building.position.x > 1030 and building.position.x < 1400 and building.position.y == 1060:
 		max_height = minf(max_height, 130)
 	var factor: float = minf(max_width / used.x, max_height / used.y)
 	if building.building_type == "kiosk":
-		# Kiosk source art has transparent canvas padding. Cap the full canvas,
-		# not only the non-transparent used rect, so it is never visibly blown up.
 		factor = minf(factor, 128.0 / building.facade.get_size().x)
 	building.size = building.facade.get_size() * factor
 	var normal := AssetOrientation.vector(building.orientation)
@@ -461,24 +476,21 @@ func building_visual_valid(building: CityBuilding) -> bool:
 	return true
 
 func texture_used_rect(texture: Texture2D) -> Rect2:
-	var key := texture.resource_path
-	if key.is_empty():
-		return texture.get_image().get_used_rect()
-	if not texture_used_cache.has(key):
-		texture_used_cache[key] = texture.get_image().get_used_rect()
-	return texture_used_cache[key]
+	return TextureBoundsScript.used(texture)
 
 func add_building_solid(building: CityBuilding) -> void:
+	if building.access != CityBuilding.Access.EXTERIOR_ONLY:
+		entrance_clearance.append(Rect2(building.position + building.door_offset - Vector2(24, 18), Vector2(48, 40)))
 	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
 
 func roads() -> Array[Rect2]:
 	return road_cache
 
-func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Vector2:
-	# Reserve the entire facade envelope, not just its collision strip. This
-	# prevents short props from appearing pasted onto a tall building's front.
+func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false, bench: bool = false) -> Vector2:
+	# Benches are public-space furniture: never nudge them beside a facade just
+	# to force placement. Invalid authored seats are omitted instead.
 	var offsets := [Vector2.ZERO]
-	if not parked:
+	if not parked and not bench:
 		for distance in [32, 64, 96, 128]:
 			for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP]:
 				offsets.append(direction * distance)
@@ -486,20 +498,38 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Ve
 		var candidate: Vector2 = at + offset
 		var visual := Rect2(candidate - Vector2(size.x / 2, size.y), size)
 		var base := Rect2(candidate - Vector2(size.x / 2, 16), Vector2(size.x, 20))
-		if not Rect2(Vector2(20, 20), map_size - Vector2(40, 40)).encloses(visual): continue
+		if not Rect2(Vector2(20, 20), map_size - Vector2(40, 40)).encloses(visual):
+			continue
+		if bench and not bench_zone().any(func(zone: Rect2): return zone.encloses(base.grow(12))):
+			continue
 		var valid := true
+		for bounds in entrance_clearance:
+			if base.grow(12).intersects(bounds):
+				valid = false
 		for bounds in building_bounds:
-			if visual.intersects(bounds.grow(8)): valid = false
+			if visual.intersects(bounds.grow(8)):
+				valid = false
 		for road in roads():
-			if base.intersects(road.grow(8)): valid = false
+			if base.intersects(road.grow(8)):
+				valid = false
 		for bounds in protected_content:
-			if visual.intersects(bounds): valid = false
+			if visual.intersects(bounds):
+				valid = false
 		for bounds in placed_prop_bounds:
-			if base.intersects(bounds.grow(5)): valid = false
+			if base.intersects(bounds.grow(5)):
+				valid = false
 		if valid:
 			placed_prop_bounds.append(base)
 			return candidate
 	return Vector2(INF, INF)
+
+func bench_zone() -> Array[Rect2]:
+	return [
+		Rect2(72, 620, 720, 330),
+		Rect2(2980, 650, 520, 360),
+		Rect2(4040, 1370, 500, 350),
+		Rect2(350, 2820, 560, 300),
+	]
 
 func integrate_argentina() -> void:
 	# Argentine identity is distributed across the district instead of being

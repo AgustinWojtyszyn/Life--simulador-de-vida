@@ -1,9 +1,8 @@
 class_name CityBuilding
 extends Node2D
 
-static var facade_bounds_cache: Dictionary = {}
-
 const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
+const TextureBoundsScript := preload("res://scripts/data/texture_bounds.gd")
 
 enum Access { EXTERIOR_ONLY, INTERACTABLE, ENTERABLE }
 var access := Access.EXTERIOR_ONLY
@@ -24,10 +23,7 @@ func _ready() -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = facade
 	sprite.region_enabled = true
-	var cache_key := facade.resource_path
-	if not facade_bounds_cache.has(cache_key):
-		facade_bounds_cache[cache_key] = facade.get_image().get_used_rect()
-	sprite.region_rect = facade_bounds_cache[cache_key]
+	sprite.region_rect = TextureBoundsScript.used(facade)
 	sprite.scale = size / facade.get_size()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
 	# Stable per-building variation breaks the repeated-stamp effect without

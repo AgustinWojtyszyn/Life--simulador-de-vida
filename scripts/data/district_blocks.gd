@@ -17,6 +17,10 @@ const HORIZONTAL_SPECS := [
 	[2660.0, 126.0],
 ]
 
+# The generated catalog is south-facing art. These anchors sit immediately
+# north of real east-west streets, so all 16 families keep valid frontage.
+const CATALOG_ROW_X: Array[float] = [180.0, 430.0, 1430.0, 2350.0, 3280.0, 4270.0, 4560.0]
+
 static func vertical_roads(district: DistrictData) -> Array[Rect2]:
 	var result: Array[Rect2] = []
 	for spec in VERTICAL_SPECS:
@@ -109,6 +113,19 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 			if x > 1410 and x < 1690 and y < 500:
 				# Leave breathing room around the starter home.
 				continue
+			var catalog_index := catalog_index_for(Vector2(x, y))
+			if catalog_index >= 0:
+				var catalog_mode := "EXTERIOR_ONLY" if catalog_index < 6 else "ENTERABLE" if catalog_index <= 10 else "INTERACTABLE"
+				slots.append({
+					"position": Vector2(x, y),
+					"kind": "house" if catalog_index < 6 else "shop",
+					"mode": catalog_mode,
+					"catalog_index": catalog_index,
+					"facing": "south",
+					"street_normal": "south",
+				})
+				index += 1
+				continue
 			var kind := "house"
 			var mode := "EXTERIOR_ONLY"
 			if y > 600 and column % 7 == 3:
@@ -177,3 +194,17 @@ static func reserved_city_feature(at: Vector2) -> bool:
 	var starter_parking := Rect2(980, 600, 450, 345)
 	var civic_block := Rect2(1900, 2020, 890, 650)
 	return starter_plaza.has_point(at) or starter_parking.has_point(at) or civic_block.has_point(at)
+
+static func catalog_index_for(at: Vector2) -> int:
+	var x_index := CATALOG_ROW_X.find(at.x)
+	if x_index < 0:
+		return -1
+	# 7 families on the second street, 7 on the third, last 2 at the
+	# far-east fourth street. The civic/sports block stays untouched.
+	if is_equal_approx(at.y, 1104.0):
+		return x_index
+	if is_equal_approx(at.y, 1874.0):
+		return x_index + 7
+	if is_equal_approx(at.y, 2634.0) and at.x in [4270.0, 4560.0]:
+		return 14 + [4270.0, 4560.0].find(at.x)
+	return -1
