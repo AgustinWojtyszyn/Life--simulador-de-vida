@@ -135,6 +135,14 @@ func free_distance() -> float:
 		var ahead := relative.dot(forward)
 		if ahead >= -half_width - 6.0 and absf(relative.cross(forward)) < 24.0:
 			gap = minf(gap, ahead - half_width - 18.0)
+	# Signals participate in the same cached proximity pass as cars and
+	# pedestrians, so red lights do not add per-frame work.
+	for traffic_signal in get_tree().get_nodes_in_group("traffic_signals"):
+		if not traffic_signal.has_method("blocking_distance"):
+			continue
+		var signal_gap: float = traffic_signal.blocking_distance(position, forward)
+		if is_finite(signal_gap):
+			gap = minf(gap, signal_gap)
 	return maxf(0.0, gap)
 
 func _physics_process(delta: float) -> void:
