@@ -13,15 +13,15 @@ var busy := false
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var theme_resource := Theme.new()
-	theme_resource.default_font_size = 16
+	theme_resource.default_font_size = 20 if InputManager.touch_enabled else 17
 	for type in ["Button", "OptionButton", "LineEdit"]:
 		var normal := StyleBoxFlat.new()
 		normal.bg_color = Color("253d42")
 		normal.set_corner_radius_all(6)
-		normal.content_margin_left = 16
-		normal.content_margin_right = 16
-		normal.content_margin_top = 10
-		normal.content_margin_bottom = 10
+		normal.content_margin_left = 20 if InputManager.touch_enabled else 16
+		normal.content_margin_right = 20 if InputManager.touch_enabled else 16
+		normal.content_margin_top = 13 if InputManager.touch_enabled else 10
+		normal.content_margin_bottom = 13 if InputManager.touch_enabled else 10
 		theme_resource.set_stylebox("normal", type, normal)
 		var focus := normal.duplicate()
 		focus.border_color = Color("d9b47c")
@@ -51,7 +51,7 @@ func shell(title: String, subtitle: String) -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
+		margin.add_theme_constant_override("margin_" + side, 34 if InputManager.touch_enabled else 28)
 	add_child(margin)
 	var scroll := ScrollContainer.new()
 	margin.add_child(scroll)
@@ -59,8 +59,8 @@ func shell(title: String, subtitle: String) -> void:
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.add_theme_constant_override("separation", 8)
 	scroll.add_child(panel)
-	label(title, 30, Color("f0dfbe"))
-	label(subtitle, 14, Color("a5b7b3"))
+	label(title, 38 if InputManager.touch_enabled else 32, Color("f0dfbe"))
+	label(subtitle, 18 if InputManager.touch_enabled else 15, Color("a5b7b3"))
 
 func label(text: String, font_size := 16, color := Color("eee5d2")) -> Label:
 	var node := Label.new()
@@ -73,8 +73,11 @@ func label(text: String, font_size := 16, color := Color("eee5d2")) -> Label:
 func button(text: String, action: Callable) -> Button:
 	var node := Button.new()
 	node.text = text
-	node.custom_minimum_size.y = 44
-	node.pressed.connect(action)
+	node.custom_minimum_size.y = 58 if InputManager.touch_enabled else 46
+	node.add_theme_font_size_override("font_size", 19 if InputManager.touch_enabled else 16)
+	node.pressed.connect(func():
+		AudioSystem.play_ui()
+		action.call())
 	panel.add_child(node)
 	return node
 
@@ -117,13 +120,13 @@ func create_screen() -> void:
 	name_edit.placeholder_text = "Tu nombre"
 	name_edit.max_length = 24
 	name_edit.text = draft.player_name
-	name_edit.custom_minimum_size.y = 44
+	name_edit.custom_minimum_size.y = 56 if InputManager.touch_enabled else 44
 	fields.add_child(name_edit)
 	var gender := OptionButton.new()
 	gender.add_item("Hombre")
 	gender.add_item("Mujer")
 	gender.selected = 1 if draft.gender == "female" else 0
-	gender.custom_minimum_size.y = 44
+	gender.custom_minimum_size.y = 56 if InputManager.touch_enabled else 44
 	gender.item_selected.connect(func(i: int): draft.gender = "female" if i == 1 else "male"; preview.apply_profile(draft))
 	fields.add_child(gender)
 	var grid := GridContainer.new()
@@ -135,7 +138,7 @@ func create_screen() -> void:
 		title.text = entry[1]
 		grid.add_child(title)
 		var choice := OptionButton.new()
-		choice.custom_minimum_size.y = 38
+		choice.custom_minimum_size.y = 50 if InputManager.touch_enabled else 40
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		for option in entry[2]:
 			choice.add_item(option)
@@ -154,7 +157,7 @@ func create_screen() -> void:
 func country_screen() -> void:
 	shell("ELEGÍ DÓNDE EMPEZAR", "Una vivienda propia te espera en cada destino.")
 	var selection := OptionButton.new()
-	selection.custom_minimum_size.y = 46
+	selection.custom_minimum_size.y = 58 if InputManager.touch_enabled else 46
 	panel.add_child(selection)
 	country_preview = TextureRect.new()
 	country_preview.custom_minimum_size = Vector2(180, 140)
