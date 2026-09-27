@@ -27,6 +27,8 @@ var body_height := 14.0
 var visual_scale := 1.0
 var braking := BRAKING
 var braking_sound_active := false
+var horn_cooldown := 0.0
+var blocked_time := 0.0
 var proximity_clock := 0.0
 var cached_gap := 99999.0
 ## Lane offset: lateral displacement from route centreline (negative = left, positive = right)
@@ -160,7 +162,26 @@ func free_distance() -> float:
 			gap = minf(gap, signal_gap)
 	return maxf(0.0, gap)
 
+func has_honk_target() -> bool:
+	var forward := forward_vector()
+	for other in get_tree().get_nodes_in_group("city_traffic"):
+		if other == self or not is_instance_valid(other):
+			continue
+		var relative: Vector2 = other.position - position
+		var ahead := relative.dot(forward)
+		if ahead > 0.0 and ahead < 90.0 and absf(relative.cross(forward)) < 28.0:
+			return true
+	for pedestrian in get_tree().get_nodes_in_group("city_residents"):
+		if not is_instance_valid(pedestrian) or not pedestrian.visible:
+			continue
+		var relative: Vector2 = pedestrian.position - position
+		var ahead := relative.dot(forward)
+		if ahead > 0.0 and ahead < 72.0 and absf(relative.cross(forward)) < 25.0:
+			return true
+	return false
+
 func _physics_process(delta: float) -> void:
+	horn_cooldown = maxf(0.0, horn_cooldown - delta)
 	# Proximity scans are the expensive part of traffic AI: each vehicle checks
 	# every other vehicle and resident. Reuse the result for a few physics ticks,
 	# especially when the car is far from the player.
@@ -170,6 +191,14 @@ func _physics_process(delta: float) -> void:
 		var near_player := is_instance_valid(player) and position.distance_squared_to(player.position) < 900.0 * 900.0
 		proximity_clock = 0.05 if near_player else 0.16
 	var gap := cached_gap
+	if gap < 46.0 and current_speed < 18.0 and has_honk_target():
+		blocked_time += delta
+		if blocked_time >= 2.0 and horn_cooldown <= 0.0:
+			AudioSystem.play_sfx("horn", position)
+			horn_cooldown = 6.0 + float(get_index() % 4)
+			blocked_time = 0.0
+	else:
+		blocked_time = maxf(0.0, blocked_time - delta * 2.0)
 	var desired := cruise_speed * (0.8 if WeatherSystem.state == "rain" else 1.0)
 	if not route_points.is_empty():
 		# Brake before the arc instead of rotating the artwork after a hard turn.
