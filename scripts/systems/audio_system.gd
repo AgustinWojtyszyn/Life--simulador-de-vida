@@ -6,12 +6,17 @@ extends Node
 const SAMPLE_RATE := 16000
 const TRACK_SECONDS := 24.0
 const MAX_TRAFFIC_VOICES := 4
+# All tracks use uplifting major progressions (intervals 0,4,7,9,11 = major/happy).
+# Progression values = semitone steps from root (0=root, 4=major 3rd, 5=4th, 7=5th, 9=6th).
+# No minor 3rds (3) or minor 7ths (10) in progressions to keep the mood warm.
 const TRACKS := [
-	{"name": "Barrio de Sol", "tempo": 72.0, "progression": [0, 9, 5, 7], "melody": [0, 2, 4, 2, 5, 4, 2, 1], "minor": false},
-	{"name": "Ventanas al atardecer", "tempo": 66.0, "progression": [0, 5, 8, 7], "melody": [0, 2, 3, 5, 3, 2, 1, 2], "minor": true},
-	{"name": "Ciudad tranquila", "tempo": 82.0, "progression": [0, 4, 5, 7], "melody": [0, 1, 3, 4, 3, 5, 4, 2], "minor": false},
-	{"name": "Noche en movimiento", "tempo": 88.0, "progression": [0, 8, 5, 10], "melody": [0, 3, 2, 4, 5, 4, 2, 1], "minor": true},
-	{"name": "Domingo largo", "tempo": 62.0, "progression": [0, 7, 9, 5], "melody": [0, 2, 4, 5, 4, 2, 3, 1], "minor": false},
+	{"name": "Barrio de Sol", "tempo": 72.0, "progression": [0, 5, 9, 7], "melody": [0, 4, 7, 5, 4, 2, 4, 5], "minor": false},
+	{"name": "Tarde de plaza", "tempo": 66.0, "progression": [0, 4, 7, 5], "melody": [4, 5, 7, 5, 4, 2, 0, 2], "minor": false},
+	{"name": "Ciudad tranquila", "tempo": 82.0, "progression": [0, 7, 9, 5], "melody": [0, 2, 4, 5, 7, 5, 4, 2], "minor": false},
+	{"name": "Domingo largo", "tempo": 62.0, "progression": [0, 4, 5, 7], "melody": [0, 4, 5, 7, 5, 4, 2, 0], "minor": false},
+	{"name": "Paseo de mañana", "tempo": 75.0, "progression": [0, 9, 7, 5], "melody": [7, 9, 7, 5, 4, 5, 4, 2], "minor": false},
+	{"name": "Verano en la vereda", "tempo": 88.0, "progression": [0, 5, 4, 7], "melody": [0, 2, 4, 7, 5, 4, 5, 7], "minor": false},
+	{"name": "Noche cálida", "tempo": 58.0, "progression": [0, 7, 5, 4], "melody": [4, 7, 9, 7, 5, 4, 2, 0], "minor": false},
 ]
 
 var music_players := []
@@ -290,25 +295,40 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 		var pad := lerpf(pad_a, pad_b, blend) * 0.030
 		pad *= 0.88 + 0.12 * sin(TAU * (2.0 / TRACK_SECONDS) * t)
 
+		# Piano-style envelope: fast attack, exponential decay, gentle sustain
 		var melody_step: int = int(t / melody_span) % melody_freqs.size()
 		var note_phase := fposmod(t, melody_span) / melody_span
 		var melody_env := sin(PI * note_phase)
 		melody_env *= melody_env
+		var note_attack := clampf(note_phase * 12.0, 0.0, 1.0)  # 8% of note = attack
+		var note_decay := exp(-4.5 * maxf(0.0, note_phase - 0.08))
+		var piano_env := note_attack * (0.25 + 0.75 * note_decay)
 		var melody_freq: float = float(melody_freqs[melody_step])
-		var lead := (sin(TAU * melody_freq * t) * 0.018 + sin(TAU * melody_freq * 0.5 * t + 0.8) * 0.009) * melody_env
+		# Bright piano-like timbre: fundamental + 2nd + 3rd harmonics
+		var lead := piano_env * melody_env * (
+			sin(TAU * melody_freq * t) * 0.022 +
+			sin(TAU * melody_freq * 2.0 * t + 0.3) * 0.010 +
+			sin(TAU * melody_freq * 3.0 * t + 0.7) * 0.005
+		)
 
 		var bass_a := sin(TAU * float(bass_freqs[chord_index]) * t + 0.18)
 		var bass_b := sin(TAU * float(bass_freqs[next_chord_index]) * t + 0.18)
-		var bass := lerpf(bass_a, bass_b, blend) * 0.024
+		# Add 2nd harmonic to bass for warmth
+		bass_a += sin(TAU * float(bass_freqs[chord_index]) * 2.0 * t) * 0.4
+		bass_b += sin(TAU * float(bass_freqs[next_chord_index]) * 2.0 * t) * 0.4
+		var bass := lerpf(bass_a, bass_b, blend) * 0.018
 
 		var beat_phase := fposmod(t, beat)
 		var soft_kick := 0.0
-		if style in [2, 3] and beat_phase < 0.14:
+		if style in [2, 5] and beat_phase < 0.14:
 			var kick_env := 1.0 - beat_phase / 0.14
-			soft_kick = sin(TAU * (54.0 + 14.0 * kick_env) * t) * kick_env * 0.014
-		var shimmer := sin(TAU * shimmer_freq * t + 1.25) * 0.004
-		var left := clampf(pad + bass + lead * 0.92 + soft_kick + shimmer, -0.68, 0.68)
-		var right := clampf(pad * 0.98 + bass + lead * 1.08 + soft_kick - shimmer, -0.68, 0.68)
+			soft_kick = sin(TAU * (52.0 + 12.0 * kick_env) * t) * kick_env * 0.012
+		# Gentle stereo shimmer from high overtone
+		var shimmer := sin(TAU * shimmer_freq * t + 1.25) * 0.005
+		# Soft pad volume breathe for warmth
+		pad *= 0.85 + 0.15 * sin(TAU * (1.5 / TRACK_SECONDS) * t)
+		var left := clampf(pad + bass + lead * 0.88 + soft_kick + shimmer, -0.65, 0.65)
+		var right := clampf(pad * 0.96 + bass + lead * 1.12 + soft_kick - shimmer * 0.8, -0.65, 0.65)
 		bytes.encode_s16(i * 4, int(left * 32767.0))
 		bytes.encode_s16(i * 4 + 2, int(right * 32767.0))
 	var wav := AudioStreamWAV.new()

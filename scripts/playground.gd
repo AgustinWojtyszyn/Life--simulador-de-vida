@@ -65,20 +65,38 @@ func _ready() -> void:
 	for i in parked_positions.size():
 		var size := Vector2(98, 70) if parked_models[i] == "van" else Vector2(90, 60)
 		add_asset("vehicles/" + parked_models[i], parked_positions[i], size, Rect2(-37, -19, 74, 18), Color.WHITE, "east" if i % 2 else "west")
-	var regional_models: Array = {"ar": ["compact", "taxi", "van", "sedan"], "jp": ["hatchback", "compact", "van", "sedan"], "us": ["pickup", "suv", "sedan", "van"], "it": ["compact", "hatchback", "sedan", "van"], "br": ["compact", "pickup", "sedan", "suv"]}[WorldManager.country.id]
+	var regional_models: Array = {
+		"ar": ["compact", "taxi", "van", "sedan", "hatchback", "pickup", "classic", "compact", "sedan", "taxi", "van", "sports"],
+		"jp": ["hatchback", "compact", "van", "sedan", "suv", "taxi", "compact", "hatchback", "van", "sports", "sedan", "classic"],
+		"us": ["pickup", "suv", "sedan", "van", "compact", "taxi", "pickup", "truck", "suv", "sports", "sedan", "classic"],
+		"it": ["compact", "hatchback", "sedan", "van", "taxi", "suv", "compact", "classic", "hatchback", "sports", "sedan", "van"],
+		"br": ["compact", "pickup", "sedan", "suv", "hatchback", "van", "compact", "taxi", "sedan", "pickup", "sports", "classic"],
+	}[WorldManager.country.id]
+	# Spawn 2 sub-lanes per traffic lane direction: offset ±12px laterally
+	# so cars are visually separated and less likely to form single-file jams.
 	for lane_index in TRAFFIC_LANES.size():
 		var lane: Dictionary = TRAFFIC_LANES[lane_index]
-		for i in 3:
-			var vehicle := AnimatableBody2D.new()
-			vehicle.set_script(Vehicle)
-			vehicle.name = "Traffic_%s_%s" % [lane_index, i]
-			vehicle.model = regional_models[(i + lane_index * 2) % regional_models.size()]
-			vehicle.position = Vector2(100 + i * 560 + lane_index * 200, lane.from.y)
-			vehicle.direction = lane.direction.x
-			vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - i * 3.0
-			vehicle.route_right = map_size.x + 140.0
-			vehicle.player = $Player
-			add_child(vehicle)
+		var sub_lane_offsets := [-11.0, 11.0]  # px perpendicular to travel
+		for sub_lane in 2:
+			var y_offset := sub_lane_offsets[sub_lane]
+			var models_in_lane := regional_models.size()
+			var vehicles_per_sub := 3
+			for i in vehicles_per_sub:
+				var vehicle := AnimatableBody2D.new()
+				vehicle.set_script(Vehicle)
+				vehicle.name = "Traffic_%s_%s_%s" % [lane_index, sub_lane, i]
+				var model_idx := (i + lane_index * 3 + sub_lane * 2) % models_in_lane
+				vehicle.model = regional_models[model_idx]
+				var start_x := 100.0 + i * 420.0 + sub_lane * 200.0 + lane_index * 100.0
+				vehicle.position = Vector2(start_x, lane.from.y + y_offset)
+				vehicle.direction = lane.direction.x
+				# Different speeds per sub-lane: inner sub-lane slightly faster
+				var speed_variance := (sub_lane * 8.0) - i * 2.5
+				vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed + speed_variance
+				vehicle.lane_offset = y_offset
+				vehicle.route_right = map_size.x + 140.0
+				vehicle.player = $Player
+				add_child(vehicle)
 	# A second circuit turns through both intersections and the southern street.
 	# Chamfered waypoints keep vehicles in paved space through each turn.
 	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25

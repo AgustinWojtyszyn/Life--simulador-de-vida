@@ -16,6 +16,25 @@ var update_clock := 0.0
 func _ready() -> void:
 	add_to_group("traffic_signals")
 	z_index = 14
+	# Spawn four directional signal sprites using the PixelLab asset
+	var sprite_path := "res://assets/city/props/traffic_light.png"
+	if ResourceLoader.exists(sprite_path):
+		var tex: Texture2D = load(sprite_path)
+		# H-left, H-right, V-top, V-bottom — offsets mirror draw_head positions
+		var positions := [
+			Vector2(-vertical_half - 14.0, horizontal_half - 18.0),
+			Vector2(vertical_half + 14.0, -horizontal_half + 18.0),
+			Vector2(vertical_half - 18.0, -horizontal_half - 14.0),
+			Vector2(-vertical_half + 18.0, horizontal_half + 14.0),
+		]
+		for pos in positions:
+			var s := Sprite2D.new()
+			s.texture = tex
+			s.centered = true
+			s.position = pos
+			s.scale = Vector2(0.48, 0.48)
+			s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			add_child(s)
 	refresh_state(true)
 
 func _process(delta: float) -> void:

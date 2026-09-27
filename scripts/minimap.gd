@@ -67,44 +67,101 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var panel := Rect2(Vector2.ZERO, size)
 	draw_style_box(panel_style(), panel)
-	draw_string(font, Vector2(10, 16), "MAPA · " + WorldManager.district.title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, size.x - 20, 10, Color("e8dcc2"))
+	draw_string(font, Vector2(10, 16), "MAPA · " + WorldManager.district.title.to_upper(),
+		HORIZONTAL_ALIGNMENT_LEFT, size.x - 20, 10, Color("e8dcc2"))
 	var inner := Rect2(8, 23, size.x - 16, size.y - 31)
 	draw_rect(inner, Color(0.08, 0.13, 0.14, 0.96))
 	var world_rect := Rect2(Vector2.ZERO, WorldManager.district.world_size)
 	var mapped_world := rect_to_map(world_rect, inner)
-	draw_rect(mapped_world, Color("b8b39e"))
+	draw_rect(mapped_world, Color("9fa89a"))  # slightly warmer ground
+	# Roads
 	for road in DistrictBlocks.roads(WorldManager.district):
-		draw_rect(rect_to_map(road, inner), Color("43505a"))
+		draw_rect(rect_to_map(road, inner), Color("34404a"))
+	# Buildings with color-coded types
 	for object in world.city_objects:
 		if not object.has_meta("building_type"):
 			continue
 		var p := world_to_map(object.position, inner)
 		var kind := str(object.get_meta("building_type"))
-		var color := Color("c9b27c") if kind.begins_with("residential") else Color("ddb573")
-		draw_rect(Rect2(p - Vector2(1.5, 1.5), Vector2(3, 3)), color)
+		var col: Color
+		var poi_label := ""
+		match true:
+			kind.contains("cafe"), kind.contains("coffee"):
+				col = Color("d9995a")
+				poi_label = "CAFÉ"
+			kind.contains("market"), kind.contains("shop"), kind.contains("mercado"):
+				col = Color("5aaed9")
+				poi_label = "ALMACÉN" if kind.contains("market") else "TIENDA"
+			kind.contains("clinic"), kind.contains("hospital"):
+				col = Color("e05050")
+				poi_label = "CLÍNICA"
+			kind.contains("bakery"), kind.contains("panaderia"):
+				col = Color("e0a040")
+				poi_label = "PANADERÍA"
+			kind.contains("office"):
+				col = Color("708090")
+			kind.begins_with("residential"):
+				col = Color("c9b27c")
+			_:
+				col = Color("9d8a6e")
+		var dot_size := 2.0 if not expanded else 3.0
+		draw_rect(Rect2(p - Vector2(dot_size, dot_size), Vector2(dot_size * 2, dot_size * 2)), col)
+		# Show POI labels only when expanded and near player
+		if expanded and poi_label != "" and is_instance_valid(world.get_node_or_null("Player")):
+			var player_p := world.get_node("Player").global_position
+			if object.position.distance_to(player_p) < 600:
+				draw_string(font, p + Vector2(4, 4), poi_label, HORIZONTAL_ALIGNMENT_LEFT, 60, 7, col)
+	# Traffic signals
 	for traffic_light in get_tree().get_nodes_in_group("traffic_signals"):
 		if not is_instance_valid(traffic_light):
 			continue
 		var p := world_to_map(traffic_light.global_position, inner)
-		var color := Color("72bd79") if traffic_light.horizontal_state == "green" else Color("dc6b60")
-		draw_circle(p, 1.7 if not expanded else 2.2, color)
+		var tl_col := Color("72bd79") if traffic_light.horizontal_state == "green" else \
+			(Color("e8c840") if traffic_light.horizontal_state == "amber" else Color("dc6b60"))
+		draw_circle(p, 1.8 if not expanded else 2.5, tl_col)
+	# Vehicles
 	for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 		if not is_instance_valid(vehicle):
 			continue
 		var p := world_to_map(vehicle.global_position, inner)
-		draw_circle(p, 1.4 if not expanded else 2.0, Color("e7c36e"))
+		draw_circle(p, 1.2 if not expanded else 1.8, Color("e7c36e"))
+	# NPC walkers (expanded only)
+	if expanded:
+		for walker in get_tree().get_nodes_in_group("city_residents"):
+			if not is_instance_valid(walker):
+				continue
+			var p := world_to_map(walker.global_position, inner)
+			draw_circle(p, 1.0, Color("b0c8a0", 0.7))
+	# Home marker
 	var home := world_to_map(WorldManager.district.home_position, inner)
-	draw_circle(home, 2.4 if not expanded else 3.4, Color("df9d70"))
-	var player := world.get_node_or_null("Player") as Node2D
-	if is_instance_valid(player):
-		var p := world_to_map(player.global_position, inner)
-		draw_circle(p, 3.0 if not expanded else 4.4, Color("8ad4d0"))
-		draw_arc(p, 5.0 if not expanded else 7.0, 0, TAU, 18, Color(0.9, 1.0, 0.96, 0.75), 1.0)
+	draw_circle(home, 2.6 if not expanded else 3.8, Color("df9d70"))
+	draw_string(font, home + Vector2(4, 4), "🏠", HORIZONTAL_ALIGNMENT_LEFT, 16, 8, Color("df9d70"))
+	# Player dot — directional arrow
+	var player_node := world.get_node_or_null("Player") as Node2D
+	if is_instance_valid(player_node):
+		var p := world_to_map(player_node.global_position, inner)
+		draw_circle(p, 3.2 if not expanded else 5.0, Color("8ad4d0"))
+		draw_arc(p, 5.5 if not expanded else 8.0, 0, TAU, 20, Color(0.9, 1.0, 0.96, 0.8), 1.2)
+	# Legend (expanded)
+	if expanded:
+		var ly := inner.end.y - 28
+		var lx := inner.position.x + 4
+		var legend_items := [
+			[Color("8ad4d0"), "Jugador"],
+			[Color("df9d70"), "Casa"],
+			[Color("d9995a"), "Café"],
+			[Color("5aaed9"), "Tienda"],
+			[Color("e05050"), "Clínica"],
+		]
+		for item in legend_items:
+			draw_circle(Vector2(lx + 3, ly + 3), 2.5, item[0])
+			draw_string(font, Vector2(lx + 9, ly + 6), str(item[1]), HORIZONTAL_ALIGNMENT_LEFT, 55, 7, Color("c8c0b0"))
+			lx += 68
 
 func panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.07, 0.12, 0.14, 0.94)
-	style.border_color = Color("6b756f")
+	style.bg_color = Color(0.06, 0.10, 0.12, 0.95)
+	style.border_color = Color("4a5a52")
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(7)
+	style.set_corner_radius_all(8)
 	return style

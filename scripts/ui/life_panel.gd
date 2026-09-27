@@ -107,6 +107,8 @@ func talk(person: String) -> void:
 				WorldManager.active_world.get_node("Interactions").say(message)
 			close())
 
+
+
 static func panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("192e34")

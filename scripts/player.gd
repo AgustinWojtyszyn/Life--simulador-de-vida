@@ -38,28 +38,26 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 	wave_time = maxf(0, wave_time - delta)
-	if wave_time > 0:
-		sprite.texture = WAVE
-	else:
-		sprite.texture = (EAST if facing.x > 0 else WEST) if absf(facing.x) > absf(facing.y) else (SOUTH if facing.y >= 0 else NORTH)
-	var direction := InputManager.movement()
+	var raw_direction := InputManager.movement()
+	# IMPORTANT: normalize so diagonal is not √2 faster than cardinal
+	var direction := raw_direction.normalized() if raw_direction.length_squared() > 0.01 else Vector2.ZERO
+	var target_speed := SPEED
+	if InputManager.touch_enabled:
+		# Touch joystick gives analogue magnitude — preserve it
+		target_speed = SPEED * clampf(raw_direction.length(), 0.0, 1.0)
 	var rate := ACCELERATION if direction != Vector2.ZERO else DECELERATION
-	if direction.dot(velocity) < 0: rate = 950.0
-	velocity = velocity.move_toward(direction * SPEED, rate * delta)
+	if direction.dot(velocity.normalized()) < -0.2:
+		rate = 950.0  # quick direction reversal
+	velocity = velocity.move_toward(direction * target_speed, rate * delta)
 	if direction != Vector2.ZERO:
 		facing = direction
-		if absf(facing.x) > absf(facing.y):
-			sprite.texture = EAST if facing.x > 0 else WEST
-		else:
-			sprite.texture = SOUTH if facing.y > 0 else NORTH
-	if wave_time > 0:
-		sprite.texture = WAVE
 	var before := position
 	move_and_slide()
+	var moved := position - before
 	if wave_time > 0:
 		visual.set_art("wave", "south", 0)
 	else:
-		visual.animate_motion(position - before, position.distance_to(before))
+		visual.animate_motion(moved, moved.length())
 
 
 func _draw() -> void:

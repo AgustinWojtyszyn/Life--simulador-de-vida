@@ -3,11 +3,11 @@ extends RefCounted
 
 const HOMES := ["modern", "common", "compact", "duplex", "old", "restored", "apartments", "brick", "premium_home"]
 const COUNTRY_HOMES := {
-	"ar": HOMES,
-	"br": ["compact", "common", "modern", "duplex", "apartments", "restored", "old"],
-	"jp": ["modern", "compact", "mixed_old", "apartments", "duplex", "common"],
-	"it": ["old", "restored", "apartments", "premium_home", "common", "duplex", "brick"],
-	"us": ["brick", "duplex", "modern", "premium_home", "apartments", "common", "restored"],
+	"ar": ["house", "apartments", "modern", "common", "compact", "duplex", "old", "restored", "brick", "premium_home"],
+	"br": ["house", "compact", "common", "modern", "duplex", "apartments", "restored", "old"],
+	"jp": ["modern", "compact", "machiya", "apartments", "duplex", "common", "mixed_old"],
+	"it": ["apartment", "old", "restored", "apartments", "premium_home", "common", "duplex", "brick"],
+	"us": ["house", "brick", "duplex", "modern", "premium_home", "apartments", "common", "restored"],
 }
 const FRONTAGES := {
 	"ar": ["cafe", "almacen", "panaderia", "kiosco"],
@@ -17,18 +17,23 @@ const FRONTAGES := {
 	"us": ["diner", "market", "coffee_shop", "cafe"],
 }
 const SHOPS := {
-	"ar": ["market", "panaderia", "kiosco", "cafe", "bookshop", "workshop"],
+	"ar": ["market", "panaderia", "kiosco", "cafe", "bookshop", "workshop", "parrilla"],
 	"br": ["padaria", "market", "cafe", "workshop"],
 	"jp": ["konbini", "market", "cafe", "workshop"],
-	"it": ["pizzeria", "market", "cafe", "workshop"],
+	"it": ["pizzeria", "trattoria", "market", "cafe", "workshop"],
 	"us": ["coffee_shop", "market", "diner", "workshop"],
 }
-const TYPES := {"almacen": "market", "panaderia": "bakery", "padaria": "bakery", "bakery_corner": "bakery", "kiosco": "kiosk", "coffee_shop": "cafe", "apartments": "residential_apartment", "mixed_old": "residential_building"}
+const TYPES := {
+	"almacen": "market", "panaderia": "bakery", "padaria": "bakery", "bakery_corner": "bakery",
+	"kiosco": "kiosk", "coffee_shop": "cafe", "apartments": "residential_apartment",
+	"mixed_old": "residential_building", "machiya": "residential_house", "house": "residential_house",
+	"apartment": "residential_apartment", "parrilla": "restaurant", "trattoria": "restaurant",
+}
 const LABELS := {
-	"ar": {"market": "ALMACÉN", "bakery": "PANADERÍA", "kiosk": "KIOSCO", "cafe": "CAFÉ", "clinic": "CLÍNICA", "office": "OFICINAS", "workshop": "TALLER", "bookshop": "LIBRERÍA"},
+	"ar": {"market": "ALMACÉN", "bakery": "PANADERÍA", "kiosk": "KIOSCO", "cafe": "CAFÉ", "clinic": "CLÍNICA", "office": "OFICINAS", "workshop": "TALLER", "bookshop": "LIBRERÍA", "restaurant": "PARRILLA"},
 	"br": {"market": "MERCADO", "bakery": "PADARIA", "cafe": "CAFÉ", "clinic": "CLÍNICA", "office": "ESCRITÓRIOS", "workshop": "OFICINA"},
 	"jp": {"market": "AOBA MART", "konbini": "KONBINI", "cafe": "KISSA", "clinic": "CLINIC", "office": "OFFICES", "workshop": "REPAIR"},
-	"it": {"market": "ALIMENTARI", "pizzeria": "PIZZERIA", "trattoria": "TRATTORIA", "cafe": "CAFFÈ", "clinic": "CLINICA", "office": "UFFICI", "workshop": "BOTTEGA"},
+	"it": {"market": "ALIMENTARI", "pizzeria": "PIZZERIA", "trattoria": "TRATTORIA", "cafe": "CAFFÈ", "clinic": "CLINICA", "office": "UFFICI", "workshop": "BOTTEGA", "restaurant": "TRATTORIA"},
 	"us": {"market": "GROCERY", "cafe": "COFFEE SHOP", "diner": "DINER", "clinic": "CLINIC", "office": "OFFICES", "workshop": "REPAIR SHOP"},
 }
 
@@ -41,17 +46,26 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 		var choices: Array = SHOPS[country]
 		asset = choices[posmod(index, choices.size())]
 	var type: String = TYPES.get(asset, "residential_house" if residential else asset)
-	var folder := "houses" if residential else "buildings"
+	# New named assets (house, machiya, apartment, parrilla, trattoria) live in buildings/
+	var new_building_assets := ["house", "machiya", "apartment", "parrilla", "trattoria"]
+	var folder := "buildings" if (not residential or asset in new_building_assets) else "houses"
 	var path := "res://assets/%s/%s/%s.png" % [folder, country, asset]
 	if mixed:
 		type = "residential_building"
 		path = "res://assets/buildings/ar/mixed_old.png" if country == "ar" else "res://assets/regions/%s.png" % country
 	# A regional café/diner is never a fallback for a clinic, office or house.
-	if asset in ["bakery_corner", "trattoria", "diner"]:
+	if asset in ["bakery_corner", "diner"]:
+		path = "res://assets/regions/%s.png" % country
+	if asset == "trattoria" and not ResourceLoader.exists(path):
 		path = "res://assets/regions/%s.png" % country
 	if asset == "mixed_old": path = "res://assets/buildings/%s/mixed_old.png" % country
 	if not ResourceLoader.exists(path):
-		path = "res://assets/%s/ar/%s.png" % [folder, asset]
+		# Try buildings/ as second option for named assets
+		var alt_path := "res://assets/buildings/%s/%s.png" % [country, asset]
+		if ResourceLoader.exists(alt_path):
+			path = alt_path
+		else:
+			path = "res://assets/houses/ar/%s.png" % asset
 	var title: String = LABELS[country].get(type, type.to_upper())
 	if residential:
 		title = {"ar": "VIVIENDA", "br": "MORADIA", "jp": "RESIDENCE", "it": "CASA", "us": "HOME"}[country]
