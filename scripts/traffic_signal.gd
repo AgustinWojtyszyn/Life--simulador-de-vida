@@ -20,19 +20,13 @@ func _ready() -> void:
 	var sprite_path := "res://assets/city/props/traffic_light.png"
 	if ResourceLoader.exists(sprite_path):
 		var tex: Texture2D = load(sprite_path)
-		# H-left, H-right, V-top, V-bottom — offsets mirror draw_head positions
-		var positions := [
-			Vector2(-vertical_half - 14.0, horizontal_half - 18.0),
-			Vector2(vertical_half + 14.0, -horizontal_half + 18.0),
-			Vector2(vertical_half - 18.0, -horizontal_half - 14.0),
-			Vector2(-vertical_half + 18.0, horizontal_half + 14.0),
-		]
-		for pos in positions:
+		# Signals stand on the four sidewalk corners, never inside a traffic lane.
+		for pos in signal_positions():
 			var s := Sprite2D.new()
 			s.texture = tex
 			s.centered = true
 			s.position = pos
-			s.scale = Vector2(0.48, 0.48)
+			s.scale = Vector2(0.78, 0.78)
 			s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			add_child(s)
 	refresh_state(true)
@@ -91,22 +85,28 @@ func blocking_distance(vehicle_position: Vector2, forward: Vector2) -> float:
 		return INF
 	return maxf(0.0, ahead - 12.0)
 
+func signal_positions() -> Array[Vector2]:
+	var margin := 24.0
+	return [
+		Vector2(-vertical_half - margin, -horizontal_half - margin),
+		Vector2(vertical_half + margin, -horizontal_half - margin),
+		Vector2(vertical_half + margin, horizontal_half + margin),
+		Vector2(-vertical_half - margin, horizontal_half + margin),
+	]
+
 func _draw() -> void:
-	var h_left := Vector2(-vertical_half - 14.0, horizontal_half - 18.0)
-	var h_right := Vector2(vertical_half + 14.0, -horizontal_half + 18.0)
-	var v_top := Vector2(vertical_half - 18.0, -horizontal_half - 14.0)
-	var v_bottom := Vector2(-vertical_half + 18.0, horizontal_half + 14.0)
-	draw_head(h_left, horizontal_state)
-	draw_head(h_right, horizontal_state)
-	draw_head(v_top, vertical_state)
-	draw_head(v_bottom, vertical_state)
+	var positions := signal_positions()
+	draw_head(positions[0], horizontal_state)
+	draw_head(positions[2], horizontal_state)
+	draw_head(positions[1], vertical_state)
+	draw_head(positions[3], vertical_state)
 
 func draw_head(at: Vector2, state: String) -> void:
-	draw_line(at + Vector2(0, 5), at + Vector2(0, 17), Color("36454a"), 2.0)
-	draw_rect(Rect2(at - Vector2(4, 10), Vector2(8, 17)), Color("172428"))
+	draw_line(at + Vector2(0, 8), at + Vector2(0, 28), Color("36454a"), 3.0)
+	draw_rect(Rect2(at - Vector2(6, 14), Vector2(12, 25)), Color("172428"))
 	var red := Color("e05a52") if state == "red" else Color(0.28, 0.20, 0.19)
 	var amber := Color("e6b95e") if state == "amber" else Color(0.28, 0.24, 0.17)
 	var green := Color("68b878") if state == "green" else Color(0.18, 0.28, 0.20)
-	draw_circle(at + Vector2(0, -6), 2.2, red)
-	draw_circle(at + Vector2(0, -1), 2.2, amber)
-	draw_circle(at + Vector2(0, 4), 2.2, green)
+	draw_circle(at + Vector2(0, -9), 3.2, red)
+	draw_circle(at + Vector2(0, -1), 3.2, amber)
+	draw_circle(at + Vector2(0, 7), 3.2, green)
