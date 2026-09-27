@@ -9,8 +9,11 @@ void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	vec2 p = (UV - bounds.xy) / bounds.zw;
 	float light = max(c.r, max(c.g, c.b));
-	bool skin = c.r > c.g * 1.16 && c.g > c.b * 1.12 && light > 0.40;
-	bool hair = p.y < 0.42 && c.r > c.b * 1.15 && light < 0.53;
+	// Darker authored skin pixels must remain skin. The old light > 0.40 gate
+	// classified parts of some female faces as hair, producing a black-face artifact.
+	bool skin = c.r > c.g * 1.12 && c.g > c.b * 1.08 && light > 0.22;
+	bool face_zone = p.y > 0.15 && p.y < 0.44 && p.x > 0.25 && p.x < 0.75;
+	bool hair = !skin && !face_zone && p.y < 0.42 && c.r > c.b * 1.15 && light < 0.53;
 	bool fringe = skin && ((hair_style == 1 && p.y < 0.29) || (hair_style == 2 && p.y < 0.39 && p.x < 0.42));
 	if (hair || fringe) c.rgb = hair_color.rgb * (0.60 + light);
 	else if (skin) c.rgb = skin_color.rgb * (0.55 + light * 0.60);
