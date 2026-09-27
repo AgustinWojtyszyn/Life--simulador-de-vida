@@ -23,6 +23,7 @@ var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 var texture_used_cache: Dictionary = {}
 var road_cache: Array[Rect2] = []
+var occlusion_clock := 0.0
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
 	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
@@ -286,18 +287,27 @@ func add_prop(kind: String, pos: Vector2, footprint: Rect2) -> void:
 		add_solid(Rect2(pos + footprint.position, footprint.size))
 
 func _process(delta: float) -> void:
-	# Keep the controllable resident readable while passing behind a facade/canopy.
+	# Visibility/occlusion does not need a 60 Hz scan over every facade and tree.
+	# Updating at 10 Hz keeps the same visual behaviour while removing hundreds
+	# of transforms and rect checks per rendered frame in the expanded district.
+	occlusion_clock += delta
+	if occlusion_clock < 0.10:
+		return
+	var elapsed := occlusion_clock
+	occlusion_clock = 0.0
 	var player: Node2D = $Player
 	for sprite in occluders:
-		var nearby := player.position.distance_squared_to(sprite.get_parent().position) < 1050.0 * 1050.0
-		sprite.get_parent().visible = nearby
-		if not nearby: continue
-		var behind: bool = player.position.y < sprite.get_parent().position.y
+		var parent := sprite.get_parent() as Node2D
+		var nearby := player.position.distance_squared_to(parent.position) < 1050.0 * 1050.0
+		parent.visible = nearby
+		if not nearby:
+			continue
+		var behind: bool = player.position.y < parent.position.y
 		var local_head := sprite.to_local(player.position - Vector2(0, 15))
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
-		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, delta * 4.0)
-		if sprite.get_parent().get_script() == CityBuildingScript:
-			sprite.get_parent().modulate.a = 1.0
+		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, elapsed * 4.0)
+		if parent.get_script() == CityBuildingScript:
+			parent.modulate.a = 1.0
 
 func build_expansion() -> void:
 	var data: DistrictData = WorldManager.district
