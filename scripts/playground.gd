@@ -19,6 +19,7 @@ var placed_prop_bounds: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 var texture_used_cache: Dictionary = {}
+var road_cache: Array[Rect2] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
 	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
@@ -29,6 +30,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	configure_input()
 	map_size = WorldManager.district.world_size
+	road_cache = DistrictBlocks.roads(WorldManager.district)
 	$Player/Camera2D.limit_right = int(map_size.x)
 	$Player/Camera2D.limit_bottom = int(map_size.y)
 	# Static CanvasItem drawing is cached without allocating a 4800x3200
@@ -239,7 +241,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	prop.set_meta("orientation", facing)
 	sprite.texture = texture
 	sprite.region_enabled = true
-	sprite.region_rect = sprite.texture.get_image().get_used_rect()
+	sprite.region_rect = texture_used_rect(sprite.texture)
 	sprite.position = Vector2(0, -size.y / 2)
 	sprite.scale = size / sprite.region_rect.size
 	sprite.modulate = tint
@@ -466,7 +468,7 @@ func add_building_solid(building: CityBuilding) -> void:
 	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
 
 func roads() -> Array[Rect2]:
-	return DistrictBlocks.roads(WorldManager.district)
+	return road_cache
 
 func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Vector2:
 	# Reserve the entire facade envelope, not just its collision strip. This
