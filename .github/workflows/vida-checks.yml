@@ -30,3 +30,7 @@ jobs:
         run: timeout 75s godot --headless --path . -s tests/interactions_test.gd
       - name: Movement
         run: timeout 75s godot --headless --path . -s tests/movement_test.gd
+      - name: Traffic
+        run: timeout 75s godot --headless --path . -s tests/traffic_test.gd
+      - name: Orientation
+        run: timeout 90s godot --headless --path . -s tests/orientation_test.gd
