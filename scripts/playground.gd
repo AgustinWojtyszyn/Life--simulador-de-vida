@@ -89,6 +89,7 @@ func _ready() -> void:
 		vehicle.player = $Player
 		add_child(vehicle)
 	add_expansion_traffic(regional_models)
+	add_grid_traffic(regional_models)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
@@ -122,6 +123,27 @@ func _ready() -> void:
 	interactions.set_script(Interactions)
 	interactions.hud = hud
 	add_child(interactions)
+
+func add_grid_traffic(regional_models: Array) -> void:
+	# The expanded city must not feel like traffic exists only around spawn.
+	# Two lightweight vehicles circulate on each additional avenue lane.
+	var roads_h := DistrictBlocks.horizontal_roads(WorldManager.district)
+	for road_index in range(1, roads_h.size()):
+		var road: Rect2 = roads_h[road_index]
+		for lane_index in 2:
+			var vehicle := AnimatableBody2D.new()
+			vehicle.set_script(Vehicle)
+			vehicle.name = "GridTraffic_%s_%s" % [road_index, lane_index]
+			vehicle.model = regional_models[(road_index + lane_index) % regional_models.size()]
+			vehicle.direction = 1.0 if lane_index == 0 else -1.0
+			vehicle.position = Vector2(
+				280.0 + road_index * 610.0 + lane_index * 920.0,
+				road.get_center().y + (-24.0 if lane_index == 0 else 24.0)
+			)
+			vehicle.route_right = map_size.x + 140.0
+			vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 7.0 - road_index * 2.0
+			vehicle.player = $Player
+			add_child(vehicle)
 
 func add_expansion_traffic(regional_models: Array) -> void:
 	var circuit: Array[Vector2] = [
