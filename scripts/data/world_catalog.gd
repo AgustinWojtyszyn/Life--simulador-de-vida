@@ -37,7 +37,7 @@ static func countries() -> Array[CountryData]:
 			{"position": Vector2(minf(east + 245, 2270), 335), "kind": "office", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(1560, 780), "kind": "clinic", "mode": "INTERACTABLE"},
 			{"position": Vector2(east, 800), "kind": "shop", "mode": "INTERACTABLE"},
-			{"position": Vector2(minf(east + 225, 2270), 920), "kind": "house", "mode": "EXTERIOR_ONLY"},
+			{"position": Vector2(minf(east + 225, 2270), 800), "kind": "house", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(230, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
 			{"position": Vector2(560, 1460), "kind": "shop", "mode": "INTERACTABLE"},
 			{"position": Vector2(1160, 1460), "kind": "house", "mode": "EXTERIOR_ONLY"},
@@ -48,7 +48,7 @@ static func countries() -> Array[CountryData]:
 		# Slots leave doors, sidewalks, the plaza and parking circulation clear.
 		var mixed_positions := [Vector2(150, 1060), Vector2(380, 1060), Vector2(620, 1060),
 			Vector2(1160, 1060), Vector2(1370, 1060),
-			Vector2(1630, 1060), Vector2(east + 160, 1060), Vector2(2200, 610),
+			Vector2(1630, 1060), Vector2(east + 160, 1060),
 			Vector2(780, 1460), Vector2(2280, 1460)]
 		for i in mixed_positions.size():
 			var housing := i % 3 != 1

@@ -13,6 +13,8 @@ const BuildingVariants := preload("res://scripts/data/building_variant.gd")
 const CityBuildingScript := preload("res://scripts/building.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
+var building_bounds: Array[Rect2] = []
+var placed_prop_bounds: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
@@ -49,6 +51,7 @@ func _ready() -> void:
 	add_frontage("market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53), 1)
 	add_frontage("cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), 2)
 	add_frontage("market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64), 3)
+	build_expansion()
 	var parked_positions := [Vector2(1126, 732), Vector2(1304, 732), Vector2(1126, 876), Vector2(1304, 876)]
 	var parked_models := ["car", "van", "coupe", "taxi"]
 	for i in parked_positions.size():
@@ -100,7 +103,7 @@ func _ready() -> void:
 	add_asset("props/fountain", Vector2(457, 819), Vector2(144, 108), Rect2(-49, -31, 98, 28))
 	add_prop("sign", Vector2(266, 355), Rect2(-7, -5, 14, 6))
 	add_prop("sign", Vector2(499, 354), Rect2(-7, -5, 14, 6))
-	build_expansion()
+	decorate_expansion()
 	populate()
 	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
 	var layer := CanvasLayer.new()
@@ -154,13 +157,15 @@ func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, 
 	building.interior_type = "cafe" if spec.type in ["cafe", "diner", "pizzeria", "bakery"] else "shop"
 	building.building_id = "%s_front_%d" % [building.country_id, index]
 	building.facade = load(spec.path)
-	building.size = building.facade.get_size() * 1.25
+	fit_building(building)
 	add_child(building)
 	city_objects.append(building)
 	occluders.append(building.get_child(0))
-	add_solid(Rect2(pos + footprint.position, footprint.size))
+	add_building_solid(building)
 
 func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tint := Color.WHITE) -> void:
+	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
+	if not pos.is_finite(): return
 	var prop := Node2D.new()
 	prop.name = asset.get_file().capitalize()
 	prop.position = pos
@@ -171,9 +176,10 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	elif asset == "vegetation/tree":
 		path = WorldManager.country.greenery
 	sprite.texture = load(path)
-	sprite.centered = false
-	sprite.position = Vector2(-size.x / 2, -size.y)
-	sprite.scale = size / sprite.texture.get_size()
+	sprite.region_enabled = true
+	sprite.region_rect = sprite.texture.get_image().get_used_rect()
+	sprite.position = Vector2(0, -size.y / 2)
+	sprite.scale = size / sprite.region_rect.size
 	sprite.modulate = tint
 	prop.add_child(sprite)
 	if asset == "props/fountain":
@@ -184,6 +190,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		prop.add_to_group("parked_vehicles")
 	if asset == "props/lamp":
 		prop.add_to_group("street_lamps")
+	prop.set_meta("placement_bounds", Rect2(pos - Vector2(size.x / 2, size.y), size))
 	add_child(prop)
 	city_objects.append(prop)
 	if asset.begins_with("buildings/"):
@@ -216,7 +223,7 @@ func _process(delta: float) -> void:
 		var covered: bool = behind and sprite.get_rect().has_point(local_head)
 		sprite.modulate.a = move_toward(sprite.modulate.a, 0.45 if covered else 1.0, delta * 4.0)
 		if sprite.get_parent().get_script() == CityBuildingScript:
-			sprite.get_parent().modulate.a = sprite.modulate.a
+			sprite.get_parent().modulate.a = 1.0
 
 func build_expansion() -> void:
 	var data: DistrictData = WorldManager.district
@@ -235,12 +242,14 @@ func build_expansion() -> void:
 		building.interior_type = ("cafe" if spec.type in ["cafe", "bakery", "pizzeria", "diner"] else "shop") if slot.kind == "shop" else ""
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
-		building.size = building.facade.get_size() * 1.15
+		fit_building(building)
 		add_child(building)
 		city_objects.append(building)
 		occluders.append(building.get_child(0))
-		add_solid(Rect2(building.position + Vector2(-76, -48), Vector2(150, 44)))
+		add_building_solid(building)
 		index += 1
+func decorate_expansion() -> void:
+	var data: DistrictData = WorldManager.district
 	var east := data.side_street_x + data.side_street_width + 140
 	add_asset("props/fountain", Vector2(east, 1040), Vector2(100, 75), Rect2(-32, -21, 64, 20))
 	add_asset("props/bench", Vector2(east - 80, 1080), Vector2(58, 43), Rect2(-23, -12, 46, 12))
@@ -302,3 +311,53 @@ func add_neighbor(id: String, title: String, at: Vector2) -> void:
 	walker.set_meta("person_id", id)
 	walker.set_meta("person_name", title)
 	add_child(walker)
+
+func fit_building(building: CityBuilding) -> void:
+	var used := building.facade.get_image().get_used_rect().size
+	var max_width := 190.0
+	var max_height := 238.0
+	for road in roads():
+		if road.size.x > 1000 and road.end.y < building.position.y:
+			max_height = minf(max_height, building.position.y - road.end.y - 24)
+		if road.size.y > 1000:
+			var clearance := road.position.x - building.position.x if building.position.x < road.position.x else building.position.x - road.end.x
+			max_width = minf(max_width, (clearance - 14) * 2)
+	# The southern parking bays remain unobstructed by the next frontage.
+	if building.position.x > 1030 and building.position.x < 1400 and building.position.y == 1060:
+		max_height = minf(max_height, 130)
+	var factor := minf(max_width / used.x, max_height / used.y)
+	building.size = building.facade.get_size() * factor
+	building_bounds.append(Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
+
+func add_building_solid(building: CityBuilding) -> void:
+	var bounds: Rect2 = building_bounds.back()
+	var depth := minf(64.0, bounds.size.y * 0.32)
+	add_solid(Rect2(building.position + Vector2(-bounds.size.x * 0.46, -depth), Vector2(bounds.size.x * 0.92, depth - 4)))
+
+func roads() -> Array[Rect2]:
+	return [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(WorldManager.district.side_street_x, 16, WorldManager.district.side_street_width, 1568)]
+
+func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Vector2:
+	# Reserve the entire facade envelope, not just its collision strip. This
+	# prevents short props from appearing pasted onto a tall building's front.
+	var offsets := [Vector2.ZERO]
+	if not parked:
+		for distance in [32, 64, 96, 128]:
+			for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP]:
+				offsets.append(direction * distance)
+	for offset in offsets:
+		var candidate: Vector2 = at + offset
+		var visual := Rect2(candidate - Vector2(size.x / 2, size.y), size)
+		var base := Rect2(candidate - Vector2(size.x / 2, 16), Vector2(size.x, 20))
+		if not Rect2(20, 20, 2360, 1560).encloses(visual): continue
+		var valid := true
+		for bounds in building_bounds:
+			if visual.intersects(bounds.grow(8)): valid = false
+		for road in roads():
+			if base.intersects(road.grow(8)): valid = false
+		for bounds in placed_prop_bounds:
+			if base.intersects(bounds.grow(5)): valid = false
+		if valid:
+			placed_prop_bounds.append(base)
+			return candidate
+	return Vector2(INF, INF)
