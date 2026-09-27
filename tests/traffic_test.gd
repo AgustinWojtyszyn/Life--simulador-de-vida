@@ -55,22 +55,35 @@ func run() -> void:
 		same_lane = cars.filter(func(vehicle): return vehicle.direction > 0.0)
 	check(same_lane.size() >= 2, "Traffic test needs two same-direction vehicles")
 	var car: AnimatableBody2D = same_lane[0]
+	# Isolate braking behaviour from unrelated cars, pedestrians and red lights.
+	for other in all_cars:
+		if other != car:
+			other.remove_from_group("city_traffic")
+	for resident in get_nodes_in_group("city_residents"):
+		resident.remove_from_group("city_residents")
+	for signal in get_nodes_in_group("traffic_signals"):
+		signal.horizontal_state = "green"
+		signal.vertical_state = "green"
 	car.position = Vector2(340, car.position.y)
 	car.current_speed = 66.0
-	player.position = Vector2(465, 444)
+	car.proximity_clock = 0.0
+	player.position = Vector2(465, car.position.y - 10.0)
 	for i in 240:
 		car._physics_process(1.0 / 60.0)
 	check(car.position.x < player.position.x - car.half_width - 12, "Car must brake before the resident")
 	check(car.current_speed < 0.1, "Car must wait for the crossing to clear")
-	player.position = Vector2(590, 370)
+	player.position = Vector2(590, car.position.y - 90.0)
+	car.proximity_clock = 0.0
 	var stopped_x: float = car.position.x
 	for i in 60:
 		car._physics_process(1.0 / 60.0)
 	check(car.position.x > stopped_x + 10, "Car must resume after the resident leaves")
 	var leader: AnimatableBody2D = same_lane[1]
+	leader.add_to_group("city_traffic")
 	leader.position = Vector2(620, car.position.y)
 	car.position = Vector2(470, car.position.y)
 	car.current_speed = 66.0
+	car.proximity_clock = 0.0
 	for i in 240:
 		car._physics_process(1.0 / 60.0)
 	check(leader.position.x - car.position.x >= leader.half_width + car.half_width + 21.9, "Queue must preserve clearance")
