@@ -20,6 +20,8 @@ func _ready() -> void:
 	add_child(music_player)
 
 func start_world(country_id: String) -> void:
+	if current_country == country_id and music_player.playing:
+		return
 	current_country = country_id
 	track_index = country_seed(country_id) % 3
 	track_clock = 0.0
