@@ -16,19 +16,8 @@ var update_clock := 0.0
 func _ready() -> void:
 	add_to_group("traffic_signals")
 	z_index = 14
-	# Spawn four directional signal sprites using the PixelLab asset
-	var sprite_path := "res://assets/city/props/traffic_light.png"
-	if ResourceLoader.exists(sprite_path):
-		var tex: Texture2D = load(sprite_path)
-		# Signals stand on the four sidewalk corners, never inside a traffic lane.
-		for pos in signal_positions():
-			var s := Sprite2D.new()
-			s.texture = tex
-			s.centered = true
-			s.position = pos
-			s.scale = Vector2(0.78, 0.78)
-			s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			add_child(s)
+	# Use one state-driven signal rendering per corner. Previously a decorative
+	# sprite and the procedural signal were stacked at the same coordinates.
 	refresh_state(true)
 
 func _process(delta: float) -> void:

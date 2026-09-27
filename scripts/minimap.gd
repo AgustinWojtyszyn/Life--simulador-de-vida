@@ -117,7 +117,8 @@ func _draw() -> void:
 		draw_rect(Rect2(p - Vector2(dot_size, dot_size), Vector2(dot_size * 2, dot_size * 2)), col)
 		# Expanded map is a navigation tool, not merely a nearby radar.
 		if expanded and poi_label != "":
-			draw_string(font, p + Vector2(4, 4), poi_label, HORIZONTAL_ALIGNMENT_LEFT, 68, 7, col)
+			var destination_name := str(object.get_meta("building_title", poi_label))
+			draw_string(font, p + Vector2(4, 4), destination_name, HORIZONTAL_ALIGNMENT_LEFT, 82, 7, col)
 	# Traffic signals
 	for traffic_light in get_tree().get_nodes_in_group("traffic_signals"):
 		if not is_instance_valid(traffic_light):

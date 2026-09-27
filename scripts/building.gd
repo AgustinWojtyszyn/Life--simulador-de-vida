@@ -41,6 +41,7 @@ func _ready() -> void:
 		add_destination_label()
 	set_meta("building_mode", Access.keys()[access])
 	set_meta("building_type", building_type)
+	set_meta("building_title", "TU HOGAR" if is_home else title)
 	set_meta("orientation", orientation)
 	if access != Access.EXTERIOR_ONLY:
 		var door := InteractionTargetScript.new()

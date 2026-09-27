@@ -1,4 +1,4 @@
-extends Node2D
+extends CharacterBody2D
 
 enum State { WALK, IDLE, SIT, PHONE, DRINK, EAT, SHOP, CHAT, WAIT_CROSSING, ENTER_BUILDING, EXIT_BUILDING, LOOK_AROUND, REST, OPTIONAL_JOG }
 var state := State.WALK
@@ -23,6 +23,15 @@ var activity := "walk"
 var activity_time := 0.0
 
 func _ready() -> void:
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	collision_layer = 4
+	collision_mask = 5 # world (1) + other residents (4)
+	var collider := CollisionShape2D.new()
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(12, 8)
+	collider.shape = shape
+	collider.position = Vector2(0, -4)
+	add_child(collider)
 	add_to_group("city_residents")
 	personality = get_index() % 5
 	wait_time = float(personality) * 0.73
@@ -35,7 +44,7 @@ func _ready() -> void:
 	add_child(visual)
 	sprite = visual.sprite
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if indoor_time > 0:
 		indoor_time = maxf(0, indoor_time - delta)
 		visible = indoor_time == 0
@@ -82,20 +91,22 @@ func _process(delta: float) -> void:
 		desired += separation * minf(48.0, desired_speed * 0.75)
 		desired = desired.limit_length(desired_speed)
 	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
-	var movement := velocity * delta
-	if movement.length() > remaining: movement = goal - position
-	var candidate := position + movement
+	var intended := velocity * delta
+	if intended.length() > remaining:
+		velocity = position.direction_to(goal) * remaining / maxf(delta, 0.0001)
+		intended = goal - position
+	var candidate := position + intended
 	var parent := get_parent()
 	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
-		# Do not ghost through a facade or prop. Skip the blocked local waypoint
-		# and let the short route choose another approach on the next update.
 		velocity = Vector2.ZERO
 		crossing = false
 		destination = (destination + 1) % route.size()
 		wait_time = 0.35
 		visual.animate_motion(Vector2.ZERO, 0)
 		return
-	position = candidate
+	var before := position
+	move_and_slide()
+	var movement := position - before
 	visual.animate_motion(movement, movement.length())
 	if position.distance_to(goal) < 1:
 		velocity = Vector2.ZERO
@@ -129,10 +140,14 @@ func apply_crowd_separation(delta: float) -> void:
 	var push := crowd_separation()
 	if push.length_squared() < 0.001:
 		return
-	var candidate := position + push.normalized() * minf(20.0 * delta, 1.5)
+	var nudge := push.normalized() * minf(20.0, push.length() * 28.0)
+	var candidate := position + nudge * delta
 	var parent := get_parent()
 	if not parent.has_method("walker_position_clear") or bool(parent.call("walker_position_clear", candidate)):
-		position = candidate
+		var previous_velocity := velocity
+		velocity = nudge
+		move_and_slide()
+		velocity = previous_velocity
 
 func choose_activity() -> void:
 	if route_kind == "football":

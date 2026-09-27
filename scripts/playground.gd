@@ -461,8 +461,7 @@ func populate() -> void:
 		var seat: Vector2 = benches[0].position + Vector2(0, 2)
 		routes.append([seat, seat + Vector2(0, 28), seat + Vector2(70, 28), seat + Vector2(0, 28)])
 	for i in WorldManager.district.population:
-		var walker := Node2D.new()
-		walker.set_script(Walker)
+		var walker := Walker.new()
 		walker.route.assign(routes[i % routes.size()])
 		walker.position = walker.route[0] + Vector2(int(i / routes.size()) * 18, 0)
 		walker.speed = 58.0 + (i % 6) * 6
@@ -492,6 +491,19 @@ func fit_building(building: CityBuilding) -> void:
 	var catalog := building.variant.has("family")
 	var max_width := 170.0 if catalog else 190.0
 	var max_height := float(building.variant.get("height", 238.0)) if catalog else 238.0
+	# Preserve hierarchy without making houses microscopic beside towers.
+	if building.building_type in ["tower", "residential_tower"]:
+		max_width = maxf(max_width, 220.0)
+		max_height = maxf(max_height, 300.0)
+	elif building.building_type in ["apartments", "residential_apartment", "residential_building", "low_apartments"]:
+		max_width = maxf(max_width, 195.0)
+		max_height = maxf(max_height, 220.0)
+	elif building.building_type in ["clinic", "office", "school", "library", "public"]:
+		max_width = maxf(max_width, 205.0)
+		max_height = maxf(max_height, 190.0)
+	elif building.building_type.begins_with("residential"):
+		max_width = minf(max_width, 178.0)
+		max_height = minf(max_height, 170.0)
 	if building.building_type == "kiosk":
 		max_width = 132.0
 		max_height = 170.0
