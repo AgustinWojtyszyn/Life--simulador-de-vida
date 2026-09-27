@@ -61,6 +61,8 @@ func run() -> void:
 				check(orientation.vector(facing).dot(car.motion_vector.normalized()) >= 0.923, "Vehicle frame agrees with actual displacement within 22.5 degrees")
 				check(car.sprite.rotation == 0, "No rotated vehicle PNGs")
 				check(car.sprite.position == Vector2(0, -car.body_height), "Turning keeps the same ground centre")
+				var frame_bounds: Rect2 = car.art_bounds[car.facing_index]
+				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y * 0.5), "Directional frames share one wheel/ground anchor")
 			check(seen.size() == 8, "Rounded circuit exercises all eight views")
 		print("ORIENTATION: ", country.id, " ", views.keys())
 		world.queue_free()
