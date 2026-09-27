@@ -430,7 +430,11 @@ func fit_building(building: CityBuilding) -> void:
 	# The southern parking bays remain unobstructed by the next frontage.
 	if building.position.x > 1030 and building.position.x < 1400 and building.position.y == 1060:
 		max_height = minf(max_height, 130)
-	var factor := minf(max_width / used.x, max_height / used.y)
+	var factor: float = minf(max_width / used.x, max_height / used.y)
+	if building.building_type == "kiosk":
+		# Kiosk source art has transparent canvas padding. Cap the full canvas,
+		# not only the non-transparent used rect, so it is never visibly blown up.
+		factor = minf(factor, 128.0 / building.facade.get_size().x)
 	building.size = building.facade.get_size() * factor
 	var normal := AssetOrientation.vector(building.orientation)
 	var width := used.x * factor
