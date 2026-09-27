@@ -82,8 +82,9 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 		[Vector2(4100, 2630), "shop", "ENTERABLE"],
 		[Vector2(3320, 1100), "office", "ENTERABLE"],
 	]:
-		if service[0].x < district.world_size.x - 120 and service[0].y < district.world_size.y - 120:
-			slots.append({"position": service[0], "kind": service[1], "mode": service[2], "asset_index": index, "facing": "south", "street_normal": "south"})
+		var service_at: Vector2 = service[0]
+		if service_at.x < district.world_size.x - 120 and service_at.y < district.world_size.y - 120:
+			slots.append({"position": service_at, "kind": service[1], "mode": service[2], "asset_index": index, "facing": "south", "street_normal": "south"})
 			index += 1
 
 	# South-facing rows use the broadest set of regional architecture. This is
