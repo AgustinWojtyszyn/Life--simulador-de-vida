@@ -15,7 +15,7 @@ func run() -> void:
 	var inputs := root.get_node("InputManager")
 	wm.select_country("ar")
 	wm.location = "street"
-	wm.playing = true
+	wm.playing = false
 	wm.spawn_position = Vector2(1550, 620)
 
 	var world: Node2D = load("res://scenes/playground.tscn").instantiate()
