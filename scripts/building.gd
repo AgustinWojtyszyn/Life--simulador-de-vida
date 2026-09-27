@@ -60,8 +60,22 @@ func _ready() -> void:
 		add_child(door)
 
 func _draw() -> void:
-	var width := 108 if is_home else 104
-	draw_rect(Rect2(-width / 2, -7, width, 15), Color("263d40"))
-	draw_string(ThemeDB.fallback_font, Vector2(-width / 2 + 3, 4), "TU HOGAR" if is_home else title, HORIZONTAL_ALIGNMENT_CENTER, width - 6, 9, Color("f0d5a0"))
+	# One soft ground-contact shadow integrates each facade into the pavement.
+	# It is based on the footprint rather than the PNG canvas, so tall assets do
+	# not look like stickers floating over the street.
+	var shadow_radius: float = clampf(footprint.size.x * 0.42, 34.0, 92.0)
+	draw_set_transform(Vector2(0, 2), 0.0, Vector2(1.0, 0.28))
+	draw_circle(Vector2.ZERO, shadow_radius, Color(0.08, 0.12, 0.15, 0.18))
+	draw_set_transform(Vector2.ZERO)
+
+	# Ordinary residences no longer carry a debug-like VIVIENDA/MORADIA label.
+	# Keep labels for the player's home and actual destinations only.
+	if building_type.begins_with("residential") and not is_home:
+		return
+	var width: float = 112.0 if is_home else 106.0
+	draw_rect(Rect2(-width / 2.0, -7, width, 15), Color("263d40"))
+	draw_string(ThemeDB.fallback_font, Vector2(-width / 2.0 + 3, 4), "TU HOGAR" if is_home else title, HORIZONTAL_ALIGNMENT_CENTER, width - 6, 9, Color("f0d5a0"))
+	if access == Access.ENTERABLE and not is_home:
+		draw_circle(Vector2(width / 2.0 - 7, 0), 2.5, Color("efce8a"))
 	if is_home:
 		draw_colored_polygon(PackedVector2Array([Vector2(-6, 10), Vector2(6, 10), Vector2(0, 15)]), Color("efce8a"))
