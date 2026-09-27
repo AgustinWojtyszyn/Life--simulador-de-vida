@@ -24,6 +24,8 @@ jobs:
         run: godot --headless --path . --import
       - name: Expanded city + mobile smoke
         run: timeout 75s godot --headless --path . -s tests/iteration_smoke_test.gd
+      - name: Android + desktop adaptation
+        run: timeout 120s godot --headless --path . -s tests/android_city_test.gd
       - name: Interactions
         run: timeout 75s godot --headless --path . -s tests/interactions_test.gd
       - name: Movement
