@@ -27,7 +27,8 @@ var body_height := 14.0
 var visual_scale := 1.0
 var braking := BRAKING
 var braking_sound_active := false
-var engine_sound_clock := 0.0
+var proximity_clock := 0.0
+var cached_gap := 99999.0
 
 const CATEGORIES := {
 	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0},
@@ -137,8 +138,15 @@ func free_distance() -> float:
 	return maxf(0.0, gap)
 
 func _physics_process(delta: float) -> void:
-	engine_sound_clock = maxf(0.0, engine_sound_clock - delta)
-	var gap := free_distance()
+	# Proximity scans are the expensive part of traffic AI: each vehicle checks
+	# every other vehicle and resident. Reuse the result for a few physics ticks,
+	# especially when the car is far from the player.
+	proximity_clock -= delta
+	if proximity_clock <= 0.0:
+		cached_gap = free_distance()
+		var near_player := is_instance_valid(player) and position.distance_squared_to(player.position) < 900.0 * 900.0
+		proximity_clock = 0.05 if near_player else 0.16
+	var gap := cached_gap
 	var desired := cruise_speed * (0.8 if WeatherSystem.state == "rain" else 1.0)
 	if not route_points.is_empty():
 		# Brake before the arc instead of rotating the artwork after a hard turn.
@@ -149,9 +157,8 @@ func _physics_process(delta: float) -> void:
 	if braking_now and not braking_sound_active:
 		AudioSystem.play_sfx("brake", position)
 	braking_sound_active = braking_now
-	if is_instance_valid(player) and current_speed > 45.0 and engine_sound_clock <= 0.0 and position.distance_to(player.position) < 420.0 and get_index() % 2 == 0:
-		AudioSystem.play_sfx("engine", position)
-		engine_sound_clock = 1.5 + float(get_index() % 3) * 0.28
+	# Do not spawn periodic per-car engine clips. A cluster of nearby vehicles
+	# used to create a machine-gun-like audio pattern and unnecessary audio nodes.
 	current_speed = move_toward(current_speed, safe_speed, (braking if current_speed > safe_speed else driver_acceleration) * delta)
 	var step := minf(current_speed * delta, gap)
 	var previous := position
