@@ -239,6 +239,14 @@ func add_solid(rect: Rect2) -> void:
 	add_child(body)
 	solid_rects.append(rect)
 
+func walker_position_clear(at: Vector2, radius: float = 8.0) -> bool:
+	# Lightweight navigation guard for procedural pedestrians. Full pathfinding
+	# can come later; this prevents the current ghost-through-building failure.
+	for rect in solid_rects:
+		if rect.grow(radius).has_point(at):
+			return false
+	return true
+
 func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	var building := CityBuildingScript.new()
 	building.position = pos
