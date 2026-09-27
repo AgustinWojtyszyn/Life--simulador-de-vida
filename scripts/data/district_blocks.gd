@@ -96,6 +96,8 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 			var x := row_x[column]
 			if x > district.world_size.x - 100:
 				continue
+			if reserved_for_side_facade(x, district):
+				continue
 			if y < 500 and x < 1380:
 				# The first four authored regional storefronts already occupy it.
 				continue
@@ -127,6 +129,8 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 		for x in north_row_x:
 			if x > district.world_size.x - 100:
 				continue
+			if reserved_for_side_facade(x, district):
+				continue
 			if road.position.y > 1800 and road.position.y < 2100 and x > 1930 and x < 2770:
 				continue
 			slots.append({"position": Vector2(x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "north", "street_normal": "north"})
@@ -150,3 +154,9 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				index += 1
 
 	return slots
+
+static func reserved_for_side_facade(x: float, district: DistrictData) -> bool:
+	for road in vertical_roads(district):
+		if x >= road.position.x - 300.0 and x <= road.end.x + 300.0:
+			return true
+	return false
