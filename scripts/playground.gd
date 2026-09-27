@@ -231,6 +231,12 @@ func configure_input() -> void:
 			event.physical_keycode = key
 			InputMap.action_add_event(action, event)
 
+# Collision layers: PLAYER=1, TRAFFIC=2, NPC=4, WORLD=8
+const LAYER_PLAYER := 1
+const LAYER_TRAFFIC := 2
+const LAYER_NPC := 4
+const LAYER_WORLD := 8
+
 func add_solid(rect: Rect2) -> void:
 	var body := StaticBody2D.new()
 	var collision := CollisionShape2D.new()
@@ -238,6 +244,8 @@ func add_solid(rect: Rect2) -> void:
 	shape.size = rect.size
 	collision.shape = shape
 	body.position = rect.get_center()
+	body.collision_layer = LAYER_WORLD
+	body.collision_mask = 0
 	body.add_child(collision)
 	add_child(body)
 	solid_rects.append(rect)

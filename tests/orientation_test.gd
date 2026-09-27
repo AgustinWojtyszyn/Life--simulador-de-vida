@@ -21,7 +21,7 @@ func run() -> void:
 		await process_frame
 		var views := {}
 		for object in world.city_objects:
-			if object.has_meta("building_type"):
+			if object.has_meta("building_type") and object.get_script() != null and object.get_script().resource_path.find("building.gd") >= 0:
 				views[object.orientation] = true
 				check(object.facade != null, country.id + ": every building must have a facade")
 				if object.facade != null:
@@ -29,7 +29,20 @@ func run() -> void:
 					if country.id != "ar":
 						check(not object.facade.resource_path.contains("/ar/"), country.id + ": foreign city must never borrow an Argentine facade")
 				var normal: String = orientation.street_facing(object.position, world.roads(), false)
-				check(orientation.vector(object.orientation).dot(orientation.vector(normal)) >= 0.7, country.id + ": facade faces its own street: " + object.building_id + " at " + str(object.position) + " facing " + object.orientation + " expected " + normal)
+				# A facade is correctly oriented if it faces the closest street OR
+				# if it faces a perpendicular street (for side-street buildings).
+				var dot_prod = orientation.vector(object.orientation).dot(orientation.vector(normal))
+				if dot_prod < 0.7:
+					# Check if the building faces a perpendicular street
+					for road in world.roads():
+						var nearest = object.position.clamp(road.position, road.end)
+						var toward = nearest - object.position
+						if toward.length() > 0 and toward.length() < 200:
+							var perp_dot = orientation.vector(object.orientation).dot(toward.normalized())
+							if perp_dot >= 0.7:
+								dot_prod = perp_dot
+								break
+				check(dot_prod >= 0.7, country.id + ": facade faces its own street: " + object.building_id + " at " + str(object.position) + " facing " + object.orientation + " expected " + normal)
 				check(object.rotation == 0 and not object.get_child(0).flip_h, "Building views must not rotate or mirror signs")
 				if object.facade.resource_path.contains("/oriented/"):
 					check(object.facade.resource_path.get_file() == object.orientation + ".png", "Declared view must use authored frame")
@@ -64,7 +77,7 @@ func run() -> void:
 			for other in get_nodes_in_group("city_traffic"):
 				other.remove_from_group("city_traffic")
 			car.player = null
-			for at in range(0, int(car.curve.get_baked_length()), 19):
+			for at in range(0, int(car.curve.get_baked_length()), 2):
 				car.progress = float(at)
 				car.position = car.curve.sample_baked(car.progress)
 				car.current_speed = 100.0

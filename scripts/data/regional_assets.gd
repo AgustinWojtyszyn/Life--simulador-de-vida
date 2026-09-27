@@ -61,13 +61,13 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 		path = "res://assets/catalog/%s/restaurant.tres" % country
 	if asset == "mixed_old":
 		path = "res://assets/buildings/%s/mixed_old.png" % country
-	if not ResourceLoader.exists(path):
+	# Explicit asset selection BEFORE any fallback logic
+	if country == "ar" and asset == "almacen":
+		path = "res://assets/buildings/ar/almacen_new.png"
+	elif not ResourceLoader.exists(path):
 		var alt_path := "res://assets/buildings/%s/%s.png" % [country, asset]
 		if ResourceLoader.exists(alt_path):
 			path = alt_path
-		elif asset == "almacen" and country == "ar":
-			# Use the new Argentine neighborhood store asset (no pseudo-text)
-			path = "res://assets/buildings/ar/almacen_new.png"
 		else:
 			var catalog_family: String = str({
 				"clinic": "clinic", "office": "office", "workshop": "workshop",

@@ -22,10 +22,13 @@ static func street_facing(at: Vector2, roads: Array[Rect2], corners: bool = true
 			approaches.append({"distance": toward.length(), "vector": toward.normalized()})
 	approaches.sort_custom(func(a: Dictionary, b: Dictionary): return a.distance < b.distance)
 	if approaches.is_empty(): return "south"
+	# Use the closest road's direction as the primary facing
 	var normal: Vector2 = approaches[0].vector
+	# Only combine with a second road if the building is actually at a corner
+	# (both roads are very close, within 1.5x of each other)
 	if corners and approaches.size() > 1:
 		var second: Dictionary = approaches[1]
-		if second.distance < 180.0 and second.distance < approaches[0].distance * 2.5 and absf(normal.dot(second.vector)) < 0.1:
+		if second.distance < approaches[0].distance * 1.5:
 			normal += second.vector
 	return from_vector(normal)
 

@@ -109,7 +109,7 @@ func build_curve() -> void:
 		var corner := route_points[i]
 		var incoming := corner - route_points[posmod(i - 1, route_points.size())]
 		var outgoing := route_points[(i + 1) % route_points.size()] - corner
-		var radius := minf(20.0, minf(incoming.length(), outgoing.length()) * 0.13)
+		var radius := minf(50.0, minf(incoming.length(), outgoing.length()) * 0.40)
 		var before := corner - incoming.normalized() * radius
 		var after := corner + outgoing.normalized() * radius
 		curve.add_point(before, Vector2.ZERO, incoming.normalized() * radius * 0.5523)

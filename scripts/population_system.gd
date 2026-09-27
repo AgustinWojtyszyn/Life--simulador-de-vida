@@ -6,6 +6,9 @@ var timer := 0.0
 var spatial_grid: Dictionary = {}  # Vector2i(cell) -> Array[Node2D]
 const CELL_SIZE := 128.0
 
+func _ready() -> void:
+	add_to_group("population_system")
+
 func _process(delta: float) -> void:
 	timer -= delta
 	if timer > 0:

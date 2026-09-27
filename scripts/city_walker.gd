@@ -89,7 +89,7 @@ func _physics_process(delta: float) -> void:
 	# Check for oncoming walkers and yield deterministically.
 	# Only yield if we're the lower-priority walker AND the other walker
 	# is actually moving toward us (not just standing still).
-	for other in get_tree().get_nodes_in_group("city_residents"):
+	for other in get_nearby_residents(90.0):
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		if is_facing_oncoming(other) and should_yield_to(other):
@@ -201,6 +201,13 @@ func is_facing_oncoming(other: Node2D) -> bool:
 	if my_dir == Vector2.ZERO or other_dir == Vector2.ZERO:
 		return false
 	return my_dir.dot(other_dir) < -0.5
+
+func get_nearby_residents(radius: float) -> Array:
+	# Use spatial grid for O(1) neighbor queries
+	var pop_system := get_tree().get_nodes_in_group("population_system")
+	if not pop_system.is_empty():
+		return pop_system[0].call("get_nearby_npcs", position, radius)
+	return get_tree().get_nodes_in_group("city_residents")
 
 func should_yield_to(other: Node2D) -> bool:
 	# Deterministic priority: lower instance_id yields
