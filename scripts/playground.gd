@@ -18,6 +18,7 @@ var protected_content: Array[Rect2] = []
 var placed_prop_bounds: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
+var texture_used_cache: Dictionary = {}
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
 const TRAFFIC_LANES := [
 	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
@@ -227,7 +228,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		var model: String = {"car": "compact", "coupe": "sedan"}.get(asset.get_file(), asset.get_file())
 		path = "res://assets/vehicles/%s/%s.png" % [model, Vehicle.source_direction(model, facing)]
 	var texture: Texture2D = load(path)
-	var used := Vector2(texture.get_image().get_used_rect().size)
+	var used := Vector2(texture_used_rect(texture).size)
 	size = used * minf(size.x / used.x, size.y / used.y)
 	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
 	if not pos.is_finite():
@@ -410,7 +411,7 @@ func add_neighbor(id: String, title: String, at: Vector2) -> void:
 	add_child(walker)
 
 func fit_building(building: CityBuilding) -> void:
-	var used := building.facade.get_image().get_used_rect().size
+	var used := texture_used_rect(building.facade).size
 	var max_width := 190.0
 	var max_height := 238.0
 	if building.building_type == "kiosk":
@@ -452,6 +453,14 @@ func building_visual_valid(building: CityBuilding) -> bool:
 		if bounds.intersects(road.grow(2)):
 			return false
 	return true
+
+func texture_used_rect(texture: Texture2D) -> Rect2:
+	var key := texture.resource_path
+	if key.is_empty():
+		return texture.get_image().get_used_rect()
+	if not texture_used_cache.has(key):
+		texture_used_cache[key] = texture.get_image().get_used_rect()
+	return texture_used_cache[key]
 
 func add_building_solid(building: CityBuilding) -> void:
 	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
