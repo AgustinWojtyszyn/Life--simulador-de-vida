@@ -20,8 +20,12 @@ func _ready() -> void:
 	add_target(Vector2(390, 359), "Salir al barrio", "exit_interior", "exit")
 
 	match interior_kind:
-		"cafe", "bakery", "pizzeria", "trattoria":
+		"cafe":
 			setup_cafe_like()
+		"bakery":
+			setup_bakery()
+		"restaurant", "pizzeria", "trattoria":
+			setup_restaurant()
 		"clinic":
 			setup_clinic()
 		"office":
@@ -57,6 +61,29 @@ func setup_cafe_like() -> void:
 	add_target(Vector2(550, 250), "Pedir algo", "coffee", "counter")
 	add_resident("nico", "Nico", Vector2(656, 255), true)
 	add_resident("customer", "Cliente", Vector2(292, 293), false)
+
+func setup_bakery() -> void:
+	furniture("cafe_bar", Vector2(574, 205), Vector2(176, 105), Rect2(505, 160, 138, 40), "south-west")
+	furniture("market_shelf", Vector2(184, 212), Vector2(76, 110), Rect2(152, 182, 64, 24), "south-east")
+	furniture("market_shelf", Vector2(302, 212), Vector2(76, 110), Rect2(270, 182, 64, 24), "south-west")
+	furniture("checkout", Vector2(566, 300), Vector2(126, 88), Rect2(511, 266, 110, 26), "south-east")
+	add_target(Vector2(540, 328), "Comprar pan y provisiones · $12", "buy_food", "bakery_counter")
+	add_resident("baker", "Panadero", Vector2(620, 162), true)
+	add_resident("customer", "Cliente", Vector2(350, 305), false)
+
+func setup_restaurant() -> void:
+	for entry in [
+		[Vector2(190, 220), "south-east"],
+		[Vector2(345, 220), "south-west"],
+		[Vector2(230, 330), "south-west"],
+		[Vector2(405, 330), "south-east"],
+	]:
+		var at: Vector2 = entry[0]
+		furniture("dining", at, Vector2(88, 70), Rect2(at - Vector2(33, 26), Vector2(66, 22)), entry[1])
+	furniture("checkout", Vector2(590, 215), Vector2(132, 92), Rect2(533, 178, 114, 28), "south-west")
+	add_target(Vector2(560, 248), "Pedir comida", "buy_food", "restaurant_counter")
+	add_resident("host", "Encargado", Vector2(625, 176), true)
+	add_resident("customer", "Cliente", Vector2(430, 300), false)
 
 func setup_market_like() -> void:
 	for entry in [
