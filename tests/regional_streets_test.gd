@@ -56,7 +56,9 @@ func run() -> void:
 				if node.has_meta("building_type"): types.append(node.get_meta("building_type"))
 			check("sports" in types and "transport_stop" in types, "Argentina needs a pitch and bus stop")
 		check(facades.size() >= 10, country.id + ": diverse residential and commercial facades")
-		check(get_nodes_in_group("parked_vehicles").size() == 4, "Four valid parking spaces")
+		var parked := get_nodes_in_group("parked_vehicles")
+		print("PARKED ", country.id, " ", parked.size(), " ", parked.map(func(node): return node.position))
+		check(parked.size() == 4, "Four valid parking spaces")
 		print("REGIONAL STREET: ", country.id, " facades=", facades.size(), " objects=", world.city_objects.size())
 		world.queue_free()
 		await process_frame
