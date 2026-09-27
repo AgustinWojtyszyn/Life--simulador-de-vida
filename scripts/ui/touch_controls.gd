@@ -2,9 +2,12 @@ extends Control
 
 var stick_finger := -1
 var action_finger := -1
+var journal_finger := -1
 var stick_center := Vector2.ZERO
 var action_center := Vector2.ZERO
-var radius := 54.0
+var journal_center := Vector2.ZERO
+var radius := 72.0
+var action_radius := 50.0
 var context_available := false
 
 func _ready() -> void:
@@ -17,12 +20,20 @@ func _ready() -> void:
 func layout_controls() -> void:
 	var safe := DisplayServer.get_display_safe_area()
 	var screen := Vector2(DisplayServer.window_get_size())
+	var logical := get_viewport_rect().size
+	var scale_factor := clampf(minf(logical.x / 800.0, logical.y / 450.0), 1.0, 1.35)
+	radius = 72.0 * scale_factor
+	action_radius = 50.0 * scale_factor
 	var inset := Vector2(24, 24)
-	if screen.x > 0 and screen.y > 0:
-		inset = Vector2(maxf(24, safe.position.x * size.x / screen.x), maxf(24, (screen.y - safe.end.y) * size.y / screen.y))
-	stick_center = Vector2(inset.x + radius + 18, size.y - inset.y - radius - 8)
-	var right_inset := maxf(24, (screen.x - safe.end.x) * size.x / maxf(screen.x, 1))
-	action_center = Vector2(size.x - right_inset - 54, size.y - inset.y - 60)
+	if screen.x > 0 and screen.y > 0 and safe.size != Vector2i.ZERO:
+		inset = Vector2(
+			maxf(24, safe.position.x * logical.x / screen.x),
+			maxf(24, (screen.y - safe.end.y) * logical.y / screen.y)
+		)
+	stick_center = Vector2(inset.x + radius + 18, logical.y - inset.y - radius - 14)
+	var right_inset := maxf(24, (screen.x - safe.end.x) * logical.x / maxf(screen.x, 1)) if safe.size != Vector2i.ZERO else 24.0
+	action_center = Vector2(logical.x - right_inset - action_radius - 18, logical.y - inset.y - action_radius - 18)
+	journal_center = action_center + Vector2(0, -(action_radius * 2.0 + 28.0))
 	queue_redraw()
 
 func _process(_delta: float) -> void:
@@ -31,6 +42,7 @@ func _process(_delta: float) -> void:
 	if get_tree().paused:
 		stick_finger = -1
 		action_finger = -1
+		journal_finger = -1
 		InputManager.reset()
 		queue_redraw()
 		return
@@ -43,46 +55,67 @@ func _process(_delta: float) -> void:
 		queue_redraw()
 
 func _input(event: InputEvent) -> void:
-	if not visible or get_tree().paused:
+	if not visible:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if stick_finger == -1 and event.position.distance_to(stick_center) < radius * 1.6:
+			if get_tree().paused:
+				return
+			if stick_finger == -1 and event.position.distance_to(stick_center) < radius * 1.55:
 				stick_finger = event.index
 				update_stick(event.position)
-			elif context_available and action_finger == -1 and event.position.distance_to(action_center) < 45:
+			elif action_finger == -1 and event.position.distance_to(action_center) < action_radius * 1.25:
 				action_finger = event.index
-				InputManager.touch_interaction = true
+				if context_available:
+					InputManager.touch_interaction = true
+			elif journal_finger == -1 and event.position.distance_to(journal_center) < action_radius:
+				journal_finger = event.index
+				open_journal()
 		else:
 			if event.index == stick_finger:
 				stick_finger = -1
 				InputManager.touch_vector = Vector2.ZERO
 			if event.index == action_finger:
 				action_finger = -1
-		queue_redraw()
+			if event.index == journal_finger:
+				journal_finger = -1
+			queue_redraw()
 	elif event is InputEventScreenDrag and event.index == stick_finger:
 		update_stick(event.position)
 
 func update_stick(at: Vector2) -> void:
 	var axis := (at - stick_center) / radius
-	InputManager.touch_vector = Vector2.ZERO if axis.length() < 0.15 else axis.limit_length()
+	InputManager.touch_vector = Vector2.ZERO if axis.length() < 0.12 else axis.limit_length()
 	queue_redraw()
+
+func open_journal() -> void:
+	var world := WorldManager.active_world
+	if not is_instance_valid(world):
+		return
+	var life_panel := world.get_node_or_null("LifePanel")
+	if life_panel != null and not life_panel.opened:
+		life_panel.show_journal()
 
 func _draw() -> void:
 	if not visible:
 		return
-	draw_circle(stick_center, radius, Color(0.1, 0.2, 0.23, 0.32))
-	draw_arc(stick_center, radius, 0, TAU, 48, Color(0.9, 0.85, 0.7, 0.42), 2)
-	draw_circle(stick_center + InputManager.touch_vector * radius * 0.7, 22, Color(0.8, 0.82, 0.74, 0.5))
-	if context_available:
-		draw_circle(action_center, 38, Color(0.12, 0.22, 0.25, 0.78))
-		draw_arc(action_center, 38, 0, TAU, 32, Color("d3b17b"), 2)
-		draw_string(ThemeDB.fallback_font, action_center + Vector2(-29, 5), "ACTUAR", HORIZONTAL_ALIGNMENT_CENTER, 58, 12, Color("f2ddaa"))
+	var font := ThemeDB.fallback_font
+	draw_circle(stick_center, radius, Color(0.06, 0.12, 0.15, 0.42))
+	draw_arc(stick_center, radius, 0, TAU, 56, Color(0.93, 0.86, 0.69, 0.58), 3)
+	draw_circle(stick_center + InputManager.touch_vector * radius * 0.68, radius * 0.34, Color(0.79, 0.82, 0.75, 0.68))
+	var action_color := Color(0.12, 0.22, 0.25, 0.88) if context_available else Color(0.12, 0.18, 0.20, 0.38)
+	draw_circle(action_center, action_radius, action_color)
+	draw_arc(action_center, action_radius, 0, TAU, 40, Color("d3b17b") if context_available else Color(0.65, 0.64, 0.57, 0.42), 3)
+	draw_string(font, action_center + Vector2(-44, 6), "ACTUAR", HORIZONTAL_ALIGNMENT_CENTER, 88, 15, Color("f2ddaa") if context_available else Color(0.72, 0.71, 0.66, 0.62))
+	draw_circle(journal_center, action_radius * 0.78, Color(0.08, 0.16, 0.18, 0.78))
+	draw_arc(journal_center, action_radius * 0.78, 0, TAU, 36, Color(0.83, 0.74, 0.56, 0.62), 2)
+	draw_string(font, journal_center + Vector2(-34, 5), "VIDA", HORIZONTAL_ALIGNMENT_CENTER, 68, 14, Color("eee3ca"))
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		stick_finger = -1
 		action_finger = -1
+		journal_finger = -1
 		InputManager.reset()
 
 func _exit_tree() -> void:
