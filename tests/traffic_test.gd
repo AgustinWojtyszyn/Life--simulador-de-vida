@@ -22,8 +22,9 @@ func run() -> void:
 	var all_cars := get_nodes_in_group("city_traffic")
 	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty() and vehicle.model != "colectivo")
 	var player: CharacterBody2D = world.get_node("Player")
-	check(all_cars.size() == 10, "Two circuit vehicles and two Argentine buses must join six cars")
-	check(cars.size() == 6, "Six moving vehicles must spawn")
+	check(all_cars.size() >= 16, "Expanded district must keep starter, circuit, grid and bus traffic")
+	check(cars.size() >= 12, "Expanded avenues must add straight-moving traffic beyond the starter six")
+	check(all_cars.filter(func(vehicle): return vehicle.model == "colectivo").size() >= 2, "Argentina keeps both circulating buses")
 	var circuit_cars := all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty() and vehicle.model != "colectivo")
 	for turning in circuit_cars:
 		var seen := {}
@@ -49,7 +50,7 @@ func run() -> void:
 		check(cars[i].position.y == starts[i].y, "Cars must stay in lane")
 		cars[i].set_physics_process(false)
 	check(models.size() == 4, "Traffic must use four distinct vehicle models")
-	var car: AnimatableBody2D = cars[0]
+	var car: AnimatableBody2D = world.get_node("Traffic_0_0")
 	car.position = Vector2(340, 454)
 	car.current_speed = 66.0
 	player.position = Vector2(465, 444)
@@ -62,7 +63,7 @@ func run() -> void:
 	for i in 60:
 		car._physics_process(1.0 / 60.0)
 	check(car.position.x > stopped_x + 10, "Car must resume after the resident leaves")
-	var leader: AnimatableBody2D = cars[1]
+	var leader: AnimatableBody2D = world.get_node("Traffic_0_1")
 	leader.position = Vector2(620, 454)
 	car.position = Vector2(470, 454)
 	car.current_speed = 66.0
@@ -70,10 +71,10 @@ func run() -> void:
 		car._physics_process(1.0 / 60.0)
 	check(leader.position.x - car.position.x >= leader.half_width + car.half_width + 21.9, "Queue must preserve clearance")
 	check(car.current_speed < 0.1, "Follower must stop behind a stopped vehicle")
-	car.position = Vector2(2539, 454)
+	car.position = Vector2(car.route_right - 1.0, 454)
 	car.current_speed = 66.0
 	car._physics_process(0.1)
-	check(car.position.x < -120 and car.position.x >= -140, "Cars must recycle outside the visible map")
+	check(car.position.x < car.route_left + 20.0 and car.position.x >= car.route_left, "Cars must recycle outside the expanded visible map")
 	# Isolate the collision probe from the opposite lane car at x=300.
 	for other in all_cars:
 		if other != car: other.collision_layer = 0
