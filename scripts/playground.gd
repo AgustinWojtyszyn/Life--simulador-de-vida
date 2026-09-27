@@ -68,7 +68,7 @@ func _ready() -> void:
 	var regional_models: Array = {
 		"ar": ["compact", "taxi", "van", "sedan", "hatchback", "pickup", "classic", "compact", "sedan", "taxi", "van", "sports"],
 		"jp": ["hatchback", "compact", "van", "sedan", "suv", "taxi", "compact", "hatchback", "van", "sports", "sedan", "classic"],
-		"us": ["pickup", "suv", "sedan", "van", "compact", "taxi", "pickup", "truck", "suv", "sports", "sedan", "classic"],
+		"us": ["pickup", "suv", "sedan", "van", "compact", "taxi", "pickup", "van", "suv", "sports", "sedan", "classic"],
 		"it": ["compact", "hatchback", "sedan", "van", "taxi", "suv", "compact", "classic", "hatchback", "sports", "sedan", "van"],
 		"br": ["compact", "pickup", "sedan", "suv", "hatchback", "van", "compact", "taxi", "sedan", "pickup", "sports", "classic"],
 	}[WorldManager.country.id]
@@ -496,22 +496,22 @@ func fit_building(building: CityBuilding) -> void:
 		var family := str(building.variant.get("family", ""))
 		max_width = float({
 			"small_home": 148.0,
-			"medium_home": 162.0,
-			"modern_home": 174.0,
-			"low_apartments": 188.0,
-			"apartments": 205.0,
-			"tower": 232.0,
-			"store": 172.0,
-			"bakery": 176.0,
-			"restaurant": 184.0,
-			"cafe": 174.0,
-			"supermarket": 212.0,
-			"workshop": 196.0,
-			"service": 184.0,
-			"office": 210.0,
-			"public": 218.0,
-			"clinic": 196.0,
-		}.get(family, 190.0))
+			"medium_home": 156.0,
+			"modern_home": 164.0,
+			"low_apartments": 168.0,
+			"apartments": 176.0,
+			"tower": 188.0,
+			"store": 166.0,
+			"bakery": 168.0,
+			"restaurant": 172.0,
+			"cafe": 166.0,
+			"supermarket": 178.0,
+			"workshop": 172.0,
+			"service": 168.0,
+			"office": 178.0,
+			"public": 180.0,
+			"clinic": 172.0,
+		}.get(family, 170.0))
 		max_height = float(building.variant.get("height", 238.0))
 	if building.building_type == "kiosk":
 		max_width = 132.0
