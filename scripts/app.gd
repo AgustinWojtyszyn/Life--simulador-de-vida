@@ -34,6 +34,8 @@ func switch_world() -> void:
 	InputManager.reset()
 	InputManager.refresh_device_mode()
 	WorldManager.settings["touch_controls"] = InputManager.touch_enabled
+	AudioSystem.set_enabled(bool(WorldManager.settings.get("audio_enabled", true)))
+	AudioSystem.set_music_volume(float(WorldManager.settings.get("music_volume", 0.65)))
 	if is_instance_valid(menu):
 		menu.queue_free()
 		menu = null
