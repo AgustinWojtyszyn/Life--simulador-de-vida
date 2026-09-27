@@ -5,6 +5,7 @@ var expanded := false
 var refresh_clock := 0.0
 
 func _ready() -> void:
+	add_to_group("city_minimap")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_NONE
 	gui_input.connect(_on_gui_input)
