@@ -63,7 +63,12 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 	# Countries without a full residential asset library must never silently
 	# fall back to Argentine houses. Their authored directional family is used
 	# for every residence, which keeps each city regionally coherent.
-	if residential and (country != "ar" or facing != "south" or index % 3 == 0):
+	# Argentina has a broad authored south-facing residential library; use it
+	# instead of replacing every third lot with the same directional house.
+	# Directional families are reserved for lots that genuinely face another
+	# street direction. Other countries still rely on their coherent oriented
+	# family until their full residential libraries grow.
+	if residential and (country != "ar" or facing != "south"):
 		family = "res://assets/oriented/%s/house" % country
 	elif country == "it" and asset == "pizzeria":
 		family = "res://assets/oriented/it/pizzeria"
