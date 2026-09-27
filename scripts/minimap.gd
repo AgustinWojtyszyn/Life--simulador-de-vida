@@ -82,11 +82,11 @@ func _draw() -> void:
 		var kind := str(object.get_meta("building_type"))
 		var color := Color("c9b27c") if kind.begins_with("residential") else Color("ddb573")
 		draw_rect(Rect2(p - Vector2(1.5, 1.5), Vector2(3, 3)), color)
-	for signal in get_tree().get_nodes_in_group("traffic_signals"):
-		if not is_instance_valid(signal):
+	for traffic_light in get_tree().get_nodes_in_group("traffic_signals"):
+		if not is_instance_valid(traffic_light):
 			continue
-		var p := world_to_map(signal.global_position, inner)
-		var color := Color("72bd79") if signal.horizontal_state == "green" else Color("dc6b60")
+		var p := world_to_map(traffic_light.global_position, inner)
+		var color := Color("72bd79") if traffic_light.horizontal_state == "green" else Color("dc6b60")
 		draw_circle(p, 1.7 if not expanded else 2.2, color)
 	for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 		if not is_instance_valid(vehicle):
