@@ -49,6 +49,8 @@ func _ready() -> void:
 			directional_art.append(texture)
 			art_bounds.append(texture.get_image().get_used_rect())
 	driver_acceleration = 30.0 + float(get_index() % 5) * 4.0
+	if model == "colectivo":
+		half_width = 62.0
 	if model == "van":
 		half_width = 43.0
 	var shape := RectangleShape2D.new()
@@ -138,6 +140,13 @@ func update_art() -> void:
 		return
 	facing_index = index
 	# Directional textures stay upright; only the collision footprint follows the road.
+	if model == "colectivo" and route_points.is_empty() and direction > 0:
+		sprite.texture = load("res://assets/vehicles/colectivo/east.png")
+		sprite.region_enabled = true
+		sprite.region_rect = sprite.texture.get_image().get_used_rect()
+		sprite.scale = Vector2.ONE * (128.0 / sprite.region_rect.size.x)
+		sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
+		return
 	if directional_art.size() != 8:
 		push_error("Missing directional vehicle family: " + model)
 		set_physics_process(false)

@@ -14,6 +14,7 @@ const CityBuildingScript := preload("res://scripts/building.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var building_bounds: Array[Rect2] = []
+var protected_content: Array[Rect2] = []
 var placed_prop_bounds: Array[Rect2] = []
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
@@ -48,10 +49,12 @@ func _ready() -> void:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
 	add_frontage("cafe", Vector2(195, 318), Vector2(230, 268), Rect2(-87, -64, 166, 58), 0)
-	add_frontage("market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53), 1)
-	add_frontage("cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), 2)
-	add_frontage("market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64), 3)
+	add_frontage("almacen" if WorldManager.country.id == "ar" else "market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53), 1)
+	add_frontage("panaderia" if WorldManager.country.id == "ar" else "cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), 2)
+	add_frontage("kiosco" if WorldManager.country.id == "ar" else "market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64), 3)
 	build_expansion()
+	if WorldManager.country.id == "ar":
+		integrate_argentina()
 	var parked_positions := [Vector2(1126, 732), Vector2(1304, 732), Vector2(1126, 876), Vector2(1304, 876)]
 	var parked_models := ["car", "van", "coupe", "taxi"]
 	for i in parked_positions.size():
@@ -93,7 +96,7 @@ func _ready() -> void:
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
 		add_prop("tree_bed", p + Vector2(0, 3), Rect2())
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
-	for p in [Vector2(270, 782), Vector2(621, 782), Vector2(716, 610), Vector2(1045, 601)]:
+	for p in [Vector2(365, 880), Vector2(621, 782), Vector2(716, 610), Vector2(1045, 601)]:
 		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
 	for p in [Vector2(90, 379), Vector2(510, 379), Vector2(813, 379), Vector2(1018, 379),
 		Vector2(1370, 600), Vector2(814, 600), Vector2(66, 600), Vector2(460, 888)]:
@@ -355,9 +358,66 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Ve
 			if visual.intersects(bounds.grow(8)): valid = false
 		for road in roads():
 			if base.intersects(road.grow(8)): valid = false
+		for bounds in protected_content:
+			if visual.intersects(bounds): valid = false
 		for bounds in placed_prop_bounds:
 			if base.intersects(bounds.grow(5)): valid = false
 		if valid:
 			placed_prop_bounds.append(base)
 			return candidate
 	return Vector2(INF, INF)
+
+func integrate_argentina() -> void:
+	add_asset("props/ar/choripan_stand", Vector2(150, 802), Vector2(84, 78), Rect2(-32, -18, 64, 18))
+	add_asset("props/ar/parrilla", Vector2(723, 811), Vector2(84, 78), Rect2(-32, -18, 64, 18))
+	var stop := Node2D.new()
+	stop.set_script(CityProp)
+	stop.kind = "transport_stop"
+	stop.position = Vector2(360, 600)
+	stop.set_meta("building_type", "transport_stop")
+	add_child(stop)
+	add_solid(Rect2(357, 592, 6, 8))
+	var pitch := Node2D.new()
+	pitch.set_script(preload("res://scripts/regional_content.gd"))
+	pitch.position = Vector2(215, 735)
+	pitch.z_index = -2
+	pitch.set_meta("building_type", "sports")
+	add_child(pitch)
+	protected_content.append(Rect2(210, 715, 225, 115))
+	for food_name in ["Choripan Stand", "Parrilla"]:
+		var stand := get_node(NodePath(food_name)) as Node2D
+		protected_content.append(stand.get_meta("placement_bounds"))
+		var target := preload("res://scripts/interaction_target.gd").new()
+		target.position = Vector2(0, 18)
+		target.label = "Comprar choripán" if food_name == "Choripan Stand" else "Comer en la parrilla"
+		target.action = "buy_food"
+		stand.add_child(target)
+	# Existing east art is used only on the eastbound avenue; no invented turns.
+	var bus := Vehicle.new()
+	bus.name = "Colectivo"
+	bus.model = "colectivo"
+	bus.position = Vector2(1900, 512)
+	bus.direction = 1.0
+	bus.cruise_speed = 180.0
+	bus.player = $Player
+	add_child(bus)
+	add_local_resident("Don Tito · choripán", Vector2(150, 830), "eat")
+	add_local_resident("Vecina · colectivo 60", Vector2(395, 601), "phone")
+	for i in 2:
+		var walker := Walker.new()
+		walker.route.assign([Vector2(240 + i * 135, 760), Vector2(265 + i * 130, 800)])
+		walker.position = walker.route[0]
+		walker.speed = 48 + i * 7
+		walker.route_kind = "football"
+		walker.profile = PlayerProfile.new()
+		walker.profile.top = i
+		add_child(walker)
+
+func add_local_resident(title: String, at: Vector2, activity: String) -> void:
+	var walker := Walker.new()
+	walker.position = at
+	walker.route.assign([at, at + Vector2(25, 0)])
+	walker.activity = activity
+	walker.set_meta("person_name", title)
+	add_child(walker)
+	walker.wait_time = 12.0

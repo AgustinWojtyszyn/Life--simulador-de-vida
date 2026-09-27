@@ -35,6 +35,12 @@ func run() -> void:
 		for bounds in world.building_bounds:
 			for road in world.roads():
 				check(not bounds.intersects(road), country.id + ": facade extends into road")
+		if country.id == "ar":
+			for asset in ["almacen", "panaderia", "kiosco"]:
+				check(facades.has("res://assets/buildings/ar/" + asset + ".png"), "Argentina must integrate " + asset)
+			for prop in ["Choripan Stand", "Parrilla"]:
+				check(world.has_node(prop), "Argentina street food must be placed: " + prop)
+			check(world.has_node("Colectivo"), "Argentina must have a circulating bus")
 		check(facades.size() >= 10, country.id + ": diverse residential and commercial facades")
 		check(get_nodes_in_group("parked_vehicles").size() == 4, "Four valid parking spaces")
 		print("REGIONAL STREET: ", country.id, " facades=", facades.size(), " objects=", world.city_objects.size())

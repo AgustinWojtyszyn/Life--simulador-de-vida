@@ -4,6 +4,12 @@ var kind := "sign"
 
 func _draw() -> void:
 	match kind:
+		"transport_stop":
+			draw_line(Vector2.ZERO, Vector2(0, -64), Color("546a72"), 4)
+			draw_rect(Rect2(-22, -70, 44, 28), Color("e9e0bc"))
+			draw_rect(Rect2(-22, -70, 44, 11), Color("469fc0"))
+			draw_string(ThemeDB.fallback_font, Vector2(-19, -61), "PARADA", HORIZONTAL_ALIGNMENT_CENTER, 38, 8, Color.WHITE)
+			draw_string(ThemeDB.fallback_font, Vector2(-17, -47), "60 · 152", HORIZONTAL_ALIGNMENT_CENTER, 34, 9, Color("263d40"))
 		"tree_bed":
 			paint_ellipse(Vector2(14, 0), Vector2(47, 14), Color(0.18, 0.25, 0.25, 0.16))
 			draw_rect(Rect2(-15, -8, 30, 13), Color("858574"))
