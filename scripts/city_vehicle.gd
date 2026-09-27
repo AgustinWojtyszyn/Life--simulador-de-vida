@@ -27,6 +27,8 @@ var motion_vector := Vector2.ZERO
 var body_height := 14.0
 var visual_scale := 1.0
 var braking := BRAKING
+var braking_sound_active := false
+var engine_sound_clock := 0.0
 
 const CATEGORIES := {
 	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0},
@@ -133,6 +135,7 @@ func free_distance() -> float:
 	return maxf(0.0, gap)
 
 func _physics_process(delta: float) -> void:
+	engine_sound_clock = maxf(0.0, engine_sound_clock - delta)
 	var gap := free_distance()
 	var desired := cruise_speed * (0.8 if WeatherSystem.state == "rain" else 1.0)
 	if not route_points.is_empty():
@@ -140,6 +143,13 @@ func _physics_process(delta: float) -> void:
 		var turn := absf(forward_vector().angle_to(tangent(progress + 48.0)))
 		desired *= lerpf(1.0, 0.42, clampf(turn / (PI / 2.0), 0, 1))
 	var safe_speed := minf(desired, sqrt(2.0 * braking * gap))
+	var braking_now := safe_speed < current_speed - 24.0 and current_speed > 55.0
+	if braking_now and not braking_sound_active:
+		AudioSystem.play_sfx("brake", position)
+	braking_sound_active = braking_now
+	if is_instance_valid(player) and current_speed > 45.0 and engine_sound_clock <= 0.0 and position.distance_to(player.position) < 420.0 and get_index() % 2 == 0:
+		AudioSystem.play_sfx("engine", position)
+		engine_sound_clock = 1.5 + float(get_index() % 3) * 0.28
 	current_speed = move_toward(current_speed, safe_speed, (braking if current_speed > safe_speed else driver_acceleration) * delta)
 	var step := minf(current_speed * delta, gap)
 	var previous := position
