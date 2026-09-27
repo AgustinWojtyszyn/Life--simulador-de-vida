@@ -1,6 +1,6 @@
 extends Node2D
 
-const MAP_SIZE := Vector2(2400, 1600)
+var map_size := Vector2.ZERO
 const Regional := preload("res://scripts/data/regional_assets.gd")
 const CityProp := preload("res://scripts/city_prop.gd")
 const Ground := preload("res://scripts/city_ground.gd")
@@ -27,25 +27,22 @@ const TRAFFIC_LANES := [
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	configure_input()
-	$Player/Camera2D.limit_right = int(MAP_SIZE.x)
-	$Player/Camera2D.limit_bottom = int(MAP_SIZE.y)
-	# Render thousands of static ground marks only once, then reuse one GPU texture.
-	var ground_view := SubViewport.new()
-	ground_view.name = "GroundCache"
-	ground_view.size = Vector2i(MAP_SIZE)
-	ground_view.disable_3d = true
-	ground_view.render_target_update_mode = SubViewport.UPDATE_ONCE
+	map_size = WorldManager.district.world_size
+	$Player/Camera2D.limit_right = int(map_size.x)
+	$Player/Camera2D.limit_bottom = int(map_size.y)
+	# Static CanvasItem drawing is cached without allocating a 4800x3200
+	# viewport texture, which is substantially cheaper on Android/WebGL.
 	var ground := Node2D.new()
+	ground.name = "CityGround"
 	ground.set_script(Ground)
-	ground_view.add_child(ground)
-	add_child(ground_view)
-	var ground_sprite := Sprite2D.new()
-	ground_sprite.texture = ground_view.get_texture()
-	ground_sprite.centered = false
-	ground_sprite.z_index = -10
-	add_child(ground_sprite)
-	for rect in [Rect2(0, 0, 2400, 16), Rect2(0, 1584, 2400, 16),
-		Rect2(0, 0, 16, 1600), Rect2(2384, 0, 16, 1600)]:
+	ground.z_index = -10
+	add_child(ground)
+	for rect in [
+		Rect2(0, 0, map_size.x, 16),
+		Rect2(0, map_size.y - 16, map_size.x, 16),
+		Rect2(0, 0, 16, map_size.y),
+		Rect2(map_size.x - 16, 0, 16, map_size.y),
+	]:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
 	var frontages: Array = Regional.FRONTAGES[WorldManager.country.id]
@@ -70,6 +67,7 @@ func _ready() -> void:
 			vehicle.position = Vector2(100 + i * 560 + lane_index * 200, lane.from.y)
 			vehicle.direction = lane.direction.x
 			vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - i * 3.0
+			vehicle.route_right = map_size.x + 140.0
 			vehicle.player = $Player
 			add_child(vehicle)
 	# A second circuit turns through both intersections and the southern street.
@@ -90,6 +88,7 @@ func _ready() -> void:
 		vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 12.0
 		vehicle.player = $Player
 		add_child(vehicle)
+	add_expansion_traffic(regional_models)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
@@ -124,6 +123,27 @@ func _ready() -> void:
 	interactions.hud = hud
 	add_child(interactions)
 
+func add_expansion_traffic(regional_models: Array) -> void:
+	var circuit: Array[Vector2] = [
+		Vector2(2842, 1190),
+		Vector2(2842, 1962),
+		Vector2(3822, 1962),
+		Vector2(3822, 1190),
+	]
+	for i in 2:
+		var model: String = regional_models[(i + 2) % regional_models.size()]
+		if not Vehicle.has_directional_art(model):
+			continue
+		var vehicle := AnimatableBody2D.new()
+		vehicle.set_script(Vehicle)
+		vehicle.name = "EastCircuit_%s" % i
+		vehicle.model = model
+		vehicle.route_points = circuit
+		vehicle.position = Vector2(2842, 1330 + i * 320)
+		vehicle.cruise_speed = Vehicle.profile_for(model).speed - 18.0
+		vehicle.player = $Player
+		add_child(vehicle)
+
 func configure_input() -> void:
 	var bindings := {
 		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
@@ -155,7 +175,7 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	building.position = pos
 	building.country_id = WorldManager.country.id
 	building.variant = BuildingVariants.make(building.country_id, "shop", index + 13)
-	var spec := Regional.descriptor(building.country_id, asset, index, AssetOrientation.street_facing(pos, roads()))
+	var spec := Regional.descriptor(building.country_id, asset, index, AssetOrientation.street_facing(pos, roads(), false))
 	building.orientation = spec.facing
 	building.building_type = spec.type
 	building.title = spec.title
@@ -276,56 +296,78 @@ func decorate_expansion() -> void:
 	var data: DistrictData = WorldManager.district
 	var east := data.side_street_x + data.side_street_width + 140
 	add_asset("props/fountain", Vector2(east, 1040), Vector2(100, 75), Rect2(-32, -21, 64, 20))
-	add_asset("props/bench", Vector2(east - 80, 1080), Vector2(58, 43), Rect2(-23, -12, 46, 12))
-	add_asset("props/planter", Vector2(east + 70, 1044), Vector2(48, 36), Rect2(-18, -10, 36, 12))
-	for p in [Vector2(1435, 354), Vector2(1710, 352), Vector2(1990, 580), Vector2(2340, 590), Vector2(1480, 1020), Vector2(1720, 950), Vector2(110, 1280), Vector2(760, 1280), Vector2(1040, 1280), Vector2(1720, 1280), Vector2(2340, 1280)]:
+	for p in [
+		Vector2(1435, 354), Vector2(1710, 352), Vector2(1990, 650),
+		Vector2(2340, 930), Vector2(1480, 1020), Vector2(1720, 950),
+		Vector2(110, 1280), Vector2(760, 1280), Vector2(1040, 1280),
+		Vector2(3020, 820), Vector2(3420, 940), Vector2(4140, 1520),
+		Vector2(4520, 1640), Vector2(3140, 2940), Vector2(760, 3010),
+		Vector2(1270, 2260), Vector2(4380, 2310),
+	]:
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
-	for p in [Vector2(1460, 600), Vector2(1650, 930), Vector2(530, 1285), Vector2(2170, 1030)]:
+	for p in [
+		Vector2(east - 80, 1080), Vector2(1650, 930), Vector2(530, 1285),
+		Vector2(3060, 910), Vector2(4200, 1590), Vector2(520, 2960),
+	]:
 		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
-	for p in [Vector2(1460, 380), Vector2(1730, 380), Vector2(2000, 380), Vector2(2340, 1040), Vector2(1630, 1110), Vector2(450, 1110), Vector2(1080, 1110)]:
+	for p in [
+		Vector2(1460, 380), Vector2(1730, 380), Vector2(2000, 380),
+		Vector2(2340, 1040), Vector2(1630, 1110), Vector2(450, 1110),
+		Vector2(1080, 1110), Vector2(2710, 1090), Vector2(2910, 1090),
+		Vector2(3650, 1870), Vector2(3950, 1870), Vector2(3520, 2630),
+		Vector2(4020, 2630), Vector2(1780, 2600),
+	]:
 		add_asset("props/lamp", p, Vector2(48, 96), Rect2(-4, -4, 8, 8))
+	for p in [Vector2(east + 70, 1044), Vector2(3030, 980), Vector2(4440, 1700), Vector2(820, 3050)]:
+		add_asset("props/planter", p, Vector2(48, 36), Rect2(-18, -10, 36, 12))
 
 func populate() -> void:
 	var system := Node.new()
 	system.name = "PopulationSystem"
 	system.set_script(preload("res://scripts/population_system.gd"))
 	add_child(system)
-	var east := WorldManager.district.side_street_x + WorldManager.district.side_street_width + 140
-	var routes := [
+	var routes: Array = [
 		[Vector2(340, 373), Vector2(462, 373), Vector2(462, 355), Vector2(340, 355)],
 		[Vector2(200, 608), Vector2(490, 608), Vector2(490, 626), Vector2(200, 626)],
 		[Vector2(1120, 370), Vector2(1300, 370), Vector2(1300, 350), Vector2(1120, 350)],
 		[Vector2(1490, 362), Vector2(1640, 362), Vector2(1640, 382), Vector2(1490, 382)],
-		[Vector2(2050, 364), Vector2(2270, 364), Vector2(2270, 380), Vector2(2050, 380)],
-		[Vector2(1550, 816), Vector2(1680, 816), Vector2(1680, 840), Vector2(1550, 840)],
-		[Vector2(140, 1500), Vector2(370, 1500), Vector2(370, 1520), Vector2(140, 1520)],
-		[Vector2(1130, 1500), Vector2(1420, 1500), Vector2(1420, 1520), Vector2(1130, 1520)],
-		[Vector2(270, 784), Vector2(270, 816), Vector2(335, 816), Vector2(335, 797)],
-		[Vector2(445, 334), Vector2(445, 363), Vector2(380, 363), Vector2(380, 340)],
-		[Vector2(1022, 420), Vector2(1022, 580), Vector2(1007, 580), Vector2(1007, 420)],
-		[Vector2(east, 830), Vector2(east + 130, 830), Vector2(east + 130, 856), Vector2(east, 856)],
-		[Vector2(east - 50, 1080), Vector2(east + 100, 1080), Vector2(east + 100, 1100), Vector2(east - 50, 1100)],
 		[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
-		[Vector2(1430, 1030), Vector2(1520, 1072), Vector2(1615, 1088), Vector2(1700, 1050), Vector2(1615, 1088), Vector2(1520, 1072)],
 	]
+	# Populate every quarter of the expanded city. Routes are deliberately
+	# short local loops so residents look like they belong to a block instead
+	# of marching across the whole map in straight lines.
+	var block_x := [300.0, 1320.0, 2260.0, 3260.0, 4260.0]
+	var block_y := [300.0, 830.0, 1530.0, 2290.0, 3010.0]
+	for y in block_y:
+		if y > map_size.y - 120:
+			continue
+		for x in block_x:
+			if x > map_size.x - 180:
+				continue
+			routes.append([
+				Vector2(x, y),
+				Vector2(x + 150, y),
+				Vector2(x + 150, y + 58),
+				Vector2(x + 24, y + 58),
+			])
 	var benches := get_tree().get_nodes_in_group("city_benches")
 	if not benches.is_empty():
 		var seat: Vector2 = benches[0].position + Vector2(0, 2)
-		routes[8] = [seat, seat + Vector2(0, 26), seat + Vector2(65, 26), seat + Vector2(0, 26)]
+		routes.append([seat, seat + Vector2(0, 28), seat + Vector2(70, 28), seat + Vector2(0, 28)])
 	for i in WorldManager.district.population:
 		var walker := Node2D.new()
 		walker.set_script(Walker)
 		walker.route.assign(routes[i % routes.size()])
-		walker.position = walker.route[0] + Vector2((i / routes.size()) * 25, 0)
-		walker.speed = 60.0 + (i % 5) * 6
+		walker.position = walker.route[0] + Vector2(int(i / routes.size()) * 18, 0)
+		walker.speed = 58.0 + (i % 6) * 6
 		walker.profile = PlayerProfile.new()
 		walker.profile.gender = "female" if i % 2 else "male"
 		walker.profile.skin = i % 3
-		walker.profile.hair = (i / 2) % 3
-		walker.profile.hair_color = (i / 3) % 3
+		walker.profile.hair = int(i / 2) % 3
+		walker.profile.hair_color = int(i / 3) % 3
 		walker.profile.top = (i + 1) % 3
-		walker.profile.bottom = (i / 2) % 3
-		walker.route_kind = "bench" if i % routes.size() == 8 else "shop" if i % routes.size() == 9 else "crossing" if i % routes.size() == 10 else "walk"
+		walker.profile.bottom = int(i / 2) % 3
+		walker.route_kind = "bench" if i == WorldManager.district.population - 1 else "shop" if i % 9 == 0 else "crossing" if i % 11 == 0 else "walk"
 		add_child(walker)
 		system.residents.append(walker)
 
@@ -343,6 +385,11 @@ func fit_building(building: CityBuilding) -> void:
 	var used := building.facade.get_image().get_used_rect().size
 	var max_width := 190.0
 	var max_height := 238.0
+	if building.building_type == "kiosk":
+		# The kiosk is intentionally a compact street kiosk. Keeping its source
+		# close to native scale avoids the chunky upscaling seen in the old build.
+		max_width = 132.0
+		max_height = 170.0
 	for road in roads():
 		if road.size.x > 1000 and road.end.y < building.position.y:
 			max_height = minf(max_height, building.position.y - road.end.y - 24)
@@ -384,7 +431,7 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Ve
 		var candidate: Vector2 = at + offset
 		var visual := Rect2(candidate - Vector2(size.x / 2, size.y), size)
 		var base := Rect2(candidate - Vector2(size.x / 2, 16), Vector2(size.x, 20))
-		if not Rect2(20, 20, 2360, 1560).encloses(visual): continue
+		if not Rect2(Vector2(20, 20), map_size - Vector2(40, 40)).encloses(visual): continue
 		var valid := true
 		for bounds in building_bounds:
 			if visual.intersects(bounds.grow(8)): valid = false
@@ -400,23 +447,37 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Ve
 	return Vector2(INF, INF)
 
 func integrate_argentina() -> void:
-	add_asset("props/ar/choripan_stand", Vector2(150, 802), Vector2(84, 78), Rect2(-32, -18, 64, 18))
-	add_asset("props/ar/parrilla", Vector2(723, 811), Vector2(84, 78), Rect2(-32, -18, 64, 18))
+	# Argentine identity is distributed across the district instead of being
+	# compressed into one plaza.
+	add_asset("props/ar/choripan_stand", Vector2(3270, 1710), Vector2(84, 78), Rect2(-32, -18, 64, 18))
+	add_asset("props/ar/parrilla", Vector2(4240, 1030), Vector2(92, 84), Rect2(-34, -20, 68, 20))
+
 	var stop := Node2D.new()
 	stop.set_script(CityProp)
 	stop.kind = "transport_stop"
-	stop.position = Vector2(360, 600)
+	stop.position = Vector2(1420, 600)
 	stop.set_meta("building_type", "transport_stop")
-	stop.set_meta("orientation", AssetOrientation.street_facing(stop.position, roads(), false))
+	stop.set_meta("orientation", "south")
 	add_child(stop)
-	add_solid(Rect2(357, 592, 6, 8))
+	add_solid(Rect2(stop.position + Vector2(-3, -8), Vector2(6, 8)))
+
+	# Full neighbourhood football ground. It fills the large civic block
+	# between two avenues and is no longer a miniature decoration.
 	var pitch := Node2D.new()
+	pitch.name = "Cancha Municipal"
 	pitch.set_script(preload("res://scripts/regional_content.gd"))
-	pitch.position = Vector2(215, 735)
+	pitch.position = Vector2(1985, 2110)
 	pitch.z_index = -2
 	pitch.set_meta("building_type", "sports")
 	add_child(pitch)
-	protected_content.append(Rect2(210, 715, 225, 115))
+	protected_content.append(Rect2(1965, 2085, 770, 475))
+	var football_target := preload("res://scripts/interaction_target.gd").new()
+	football_target.position = Vector2(360, 430)
+	football_target.label = "Jugar un rato a la pelota"
+	football_target.action = "play_football"
+	football_target.target_id = "cancha_barrio_del_sol"
+	pitch.add_child(football_target)
+
 	for food_name in ["Choripan Stand", "Parrilla"]:
 		var stand := get_node(NodePath(food_name)) as Node2D
 		protected_content.append(stand.get_meta("placement_bounds"))
@@ -425,28 +486,40 @@ func integrate_argentina() -> void:
 		target.label = "Comprar choripán" if food_name == "Choripan Stand" else "Comer en la parrilla"
 		target.action = "buy_food"
 		stand.add_child(target)
-	# Eight authored views let buses follow the same rounded road circuit.
+
+	# Keep the bus behaviour that already feels right, but let the second line
+	# serve the expanded eastern neighbourhood.
 	for i in 2:
 		var bus := Vehicle.new()
 		bus.name = "Colectivo" if i == 0 else "Colectivo2"
 		bus.model = "colectivo"
-		var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
-		bus.route_points.assign([Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)])
-		bus.position = Vector2(1450, 512) if i == 0 else Vector2(1300, 1160)
+		if i == 0:
+			var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
+			bus.route_points.assign([Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)])
+			bus.position = Vector2(1450, 512)
+		else:
+			bus.route_points.assign([Vector2(2842, 1190), Vector2(2842, 1962), Vector2(3822, 1962), Vector2(3822, 1190)])
+			bus.position = Vector2(2842, 1510)
 		bus.direction = 1.0
 		bus.cruise_speed = Vehicle.profile_for("colectivo").speed
 		bus.player = $Player
 		add_child(bus)
-	add_local_resident("Tito", Vector2(150, 830), "eat")
-	add_local_resident("Luli", Vector2(395, 601), "phone")
-	for i in 2:
+
+	add_local_resident("Tito", Vector2(3310, 1740), "eat")
+	add_local_resident("Luli", Vector2(1460, 610), "phone")
+	for i in 4:
 		var walker := Walker.new()
-		walker.route.assign([Vector2(240 + i * 135, 760), Vector2(265 + i * 130, 800)])
+		walker.route.assign([
+			Vector2(2070 + i * 120, 2300),
+			Vector2(2200 + i * 105, 2420),
+			Vector2(2120 + i * 115, 2480),
+		])
 		walker.position = walker.route[0]
-		walker.speed = 48 + i * 7
+		walker.speed = 50 + i * 5
 		walker.route_kind = "football"
 		walker.profile = PlayerProfile.new()
-		walker.profile.top = i
+		walker.profile.gender = "female" if i % 2 else "male"
+		walker.profile.top = i % 3
 		add_child(walker)
 
 func add_local_resident(title: String, at: Vector2, activity: String) -> void:
