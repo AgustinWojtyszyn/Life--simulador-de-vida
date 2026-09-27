@@ -38,6 +38,10 @@ func set_enabled(value: bool) -> void:
 	elif WorldManager.playing:
 		start_world(WorldManager.country.id)
 
+func set_music_volume(value: float) -> void:
+	var linear := clampf(value, 0.0, 1.0)
+	music_player.volume_db = -40.0 if linear <= 0.01 else linear_to_db(linear)
+
 func _process(delta: float) -> void:
 	if not enabled or not WorldManager.playing:
 		return
