@@ -33,8 +33,6 @@ func refresh_device_mode() -> void:
 		or DisplayServer.is_touchscreen_available()
 		or "--touch-test" in OS.get_cmdline_user_args()
 	)
-	if touch_enabled:
-		WorldManager.settings["touch_controls"] = true
 
 func movement() -> Vector2:
 	return (Input.get_vector("move_left", "move_right", "move_up", "move_down") + touch_vector).limit_length()
