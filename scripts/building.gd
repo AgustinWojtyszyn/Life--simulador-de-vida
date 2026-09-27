@@ -25,6 +25,16 @@ func _ready() -> void:
 	sprite.region_rect = facade.get_image().get_used_rect()
 	sprite.scale = size / facade.get_size()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
+	# Stable per-building variation breaks the repeated-stamp effect without
+	# rotating or mirroring signage. Variation stays deliberately subtle so the
+	# authored pixel art remains crisp.
+	var seed := int(variant.get("seed", 0))
+	var width_variation := 0.94 + float(posmod(seed * 7, 13)) / 100.0
+	var height_variation := 0.96 + float(posmod(seed * 11, 11)) / 100.0
+	if building_type.begins_with("residential"):
+		sprite.scale *= Vector2(width_variation, height_variation)
+		var warmth := float(posmod(seed * 5, 9)) / 100.0
+		sprite.modulate = Color(1.0, 0.98 + warmth * 0.25, 0.95 + warmth * 0.35)
 	add_child(sprite)
 	set_meta("building_mode", Access.keys()[access])
 	set_meta("building_type", building_type)
