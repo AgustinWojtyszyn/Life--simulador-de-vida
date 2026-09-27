@@ -100,37 +100,38 @@ func country_scale(id: String) -> Array[int]:
 			return [0, 2, 4, 7, 9, 11]
 
 func make_music(style: int, country: String) -> AudioStreamWAV:
-	var frames := int(SAMPLE_RATE * TRACK_SECONDS)
+	var frames: int = int(SAMPLE_RATE * TRACK_SECONDS)
 	var bytes := PackedByteArray()
 	bytes.resize(frames * 4)
-	var scale := country_scale(country)
-	var root := {"ar": 196.0, "us": 174.61, "jp": 220.0, "it": 196.0, "br": 185.0}.get(country, 196.0)
-	var tempo := [82.0, 112.0, 98.0][style]
-	var beat := 60.0 / tempo
+	var scale: Array[int] = country_scale(country)
+	var root: float = float({"ar": 196.0, "us": 174.61, "jp": 220.0, "it": 196.0, "br": 185.0}.get(country, 196.0))
+	var tempos: Array[float] = [82.0, 112.0, 98.0]
+	var tempo: float = tempos[style]
+	var beat: float = 60.0 / tempo
 	for i in frames:
-		var t := float(i) / SAMPLE_RATE
-		var step := int(t / (beat * 0.5))
+		var t: float = float(i) / SAMPLE_RATE
+		var step: int = int(t / (beat * 0.5))
 		var degree: int = scale[posmod(step + style * 2, scale.size())]
-		var octave := 12 if (step / scale.size()) % 2 else 0
+		var octave: int = 12 if int(step / scale.size()) % 2 != 0 else 0
 		var freq: float = root * pow(2.0, float(degree + octave) / 12.0)
-		var envelope := 0.58 + 0.42 * exp(-fposmod(t, beat * 0.5) * 4.2)
-		var lead := sin(TAU * freq * t) * 0.11
-		var warm := sin(TAU * (freq * 0.5) * t + 0.7) * 0.075
-		var sparkle := sin(TAU * (freq * 2.0) * t + 1.4) * (0.025 if style != 0 else 0.012)
-		var pulse := 0.0
+		var envelope: float = 0.58 + 0.42 * exp(-fposmod(t, beat * 0.5) * 4.2)
+		var lead: float = sin(TAU * freq * t) * 0.11
+		var warm: float = sin(TAU * (freq * 0.5) * t + 0.7) * 0.075
+		var sparkle: float = sin(TAU * (freq * 2.0) * t + 1.4) * (0.025 if style != 0 else 0.012)
+		var pulse: float = 0.0
 		if style == 1:
 			pulse = sin(TAU * (root * 0.25) * t) * 0.035
 		elif style == 2:
 			pulse = sin(TAU * (root * 0.375) * t) * 0.028
 		if country == "br":
-			var phase := fposmod(t, beat)
+			var phase: float = fposmod(t, beat)
 			if phase < 0.055 or absf(phase - beat * 0.62) < 0.045:
 				pulse += sin(TAU * 78.0 * t) * 0.045 * (1.0 - minf(phase / 0.055, 1.0))
-		var sample := clampf((lead + warm + sparkle) * envelope + pulse, -0.72, 0.72)
-		var value := int(sample * 32767.0)
+		var sample: float = clampf((lead + warm + sparkle) * envelope + pulse, -0.72, 0.72)
+		var value: int = int(sample * 32767.0)
 		bytes.encode_s16(i * 4, value)
 		bytes.encode_s16(i * 4 + 2, value)
-	var wav := AudioStreamWAV.new()
+	var wav: AudioStreamWAV = AudioStreamWAV.new()
 	wav.format = AudioStreamWAV.FORMAT_16_BITS
 	wav.mix_rate = SAMPLE_RATE
 	wav.stereo = true
@@ -141,14 +142,14 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 	return wav
 
 func make_sfx(kind: String) -> AudioStreamWAV:
-	var duration := {"brake": 0.34, "engine": 0.5, "tap": 0.08, "interact": 0.14, "kick": 0.22}.get(kind, 0.18)
+	var duration: float = float({"brake": 0.34, "engine": 0.5, "tap": 0.08, "interact": 0.14, "kick": 0.22}.get(kind, 0.18))
 	var frames := int(SAMPLE_RATE * duration)
 	var bytes := PackedByteArray()
 	bytes.resize(frames * 2)
 	for i in frames:
 		var t := float(i) / SAMPLE_RATE
-		var life := 1.0 - t / duration
-		var sample := 0.0
+		var life: float = 1.0 - t / duration
+		var sample: float = 0.0
 		match kind:
 			"brake":
 				sample = (sin(TAU * (1350.0 - 900.0 * t / duration) * t) + sin(TAU * 1900.0 * t) * 0.35) * life * 0.14
