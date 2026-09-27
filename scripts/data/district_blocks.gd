@@ -196,15 +196,18 @@ static func reserved_city_feature(at: Vector2) -> bool:
 	return starter_plaza.has_point(at) or starter_parking.has_point(at) or civic_block.has_point(at)
 
 static func catalog_index_for(at: Vector2) -> int:
-	var x_index := CATALOG_ROW_X.find(at.x)
-	if x_index < 0:
-		return -1
-	# 7 families on the second street, 7 on the third, last 2 at the
-	# far-east fourth street. The civic/sports block stays untouched.
+	# Avoid the authored service buildings already occupying four frontage
+	# anchors. These 16 slots are all existing valid south-facing lots.
 	if is_equal_approx(at.y, 1104.0):
-		return x_index
+		var row_a: Array[float] = [180.0, 430.0, 2350.0, 4270.0, 4560.0]
+		var i := row_a.find(at.x)
+		return i
 	if is_equal_approx(at.y, 1874.0):
-		return x_index + 7
-	if is_equal_approx(at.y, 2634.0) and at.x in [4270.0, 4560.0]:
-		return 14 + [4270.0, 4560.0].find(at.x)
+		var row_b: Array[float] = [180.0, 430.0, 1430.0, 2350.0, 4270.0, 4560.0]
+		var i := row_b.find(at.x)
+		return 5 + i if i >= 0 else -1
+	if is_equal_approx(at.y, 2634.0):
+		var row_c: Array[float] = [180.0, 430.0, 1430.0, 3280.0, 4560.0]
+		var i := row_c.find(at.x)
+		return 11 + i if i >= 0 else -1
 	return -1
