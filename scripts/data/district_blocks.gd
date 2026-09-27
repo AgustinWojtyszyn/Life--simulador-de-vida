@@ -76,11 +76,11 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	slots.append({"position": district.home_position, "kind": "home", "mode": "ENTERABLE", "asset_index": index, "facing": "south", "street_normal": "south"})
 	index += 1
 	for service in [
-		[Vector2(1510, 1100), "clinic", "INTERACTABLE"],
-		[Vector2(2180, 1100), "office", "EXTERIOR_ONLY"],
+		[Vector2(1510, 1100), "clinic", "ENTERABLE"],
+		[Vector2(2180, 1100), "office", "ENTERABLE"],
 		[Vector2(3120, 1870), "shop", "ENTERABLE"],
 		[Vector2(4100, 2630), "shop", "ENTERABLE"],
-		[Vector2(3320, 1100), "office", "EXTERIOR_ONLY"],
+		[Vector2(3320, 1100), "office", "ENTERABLE"],
 	]:
 		if service[0].x < district.world_size.x - 120 and service[0].y < district.world_size.y - 120:
 			slots.append({"position": service[0], "kind": service[1], "mode": service[2], "asset_index": index, "facing": "south", "street_normal": "south"})
@@ -98,6 +98,9 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 			if y < 500 and x < 1380:
 				# The first four authored regional storefronts already occupy it.
 				continue
+			if y > 2500 and y < 2700 and x > 1930 and x < 2770:
+				# Reserve the civic block for the large country landmark.
+				continue
 			if x > 1410 and x < 1690 and y < 500:
 				# Leave breathing room around the starter home.
 				continue
@@ -108,6 +111,7 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				mode = "ENTERABLE"
 			elif y > 600 and column % 11 == 7:
 				kind = "office"
+				mode = "ENTERABLE"
 			slots.append({"position": Vector2(x, y), "kind": kind, "mode": mode, "asset_index": index, "facing": "south", "street_normal": "south"})
 			index += 1
 
