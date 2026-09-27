@@ -51,6 +51,22 @@ func run() -> void:
 	check(player.velocity.length() <= 140.01, "Diagonal input must never exceed walking speed")
 	for i in 8: player._physics_process(1.0 / 60.0)
 	check(player.velocity.is_zero_approx(), "Player must stop cleanly after diagonal input")
+	for gender in ["male", "female"]:
+		var profile := PlayerProfile.new()
+		profile.gender = gender
+		player.visual.apply_profile(profile)
+		for direction in AssetOrientation.DIRECTIONS:
+			var frames_in_cycle: Array[Texture2D] = player.visual.walk_cycle(direction)
+			check(frames_in_cycle.size() >= 8, gender + " must animate eight frames toward " + direction)
+			var images := {}
+			for frame in frames_in_cycle: images[hash(frame.get_image().get_data())] = true
+			check(images.size() >= 4, "Walk cycles must contain distinct authored steps")
+			player.visual.animate_motion(AssetOrientation.vector(direction), 7.0)
+			check(player.visual.facing == direction and player.visual.pose == "walk", "Every compass direction must walk instead of falling back to idle")
+			player.visual.set_art("walk", direction, 0)
+			var pivot: Vector2 = player.visual.sprite.position
+			player.visual.set_art("walk", direction, 3)
+			check(player.visual.sprite.position.is_equal_approx(pivot), "Walking keeps its authored ground pivot")
 	var walker: CharacterBody2D = load("res://scripts/city_walker.gd").new()
 	walker.route.assign([Vector2(100, 100), Vector2(300, 100)])
 	walker.position = walker.route[0]

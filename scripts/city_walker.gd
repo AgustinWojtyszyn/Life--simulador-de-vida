@@ -9,7 +9,6 @@ var finish := Vector2.ZERO
 var route: Array[Vector2] = []
 var destination := 1
 var speed := 65.0
-var velocity := Vector2.ZERO
 var greeting_time := 0.0
 var wait_time := 0.0
 var indoor_time := 0.0

@@ -63,7 +63,7 @@ func _physics_process(delta: float) -> void:
 	if wave_time > 0:
 		visual.set_art("wave", "south", 0)
 	else:
-		visual.animate_motion(moved, moved.length())
+		visual.animate_motion(moved if moved.length_squared() > 0.001 else direction, moved.length())
 
 
 func _draw() -> void:

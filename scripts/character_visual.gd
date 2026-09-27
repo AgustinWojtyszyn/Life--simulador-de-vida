@@ -17,6 +17,19 @@ var pose := "idle"
 var activity_phase := 0.0
 var base_sprite_position := Vector2.ZERO
 var base_sprite_scale := Vector2.ONE
+const WALK_CYCLE_DISTANCE := 56.0
+var walk_cycles := {}
+
+func walk_cycle(direction: String) -> Array[Texture2D]:
+	var key := profile.gender + "/" + direction
+	if not walk_cycles.has(key):
+		var frames: Array[Texture2D] = []
+		var index := 0
+		while ResourceLoader.exists("res://assets/characters/%s/walk/%s_%d.png" % [profile.gender, direction, index]):
+			frames.append(load("res://assets/characters/%s/walk/%s_%d.png" % [profile.gender, direction, index]))
+			index += 1
+		walk_cycles[key] = frames
+	return walk_cycles[key]
 
 func _ready() -> void:
 	if profile == null:
@@ -44,7 +57,8 @@ func animate_motion(direction: Vector2, traveled: float) -> void:
 		facing = requested if ResourceLoader.exists("res://assets/characters/%s/%s.png" % [profile.gender, requested]) else (("east" if direction.x > 0 else "west") if absf(direction.x) > absf(direction.y) else ("south" if direction.y > 0 else "north"))
 	if traveled > 0.02:
 		distance_phase += traveled
-		set_art("walk", facing, int(distance_phase / 7.0) % 4)
+		var count := walk_cycle(facing).size()
+		set_art("walk", facing, int(distance_phase / WALK_CYCLE_DISTANCE * max(1, count)) % max(1, count))
 	else:
 		distance_phase = 0
 		reset_pose_transform()
@@ -85,6 +99,19 @@ func set_art(state: String, direction: String, frame: int) -> void:
 	var standing: Rect2 = bounds_cache[reference_path]
 	sprite.scale = Vector2.ONE * (52.0 / maxf(1, standing.size.y))
 	sprite.position = Vector2((texture.get_width() * 0.5 - rect.get_center().x) * sprite.scale.x, (texture.get_height() * 0.5 - rect.end.y) * sprite.scale.y)
+	if state == "walk":
+		# A cycle shares a pivot. Recentring every silhouette cancels the authored
+		# hip/foot motion, especially on vertical steps, and makes feet skate.
+		var cycle_key := profile.gender + "/walk/" + direction
+		if not bounds_cache.has(cycle_key):
+			var cycle_bounds := Rect2()
+			for art in walk_cycle(direction):
+				var used := Rect2(art.get_image().get_used_rect())
+				used.position -= art.get_size() * 0.5
+				cycle_bounds = used if not cycle_bounds.has_area() else cycle_bounds.merge(used)
+			bounds_cache[cycle_key] = cycle_bounds
+		var cycle_bounds: Rect2 = bounds_cache[cycle_key]
+		sprite.position = -Vector2(cycle_bounds.get_center().x, cycle_bounds.end.y) * sprite.scale
 	sprite.rotation = 0.0
 	if state == "seated":
 		sprite.scale.y *= 0.82
