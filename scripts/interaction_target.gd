@@ -20,11 +20,12 @@ func perform(player: Node2D) -> String:
 			var destination := "home" if action == "enter_home" else "shop" if action == "enter_shop" else "cafe" if action == "enter_cafe" else "street"
 			WorldManager.call_deferred("travel", destination)
 			return ""
-		"rest", "tv", "pc", "fridge", "eat", "coffee", "cook", "shower", "buy_food":
+		"rest", "tv", "pc", "fridge", "eat", "coffee", "cook", "shower", "buy_food", "play_football":
 			var result := LifeSimulation.act(action)
 			if not result.begins_with("Necesitás") and not result.begins_with("Faltan"):
 				player.perform_activity(action)
 			if action == "buy_food": MissionSystem.purchased()
+			if action == "play_football": AudioSystem.play_sfx("kick", player.global_position)
 			return result
 		"shop": return detail + " · Horario de atención: 9 a 20."
 	return ""
