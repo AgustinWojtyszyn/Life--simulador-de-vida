@@ -97,20 +97,27 @@ func _draw() -> void:
 		elif kind.contains("bakery") or kind.contains("panaderia"):
 			col = Color("e0a040")
 			poi_label = "PANADERÍA"
+		elif kind.contains("restaurant") or kind.contains("diner") or kind.contains("pizzeria"):
+			col = Color("d47758")
+			poi_label = "COMIDA"
 		elif kind.contains("office"):
 			col = Color("708090")
+			poi_label = "OFICINAS"
+		elif kind.contains("transport"):
+			col = Color("75a8ce")
+			poi_label = "PARADA"
+		elif kind.contains("sports"):
+			col = Color("72a36c")
+			poi_label = "CANCHA"
 		elif kind.begins_with("residential"):
 			col = Color("c9b27c")
 		else:
 			col = Color("9d8a6e")
 		var dot_size := 2.0 if not expanded else 3.0
 		draw_rect(Rect2(p - Vector2(dot_size, dot_size), Vector2(dot_size * 2, dot_size * 2)), col)
-		# Show POI labels only when expanded and near player
-		if expanded and poi_label != "" and is_instance_valid(world.get_node_or_null("Player")):
-			var player_node_for_poi := world.get_node("Player") as Node2D
-			var player_p: Vector2 = player_node_for_poi.global_position
-			if object.position.distance_to(player_p) < 600:
-				draw_string(font, p + Vector2(4, 4), poi_label, HORIZONTAL_ALIGNMENT_LEFT, 60, 7, col)
+		# Expanded map is a navigation tool, not merely a nearby radar.
+		if expanded and poi_label != "":
+			draw_string(font, p + Vector2(4, 4), poi_label, HORIZONTAL_ALIGNMENT_LEFT, 68, 7, col)
 	# Traffic signals
 	for traffic_light in get_tree().get_nodes_in_group("traffic_signals"):
 		if not is_instance_valid(traffic_light):
@@ -135,7 +142,7 @@ func _draw() -> void:
 	# Home marker
 	var home := world_to_map(WorldManager.district.home_position, inner)
 	draw_circle(home, 2.6 if not expanded else 3.8, Color("df9d70"))
-	draw_string(font, home + Vector2(4, 4), "🏠", HORIZONTAL_ALIGNMENT_LEFT, 16, 8, Color("df9d70"))
+	draw_string(font, home + Vector2(4, 4), "CASA", HORIZONTAL_ALIGNMENT_LEFT, 28, 8, Color("df9d70"))
 	# Player dot — directional arrow
 	var player_node := world.get_node_or_null("Player") as Node2D
 	if is_instance_valid(player_node):
