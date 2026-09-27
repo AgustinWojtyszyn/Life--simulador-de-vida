@@ -108,9 +108,9 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 			pair.append(round(raw * TRACK_SECONDS) / TRACK_SECONDS)
 		chord_freqs.append(pair)
 	var bass_raw := root * 0.5
-	var bass_freq := round(bass_raw * TRACK_SECONDS) / TRACK_SECONDS
+	var bass_freq: float = round(bass_raw * TRACK_SECONDS) / TRACK_SECONDS
 	var shimmer_raw := root * (2.0 if style == 2 else 1.5)
-	var shimmer_freq := round(shimmer_raw * TRACK_SECONDS) / TRACK_SECONDS
+	var shimmer_freq: float = round(shimmer_raw * TRACK_SECONDS) / TRACK_SECONDS
 	var segment_seconds := TRACK_SECONDS / 4.0
 	for i in frames:
 		var t: float = float(i) / SAMPLE_RATE
