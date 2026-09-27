@@ -61,7 +61,7 @@ func _draw() -> void:
 	# giant source texture. This is intentionally sparse for mobile GPUs.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 519 + WorldManager.country.id.hash()
-	for i in 6500:
+	for i in 3200:
 		var p := Vector2(rng.randf_range(22, world.x - 22), rng.randf_range(22, world.y - 22))
 		var on_road := false
 		for road in all_roads:
@@ -143,7 +143,7 @@ func draw_park(area: Rect2, seed: int) -> void:
 	draw_rect(area, Color("78886b"))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
-	for i in 520:
+	for i in 300:
 		var p := area.position + Vector2(rng.randf_range(3, area.size.x - 3), rng.randf_range(3, area.size.y - 3))
 		draw_line(p, p + Vector2(2, -1), Color("8fa076") if i % 3 else Color("667b62"))
 	var mid := area.get_center()
