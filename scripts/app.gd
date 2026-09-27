@@ -103,9 +103,10 @@ func setup_overlay() -> void:
 		b.text = entry[0]
 		b.custom_minimum_size.y = 54 if InputManager.touch_enabled else 44
 		b.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 15)
+		var callback: Callable = entry[1]
 		b.pressed.connect(func():
 			AudioSystem.play_ui()
-			entry[1].call())
+			callback.call())
 		list.add_child(b)
 	pause_panel.hide()
 	var fade := ColorRect.new()
