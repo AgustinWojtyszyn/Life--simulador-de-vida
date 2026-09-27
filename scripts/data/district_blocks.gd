@@ -164,7 +164,10 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	# Side streets no longer rotate arbitrary storefront PNGs. Only the
 	# directional residential family is used here, so doors/windows truly face
 	# the road rather than looking sideways into another building.
-	var side_y: Array[float] = [820.0, 1530.0, 2290.0, 3040.0]
+	# Directional side-facade art is intentionally sparser than the varied
+	# south-facing rows. Repeating the same east/west house four times per block
+	# made the city feel stamped even though the road network was larger.
+	var side_y: Array[float] = [820.0, 1850.0, 3040.0]
 	for road in vertical_roads(district):
 		for y in side_y:
 			if y > district.world_size.y - 80:
