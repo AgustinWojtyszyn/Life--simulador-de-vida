@@ -61,9 +61,9 @@ func run() -> void:
 			other.remove_from_group("city_traffic")
 	for resident in get_nodes_in_group("city_residents"):
 		resident.remove_from_group("city_residents")
-	for signal in get_nodes_in_group("traffic_signals"):
-		signal.horizontal_state = "green"
-		signal.vertical_state = "green"
+	for traffic_signal in get_nodes_in_group("traffic_signals"):
+		traffic_signal.horizontal_state = "green"
+		traffic_signal.vertical_state = "green"
 	car.position = Vector2(340, car.position.y)
 	car.current_speed = 66.0
 	car.proximity_clock = 0.0
