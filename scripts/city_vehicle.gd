@@ -33,9 +33,6 @@ var proximity_clock := 0.0
 var cached_gap := 99999.0
 ## Lane offset: lateral displacement from route centreline (negative = left, positive = right)
 var lane_offset := 0.0
-## Anti-congestion: tracks time spent near-stationary
-var stuck_timer := 0.0
-const STUCK_THRESHOLD_SECS := 9.0
 
 const CATEGORIES := {
 	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0},
@@ -212,17 +209,10 @@ func _physics_process(delta: float) -> void:
 	# Do not spawn periodic per-car engine clips. A cluster of nearby vehicles
 	# used to create a machine-gun-like audio pattern and unnecessary audio nodes.
 	current_speed = move_toward(current_speed, safe_speed, (braking if current_speed > safe_speed else driver_acceleration) * delta)
-	# ── Anti-congestion failsafe ───────────────────────────────────────────────
-	if current_speed < 8.0 and gap < 12.0:
-		stuck_timer += delta
-	else:
-		stuck_timer = maxf(0.0, stuck_timer - delta * 0.5)
-	if stuck_timer >= STUCK_THRESHOLD_SECS:
-		stuck_timer = 0.0
-		_escape_jam()
-		return
-	# ──────────────────────────────────────────────────────────────────────────
+	# Waiting at a red light or behind a pedestrian is valid. Never teleport
+	# through a queue after a timeout: the same rules apply to every model.
 	var step := minf(current_speed * delta, gap)
+	cached_gap = maxf(0.0, cached_gap - step)
 	var previous := position
 	if route_points.is_empty():
 		var new_x := route_left + fposmod(position.x + direction * step - route_left, route_length())
@@ -238,20 +228,6 @@ func _physics_process(delta: float) -> void:
 	collider.rotation = heading
 	update_art()
 	queue_redraw()
-
-func _escape_jam() -> void:
-	# Teleport the stuck vehicle to a clear point 400px ahead on its route
-	if route_points.is_empty():
-		# Straight lane: jump ahead 350px in travel direction
-		position.x = route_left + fposmod(
-			position.x + direction * 350.0 - route_left, route_length())
-	else:
-		# Circuit: advance progress by 300px of arc
-		progress = fposmod(progress + 300.0, curve.get_baked_length())
-		position = curve.sample_baked(progress)
-	current_speed = cruise_speed * 0.5
-	cached_gap = 99999.0
-	proximity_clock = 0.0
 
 func update_art() -> void:
 	var index := posmod(roundi(heading / (PI / 4.0)), 8)

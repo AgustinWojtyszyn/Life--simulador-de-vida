@@ -68,7 +68,7 @@ func run() -> void:
 	car.current_speed = 66.0
 	car.proximity_clock = 0.0
 	player.position = Vector2(465, car.position.y - 10.0)
-	for i in 240:
+	for i in 720:
 		car._physics_process(1.0 / 60.0)
 	check(car.position.x < player.position.x - car.half_width - 12, "Car must brake before the resident")
 	check(car.current_speed < 0.1, "Car must wait for the crossing to clear")
