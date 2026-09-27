@@ -141,16 +141,16 @@ func add_traffic_signals() -> void:
 		var h: Rect2 = horizontal[row]
 		for column in vertical.size():
 			var v: Rect2 = vertical[column]
-			var signal := Node2D.new()
-			signal.set_script(TrafficSignalScript)
-			signal.name = "Signal_%d_%d" % [row, column]
-			signal.position = Vector2(v.get_center().x, h.get_center().y)
-			signal.horizontal_half = h.size.y * 0.5
-			signal.vertical_half = v.size.x * 0.5
+			var traffic_light := Node2D.new()
+			traffic_light.set_script(TrafficSignalScript)
+			traffic_light.name = "Signal_%d_%d" % [row, column]
+			traffic_light.position = Vector2(v.get_center().x, h.get_center().y)
+			traffic_light.horizontal_half = h.size.y * 0.5
+			traffic_light.vertical_half = v.size.x * 0.5
 			# A small row offset creates a green-wave feel instead of every
 			# intersection changing at the exact same instant.
-			signal.cycle_offset = float(row) * 1.8 + float(column) * 0.35
-			add_child(signal)
+			traffic_light.cycle_offset = float(row) * 1.8 + float(column) * 0.35
+			add_child(traffic_light)
 
 func add_grid_traffic(regional_models: Array) -> void:
 	# The expanded city must not feel like traffic exists only around spawn.
