@@ -1,93 +1,151 @@
 extends Node2D
 
-# Static drawing is cached by Godot; no per-frame tile generation.
+# Ground is drawn once by Godot's CanvasItem cache. Keeping it as vector draw
+# commands avoids allocating one enormous 4800x3200 render texture on Android.
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 2400, 1600), Color("b5ae95"))
-	paving(Rect2(20, 24, 2360, 366))
-	paving(Rect2(20, 574, 2360, 1006))
-	# Two intersecting streets, with a darker gutter and a raised stone curb.
-	for road in [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(WorldManager.district.side_street_x, 16, WorldManager.district.side_street_width, 1568)]:
-		draw_rect(road.grow(9), Color("787d79"))
-		draw_rect(road.grow(5), Color("e3d7b7"))
-		draw_rect(road.grow(1), Color("575f65"))
+	var district: DistrictData = WorldManager.district
+	var world := district.world_size
+	var pavement := WorldManager.country.pavement
+	draw_rect(Rect2(Vector2.ZERO, world), pavement.darkened(0.12))
+	paving(Rect2(18, 18, world.x - 36, world.y - 36), pavement)
+
+	var horizontal := DistrictBlocks.horizontal_roads(district)
+	var vertical := DistrictBlocks.vertical_roads(district)
+	var all_roads := DistrictBlocks.roads(district)
+
+	for road in all_roads:
+		draw_rect(road.grow(9), Color("777d79"))
+		draw_rect(road.grow(5), Color("e0d5b8"))
+		draw_rect(road.grow(1), Color("596167"))
 		draw_rect(road, Color("424e59"))
-	# Open the shared intersection: no curb may cut across an active road.
-	draw_rect(Rect2(842, 384, 158, 190), Color("424e59"))
-	var sx := WorldManager.district.side_street_x
-	var sw := WorldManager.district.side_street_width
-	for at in [Vector2(842, 1120), Vector2(sx - 10, 384), Vector2(sx - 10, 1120)]:
-		draw_rect(Rect2(at, Vector2(158 if at.x == 842 else sw + 20, 190 if at.y == 384 else 140)), Color("424e59"))
-	for x in range(32, 2370, 44):
-		if not (x > 820 and x < 1010) and not (x > sx - 30 and x < sx + sw + 30):
-			draw_rect(Rect2(x, 1189, 22, 2), Color("c9b783"))
-	for y in range(24, 1580, 44):
-		if not (y > 370 and y < 590) and not (y > 1100 and y < 1280):
-			draw_rect(Rect2(sx + sw / 2, y, 2, 22), Color("c9b783"))
-	for y in range(1140, 1240, 18):
-		for x in [807, 1009, int(sx - 40), int(sx + sw + 20)]:
-			draw_rect(Rect2(x, y, 26, 9), Color("dcd8c2"))
+
+	# Clear every crossing after curbs are painted so streets read as a
+	# continuous network instead of disconnected demo rectangles.
+	for h in horizontal:
+		for v in vertical:
+			draw_rect(Rect2(v.position.x, h.position.y, v.size.x, h.size.y), Color("424e59"))
+
+	# Centre lines and restrained road wear.
+	for h in horizontal:
+		var y := h.get_center().y
+		for x in range(34, int(world.x) - 34, 54):
+			if not inside_vertical_crossing(Vector2(x, y), vertical):
+				draw_rect(Rect2(x, y - 1, 27, 2), Color("c9b783"))
+	for v in vertical:
+		var x := v.get_center().x
+		for y in range(30, int(world.y) - 30, 54):
+			if not inside_horizontal_crossing(Vector2(x, y), horizontal):
+				draw_rect(Rect2(x - 1, y, 2, 27), Color("c9b783"))
+
+	# Zebra crossings at each intersection. The visual scale remains legible
+	# from the default camera without turning the streets into UI decoration.
+	for h in horizontal:
+		for v in vertical:
+			var center := Vector2(v.get_center().x, h.get_center().y)
+			for offset in range(-46, 47, 16):
+				draw_rect(Rect2(center.x - v.size.x / 2 - 30, center.y + offset - 4, 24, 8), Color("ded9c3"))
+				draw_rect(Rect2(center.x + v.size.x / 2 + 6, center.y + offset - 4, 24, 8), Color("ded9c3"))
+
+	# Starter-quarter parking remains useful, but it is no longer the edge of
+	# the world: roads and blocks continue far beyond it.
+	draw_parking(Rect2(1030, 631, 370, 280))
+	draw_plaza(Rect2(72, 620, 720, 330))
+
+	# Secondary green pockets distribute visual identity through the district
+	# instead of concentrating every memorable object in the first plaza.
+	draw_park(Rect2(2980, 650, 520, 360), 41)
+	draw_park(Rect2(4040, 1370, 500, 350), 73)
+	draw_park(Rect2(350, 2820, 560, 300), 99)
+
+	# Fine, deterministic wear breaks up large expanses without creating a
+	# giant source texture. This is intentionally sparse for mobile GPUs.
 	var rng := RandomNumberGenerator.new()
-	rng.seed = 519
-	for i in 14000:
-		var p := Vector2(rng.randi_range(18, 2380), rng.randi_range(18, 1580))
-		if (p.y > 396 and p.y < 562) or (p.x > 854 and p.x < 988):
-			draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color("495560") if i % 3 else Color("3d4954"))
-	for x in range(32, 2380, 44):
-		if (x < 816 or x > 1010) and not (x > sx - 30 and x < sx + sw + 30):
-			draw_rect(Rect2(x, 478, 22, 2), Color("c9b783"))
-	for y in range(24, 1580, 44):
-		if (y < 370 or y > 590) and not (y > 1100 and y < 1280):
-			draw_rect(Rect2(920, y, 2, 22), Color("c9b783"))
-	# Crosswalks at the intersection, on all four approaches.
-	for y in range(405, 555, 18):
-		for x in [807, 1009, int(sx - 40), int(sx + sw + 20)]:
-			draw_rect(Rect2(x, y, 26, 9), Color("dcd8c2"))
-	for x in range(861, 984, 18):
-		for y in [355, 580]:
-			draw_rect(Rect2(x, y, 9, 26), Color("dcd8c2"))
-	# Dedicated off-street parking, with four numbered bays and a clear access aisle.
-	draw_rect(Rect2(1030, 631, 370, 280), Color("e3d7b7"))
-	draw_rect(Rect2(1034, 635, 362, 272), Color("4b5860"))
-	draw_rect(Rect2(990, 760, 44, 42), Color("4b5860"))
+	rng.seed = 519 + WorldManager.country.id.hash()
+	for i in 6500:
+		var p := Vector2(rng.randf_range(22, world.x - 22), rng.randf_range(22, world.y - 22))
+		var on_road := false
+		for road in all_roads:
+			if road.has_point(p):
+				on_road = true
+				break
+		if on_road:
+			draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color(0.23, 0.28, 0.31, 0.32))
+
+func inside_vertical_crossing(point: Vector2, roads: Array[Rect2]) -> bool:
+	for road in roads:
+		if absf(point.x - road.get_center().x) < road.size.x * 0.7:
+			return true
+	return false
+
+func inside_horizontal_crossing(point: Vector2, roads: Array[Rect2]) -> bool:
+	for road in roads:
+		if absf(point.y - road.get_center().y) < road.size.y * 0.7:
+			return true
+	return false
+
+func paving(rect: Rect2, base: Color) -> void:
+	draw_rect(rect, base)
+	var light := base.lightened(0.055)
+	var dark := base.darkened(0.035)
+	for y in range(int(rect.position.y), int(rect.end.y), 24):
+		for x in range(int(rect.position.x), int(rect.end.x), 48):
+			var offset := 24 if (y / 24) as int % 2 else 0
+			var tile := Rect2(x + offset, y, 47, 23).intersection(rect)
+			if tile.has_area():
+				draw_rect(tile, light if (x / 48 + y / 24) as int % 5 else dark)
+				draw_line(tile.position, tile.position + Vector2(tile.size.x, 0), base.lightened(0.09))
+
+func draw_parking(area: Rect2) -> void:
+	draw_rect(area, Color("e3d7b7"))
+	draw_rect(area.grow(-4), Color("4b5860"))
 	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(1050, 656), "P  ·  ESTACIONAMIENTO", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e9d69f"))
-	var bays := [Rect2(1050, 669, 152, 70), Rect2(1228, 669, 152, 70), Rect2(1050, 813, 152, 70), Rect2(1228, 813, 152, 70)]
+	draw_string(font, area.position + Vector2(20, 25), "P  ·  ESTACIONAMIENTO", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e9d69f"))
+	var bay_w := 152.0
+	var bays := [
+		Rect2(area.position + Vector2(20, 38), Vector2(bay_w, 70)),
+		Rect2(area.position + Vector2(198, 38), Vector2(bay_w, 70)),
+		Rect2(area.position + Vector2(20, 182), Vector2(bay_w, 70)),
+		Rect2(area.position + Vector2(198, 182), Vector2(bay_w, 70)),
+	]
 	for i in bays.size():
 		draw_rect(bays[i], Color("d3cda9"), false, 2)
 		draw_string(font, bays[i].position + Vector2(5, 16), "%02d" % (i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e9d69f"))
-	for x in range(1065, 1360, 68):
-		draw_line(Vector2(x, 781), Vector2(x + 22, 781), Color("c8c49b"), 2)
-	draw_colored_polygon(PackedVector2Array([Vector2(1020, 772), Vector2(1033, 781), Vector2(1020, 790)]), Color("e9d69f"))
-	# The plaza has raised garden beds, paths, edging and dense low vegetation.
-	for bed in [Rect2(87, 642, 258, 86), Rect2(564, 642, 202, 86),
-		Rect2(87, 839, 258, 88), Rect2(564, 839, 202, 88)]:
-		draw_rect(bed.grow(4), Color("777f67"))
-		draw_rect(bed.grow(2), Color("e0d6b6"))
-		draw_rect(bed, Color("748568"))
-		for i in 550:
-			var p: Vector2 = bed.position + Vector2(rng.randf_range(2, bed.size.x - 3), rng.randf_range(2, bed.size.y - 3))
-			draw_line(p, p + Vector2(2, -1), Color("8d9b72") if i % 2 else Color("627c62"))
-		for i in 24:
-			var p: Vector2 = bed.position + Vector2(rng.randf_range(6, bed.size.x - 6), rng.randf_range(5, bed.size.y - 5))
-			draw_rect(Rect2(p, Vector2(2, 2)), Color("d0b67a"))
-	# A diagonal walking route through the open plaza interrupts the street grid.
-	var plaza_path := PackedVector2Array([Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873)])
-	draw_polyline(plaza_path, Color("e1d6b6"), 24, true)
-	draw_polyline(plaza_path, Color("b3aa91"), 2, true)
-	for x in [98, 524, 774, 1040, 1330]:
-		draw_rect(Rect2(x, 387, 20, 4), Color("333f47"))
-		for dx in range(2, 20, 4):
-			draw_line(Vector2(x + dx, 387), Vector2(x + dx, 391), Color("7b8986"))
-	# Long afternoon cast shadows, painted on the ground behind sorted objects.
-	for p in [Vector2(195, 318), Vector2(445, 320), Vector2(704, 315), Vector2(1168, 324)]:
-		draw_colored_polygon(PackedVector2Array([p + Vector2(-87, -50), p + Vector2(80, -50), p + Vector2(128, 15), p + Vector2(-40, 15)]), Color(0.17, 0.22, 0.29, 0.19))
 
-func paving(rect: Rect2) -> void:
-	draw_rect(rect, Color("bcb8a3"))
-	for y in range(int(rect.position.y), int(rect.end.y), 16):
-		for x in range(int(rect.position.x), int(rect.end.x), 32):
-			var offset := 16 if (y / 16) % 2 else 0
-			var tile := Rect2(x + offset, y, 31, 15).intersection(rect)
-			if tile.has_area():
-				draw_rect(tile, Color("c8c4af") if (x + y) % 5 else Color("c1bda8"))
-				draw_line(tile.position, tile.position + Vector2(tile.size.x, 0), Color("d0cbb7"))
+func draw_plaza(area: Rect2) -> void:
+	draw_rect(area.grow(5), Color("ded4b6"))
+	draw_rect(area, Color("b9b49f"))
+	var beds := [
+		Rect2(area.position + Vector2(16, 18), Vector2(250, 92)),
+		Rect2(area.position + Vector2(445, 18), Vector2(250, 92)),
+		Rect2(area.position + Vector2(16, 218), Vector2(250, 92)),
+		Rect2(area.position + Vector2(445, 218), Vector2(250, 92)),
+	]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 331
+	for bed in beds:
+		draw_rect(bed.grow(3), Color("ddd3b4"))
+		draw_rect(bed, Color("748568"))
+		for i in 160:
+			var p := bed.position + Vector2(rng.randf_range(3, bed.size.x - 3), rng.randf_range(3, bed.size.y - 3))
+			draw_line(p, p + Vector2(2, -1), Color("8d9b72") if i % 2 else Color("627c62"))
+	var path := PackedVector2Array([
+		area.position + Vector2(280, 8),
+		area.position + Vector2(336, 82),
+		area.position + Vector2(365, 165),
+		area.position + Vector2(430, 245),
+		area.position + Vector2(450, 322),
+	])
+	draw_polyline(path, Color("e1d6b6"), 26, true)
+	draw_polyline(path, Color("aaa58e"), 2, true)
+
+func draw_park(area: Rect2, seed: int) -> void:
+	draw_rect(area.grow(4), Color("dfd4b7"))
+	draw_rect(area, Color("78886b"))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed
+	for i in 520:
+		var p := area.position + Vector2(rng.randf_range(3, area.size.x - 3), rng.randf_range(3, area.size.y - 3))
+		draw_line(p, p + Vector2(2, -1), Color("8fa076") if i % 3 else Color("667b62"))
+	var mid := area.get_center()
+	draw_rect(Rect2(area.position.x + 14, mid.y - 8, area.size.x - 28, 16), Color("d8cdae"))
+	draw_rect(Rect2(mid.x - 8, area.position.y + 14, 16, area.size.y - 28), Color("d8cdae"))
