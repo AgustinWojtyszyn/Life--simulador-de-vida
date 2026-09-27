@@ -4,7 +4,7 @@ extends Node
 # once per track/country and cached; traffic uses a tiny pooled set of spatial
 # loop players instead of spawning short engine clips every few seconds.
 const SAMPLE_RATE := 16000
-const TRACK_SECONDS := 32.0
+const TRACK_SECONDS := 24.0
 const MAX_TRAFFIC_VOICES := 4
 const TRACKS := [
 	{"name": "Barrio de Sol", "tempo": 72.0, "progression": [0, 9, 5, 7], "melody": [0, 2, 4, 2, 5, 4, 2, 1], "minor": false},
@@ -240,54 +240,73 @@ func make_music(style: int, country: String) -> AudioStreamWAV:
 	var bytes := PackedByteArray()
 	bytes.resize(frames * 4)
 	var tempo: float = float(profile["tempo"])
-	var beat: float = 60.0 / tempo
-	var bar: float = beat * 4.0
 	var base_root: float = country_root(country)
 	var progression: Array = profile["progression"]
 	var melody: Array = profile["melody"]
 	var scale: Array[int] = country_scale(country)
 	var minor: bool = bool(profile["minor"])
 	var third := 3 if minor else 4
+
+	# Precompute every pitch once. Track changes must never stall gameplay by
+	# evaluating pow() hundreds of thousands of times on the main thread.
+	var chord_sets := []
+	var bass_freqs := []
+	for chord_value in progression:
+		var root_step := int(chord_value)
+		var tones := []
+		for interval in [0, third, 7]:
+			tones.append(quantized_frequency(base_root * pow(2.0, float(root_step + int(interval)) / 12.0)))
+		chord_sets.append(tones)
+		bass_freqs.append(quantized_frequency(base_root * 0.5 * pow(2.0, float(root_step) / 12.0)))
+	var melody_freqs := []
+	for degree_value in melody:
+		var degree_index := int(degree_value)
+		var semitone: int = scale[posmod(degree_index, scale.size())] + 12
+		melody_freqs.append(quantized_frequency(base_root * pow(2.0, float(semitone) / 12.0)))
+	var shimmer_freq := quantized_frequency(base_root * 2.0)
+
+	# Chord and melody grids divide the full 24-second loop exactly. Combined
+	# with cycle-quantized frequencies this removes the obvious click/restart
+	# that made the old soundtrack sound broken.
+	var chord_span := TRACK_SECONDS / float(progression.size())
+	var melody_span := TRACK_SECONDS / float(melody.size() * 2)
+	var beat_count := maxi(16, roundi(tempo * TRACK_SECONDS / 60.0))
+	var beat := TRACK_SECONDS / float(beat_count)
 	for i in frames:
 		var t: float = float(i) / SAMPLE_RATE
-		var bar_index: int = int(t / bar)
-		var chord_index: int = posmod(bar_index, progression.size())
-		var next_chord_index: int = posmod(chord_index + 1, progression.size())
-		var chord_root: int = int(progression[chord_index])
-		var next_root: int = int(progression[next_chord_index])
-		var bar_phase: float = fposmod(t, bar) / bar
-		var blend: float = clampf((bar_phase - 0.78) / 0.22, 0.0, 1.0)
+		var chord_index: int = int(t / chord_span) % progression.size()
+		var next_chord_index: int = (chord_index + 1) % progression.size()
+		var chord_phase: float = fposmod(t, chord_span) / chord_span
+		var blend: float = clampf((chord_phase - 0.76) / 0.24, 0.0, 1.0)
 		blend = blend * blend * (3.0 - 2.0 * blend)
 		var pad_a := 0.0
 		var pad_b := 0.0
-		for interval in [0, third, 7, 12]:
-			var fa := quantized_frequency(base_root * pow(2.0, float(chord_root + int(interval)) / 12.0))
-			var fb := quantized_frequency(base_root * pow(2.0, float(next_root + int(interval)) / 12.0))
-			var phase_offset := float(interval) * 0.13
-			pad_a += sin(TAU * fa * t + phase_offset)
-			pad_b += sin(TAU * fb * t + phase_offset)
-		var pad := lerpf(pad_a, pad_b, blend) * 0.024
-		var pulse := 0.84 + 0.16 * sin(TAU * (2.0 / TRACK_SECONDS) * t)
-		pad *= pulse
-		var melody_span := beat * 2.0
-		var melody_step: int = int(t / melody_span)
-		var degree_index: int = int(melody[posmod(melody_step, melody.size())])
-		var semitone: int = scale[posmod(degree_index, scale.size())] + 12
-		var melody_freq := quantized_frequency(base_root * pow(2.0, float(semitone) / 12.0))
-		var note_phase := fposmod(t, melody_span)
-		var attack := clampf(note_phase / 0.24, 0.0, 1.0)
-		var release := exp(-note_phase * 0.72)
-		var melody_env := attack * release
-		var lead := (sin(TAU * melody_freq * t) * 0.020 + sin(TAU * melody_freq * 0.5 * t + 0.8) * 0.010) * melody_env
-		var bass_freq := quantized_frequency(base_root * 0.5 * pow(2.0, float(chord_root) / 12.0))
-		var bass := sin(TAU * bass_freq * t + 0.18) * 0.025
+		var tones_a: Array = chord_sets[chord_index]
+		var tones_b: Array = chord_sets[next_chord_index]
+		for tone_index in tones_a.size():
+			var phase_offset := float(tone_index) * 0.41
+			pad_a += sin(TAU * float(tones_a[tone_index]) * t + phase_offset)
+			pad_b += sin(TAU * float(tones_b[tone_index]) * t + phase_offset)
+		var pad := lerpf(pad_a, pad_b, blend) * 0.030
+		pad *= 0.88 + 0.12 * sin(TAU * (2.0 / TRACK_SECONDS) * t)
+
+		var melody_step: int = int(t / melody_span) % melody_freqs.size()
+		var note_phase := fposmod(t, melody_span) / melody_span
+		var melody_env := sin(PI * note_phase)
+		melody_env *= melody_env
+		var melody_freq: float = float(melody_freqs[melody_step])
+		var lead := (sin(TAU * melody_freq * t) * 0.018 + sin(TAU * melody_freq * 0.5 * t + 0.8) * 0.009) * melody_env
+
+		var bass_a := sin(TAU * float(bass_freqs[chord_index]) * t + 0.18)
+		var bass_b := sin(TAU * float(bass_freqs[next_chord_index]) * t + 0.18)
+		var bass := lerpf(bass_a, bass_b, blend) * 0.024
+
 		var beat_phase := fposmod(t, beat)
 		var soft_kick := 0.0
-		if style in [2, 3] and beat_phase < 0.15:
-			var kick_env := 1.0 - beat_phase / 0.15
-			soft_kick = sin(TAU * (58.0 + 16.0 * kick_env) * t) * kick_env * 0.018
-		var shimmer_freq := quantized_frequency(base_root * 2.0)
-		var shimmer := sin(TAU * shimmer_freq * t + 1.25) * 0.005
+		if style in [2, 3] and beat_phase < 0.14:
+			var kick_env := 1.0 - beat_phase / 0.14
+			soft_kick = sin(TAU * (54.0 + 14.0 * kick_env) * t) * kick_env * 0.014
+		var shimmer := sin(TAU * shimmer_freq * t + 1.25) * 0.004
 		var left := clampf(pad + bass + lead * 0.92 + soft_kick + shimmer, -0.68, 0.68)
 		var right := clampf(pad * 0.98 + bass + lead * 1.08 + soft_kick - shimmer, -0.68, 0.68)
 		bytes.encode_s16(i * 4, int(left * 32767.0))
