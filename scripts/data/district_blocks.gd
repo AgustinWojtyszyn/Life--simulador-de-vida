@@ -94,6 +94,10 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 	# South-facing rows use the broadest set of regional architecture. This is
 	# where shops and unique façades live, avoiding sideways storefront signs.
 	var row_x: Array[float] = [180.0, 430.0, 680.0, 1120.0, 1430.0, 1650.0, 2070.0, 2350.0, 2530.0, 3020.0, 3280.0, 3500.0, 4010.0, 4270.0, 4560.0]
+	# Authored/catalog POIs already provide the important destinations. Procedural
+	# filler has a hard budget so a district cannot become twenty copies of a shop.
+	var extra_shop_count := 0
+	var extra_office_count := 0
 	for road in horizontal_roads(district):
 		var y: float = road.position.y - 26.0
 		for column in row_x.size():
@@ -128,12 +132,14 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				continue
 			var kind := "house"
 			var mode := "EXTERIOR_ONLY"
-			if y > 600 and column % 7 == 3:
+			if y > 600 and column % 13 == 3 and extra_shop_count < 3:
 				kind = "shop"
 				mode = "ENTERABLE"
-			elif y > 600 and column % 11 == 7:
+				extra_shop_count += 1
+			elif y > 600 and column % 17 == 7 and extra_office_count < 2:
 				kind = "office"
 				mode = "ENTERABLE"
+				extra_office_count += 1
 			elif y > 600 and column % 5 == 2:
 				# A second region-specific building family prevents the long
 				# residential rows from becoming copies of one house model.
