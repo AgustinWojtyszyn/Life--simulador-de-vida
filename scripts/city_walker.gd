@@ -86,7 +86,7 @@ func _process(delta: float) -> void:
 	if movement.length() > remaining: movement = goal - position
 	var candidate := position + movement
 	var parent := get_parent()
-	if parent.has_method("walker_position_clear") and not parent.walker_position_clear(candidate):
+	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
 		# Do not ghost through a facade or prop. Skip the blocked local waypoint
 		# and let the short route choose another approach on the next update.
 		velocity = Vector2.ZERO
@@ -131,7 +131,7 @@ func apply_crowd_separation(delta: float) -> void:
 		return
 	var candidate := position + push.normalized() * minf(20.0 * delta, 1.5)
 	var parent := get_parent()
-	if not parent.has_method("walker_position_clear") or parent.walker_position_clear(candidate):
+	if not parent.has_method("walker_position_clear") or bool(parent.call("walker_position_clear", candidate)):
 		position = candidate
 
 func choose_activity() -> void:
