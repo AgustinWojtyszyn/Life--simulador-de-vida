@@ -85,30 +85,30 @@ func _draw() -> void:
 		var kind := str(object.get_meta("building_type"))
 		var col: Color
 		var poi_label := ""
-		match true:
-			kind.contains("cafe"), kind.contains("coffee"):
-				col = Color("d9995a")
-				poi_label = "CAFÉ"
-			kind.contains("market"), kind.contains("shop"), kind.contains("mercado"):
-				col = Color("5aaed9")
-				poi_label = "ALMACÉN" if kind.contains("market") else "TIENDA"
-			kind.contains("clinic"), kind.contains("hospital"):
-				col = Color("e05050")
-				poi_label = "CLÍNICA"
-			kind.contains("bakery"), kind.contains("panaderia"):
-				col = Color("e0a040")
-				poi_label = "PANADERÍA"
-			kind.contains("office"):
-				col = Color("708090")
-			kind.begins_with("residential"):
-				col = Color("c9b27c")
-			_:
-				col = Color("9d8a6e")
+		if kind.contains("cafe") or kind.contains("coffee"):
+			col = Color("d9995a")
+			poi_label = "CAFÉ"
+		elif kind.contains("market") or kind.contains("shop") or kind.contains("mercado"):
+			col = Color("5aaed9")
+			poi_label = "ALMACÉN" if kind.contains("market") else "TIENDA"
+		elif kind.contains("clinic") or kind.contains("hospital"):
+			col = Color("e05050")
+			poi_label = "CLÍNICA"
+		elif kind.contains("bakery") or kind.contains("panaderia"):
+			col = Color("e0a040")
+			poi_label = "PANADERÍA"
+		elif kind.contains("office"):
+			col = Color("708090")
+		elif kind.begins_with("residential"):
+			col = Color("c9b27c")
+		else:
+			col = Color("9d8a6e")
 		var dot_size := 2.0 if not expanded else 3.0
 		draw_rect(Rect2(p - Vector2(dot_size, dot_size), Vector2(dot_size * 2, dot_size * 2)), col)
 		# Show POI labels only when expanded and near player
 		if expanded and poi_label != "" and is_instance_valid(world.get_node_or_null("Player")):
-			var player_p := world.get_node("Player").global_position
+			var player_node_for_poi := world.get_node("Player") as Node2D
+			var player_p: Vector2 = player_node_for_poi.global_position
 			if object.position.distance_to(player_p) < 600:
 				draw_string(font, p + Vector2(4, 4), poi_label, HORIZONTAL_ALIGNMENT_LEFT, 60, 7, col)
 	# Traffic signals
