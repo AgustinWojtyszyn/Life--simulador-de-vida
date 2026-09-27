@@ -24,6 +24,7 @@ MissionSystem="*res://scripts/systems/mission_system.gd"
 InputManager="*res://scripts/systems/input_manager.gd"
 SaveSystem="*res://scripts/systems/save_system.gd"
 WorldManager="*res://scripts/systems/world_manager.gd"
+AudioSystem="*res://scripts/systems/audio_system.gd"
 
 [display]
 
