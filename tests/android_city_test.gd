@@ -1,8 +1,6 @@
 extends SceneTree
 
 var failures := 0
-const CityBuildingScript := preload("res://scripts/building.gd")
-
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -36,7 +34,7 @@ func run() -> void:
 
 		var families := {}
 		for object in world.city_objects:
-			if object.get_script() == CityBuildingScript and object.variant.has("family"):
+			if object.get_script() != null and object.get_script().resource_path == "res://scripts/building.gd" and object.variant.has("family"):
 				families[object.variant.family] = true
 				check(object.facade is AtlasTexture, "Country catalog must use shared atlas textures")
 				if object.facade is AtlasTexture:
