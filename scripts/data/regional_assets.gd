@@ -10,14 +10,14 @@ const COUNTRY_HOMES := {
 	"us": ["brick", "duplex", "modern", "premium_home", "apartments", "common", "restored"],
 }
 const FRONTAGES := {
-	"ar": ["cafe", "almacen", "panaderia", "kiosco"],
+	"ar": ["cafe", "market", "panaderia", "kiosco"],
 	"br": ["bakery_corner", "market", "padaria", "cafe"],
 	"jp": ["cafe", "market", "konbini", "office"],
 	"it": ["trattoria", "market", "pizzeria", "cafe"],
 	"us": ["diner", "market", "coffee_shop", "cafe"],
 }
 const SHOPS := {
-	"ar": ["almacen", "panaderia", "kiosco", "cafe", "bookshop", "workshop"],
+	"ar": ["market", "panaderia", "kiosco", "cafe", "bookshop", "workshop"],
 	"br": ["padaria", "market", "cafe", "workshop"],
 	"jp": ["konbini", "market", "cafe", "workshop"],
 	"it": ["pizzeria", "market", "cafe", "workshop"],
