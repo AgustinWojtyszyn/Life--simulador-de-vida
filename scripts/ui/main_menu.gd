@@ -9,11 +9,13 @@ var country_preview: TextureRect
 var name_edit: LineEdit
 var error_label: Label
 var busy := false
+var safe_margin: MarginContainer
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var theme_resource := Theme.new()
 	theme_resource.default_font_size = 16
+	theme_resource.set_constant("v_separation", "PopupMenu", 32 if InputManager.touch_enabled else 12)
 	for type in ["Button", "OptionButton", "LineEdit"]:
 		var normal := StyleBoxFlat.new()
 		normal.bg_color = Color("253d42")
@@ -30,6 +32,7 @@ func _ready() -> void:
 		theme_resource.set_stylebox("hover", type, focus)
 		theme_resource.set_color("font_color", type, Color("eee5d2"))
 	theme = theme_resource
+	get_viewport().size_changed.connect(layout_safe_area)
 	main_screen()
 
 func shell(title: String, subtitle: String) -> void:
@@ -49,11 +52,14 @@ func shell(title: String, subtitle: String) -> void:
 	art.modulate = Color(0.8, 0.8, 0.7, 0.2)
 	add_child(art)
 	var margin := MarginContainer.new()
+	safe_margin = margin
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 24)
 	add_child(margin)
+	layout_safe_area()
 	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	margin.add_child(scroll)
 	panel = VBoxContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -65,6 +71,7 @@ func shell(title: String, subtitle: String) -> void:
 func label(text: String, font_size := 16, color := Color("eee5d2")) -> Label:
 	var node := Label.new()
 	node.text = text
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	node.add_theme_font_size_override("font_size", font_size)
 	node.add_theme_color_override("font_color", color)
 	panel.add_child(node)
@@ -73,7 +80,7 @@ func label(text: String, font_size := 16, color := Color("eee5d2")) -> Label:
 func button(text: String, action: Callable) -> Button:
 	var node := Button.new()
 	node.text = text
-	node.custom_minimum_size.y = 44
+	node.custom_minimum_size.y = 48
 	node.pressed.connect(action)
 	panel.add_child(node)
 	return node
@@ -103,39 +110,40 @@ func create_screen() -> void:
 	var row := HBoxContainer.new()
 	panel.add_child(row)
 	var preview_box := Control.new()
-	preview_box.custom_minimum_size = Vector2(105, 106)
+	preview_box.custom_minimum_size = Vector2(105, 160)
 	row.add_child(preview_box)
 	preview = CharacterVisual.new()
 	preview.profile = draft
-	preview.position = Vector2(52, 100)
+	preview.position = Vector2(52, 150)
 	preview.scale = Vector2.ONE * 3
 	preview_box.add_child(preview)
 	var fields := VBoxContainer.new()
 	fields.custom_minimum_size.x = 160
+	fields.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(fields)
 	name_edit = LineEdit.new()
 	name_edit.placeholder_text = "Tu nombre"
 	name_edit.max_length = 24
 	name_edit.text = draft.player_name
-	name_edit.custom_minimum_size.y = 44
+	name_edit.custom_minimum_size.y = 48
 	fields.add_child(name_edit)
 	var gender := OptionButton.new()
 	gender.add_item("Hombre")
 	gender.add_item("Mujer")
 	gender.selected = 1 if draft.gender == "female" else 0
-	gender.custom_minimum_size.y = 44
+	gender.custom_minimum_size.y = 48
 	gender.item_selected.connect(func(i: int): draft.gender = "female" if i == 1 else "male"; preview.apply_profile(draft))
 	fields.add_child(gender)
 	var grid := GridContainer.new()
 	grid.columns = 2
-	row.add_child(grid)
+	panel.add_child(grid)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for entry in [["skin", "Piel", ["Clara", "Media", "Oscura"]], ["hair", "Cabello", ["Natural", "Flequillo", "Lateral"]], ["hair_color", "Color de cabello", ["Castaño", "Rubio", "Negro"]], ["top", "Prenda superior", ["Turquesa", "Bordó", "Azul"]], ["bottom", "Pantalón", ["Gris", "Arena", "Denim"]]]:
 		var title := Label.new()
 		title.text = entry[1]
 		grid.add_child(title)
 		var choice := OptionButton.new()
-		choice.custom_minimum_size.y = 38
+		choice.custom_minimum_size.y = 48
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		for option in entry[2]:
 			choice.add_item(option)
@@ -154,7 +162,7 @@ func create_screen() -> void:
 func country_screen() -> void:
 	shell("ELEGÍ DÓNDE EMPEZAR", "Una vivienda propia te espera en cada destino.")
 	var selection := OptionButton.new()
-	selection.custom_minimum_size.y = 46
+	selection.custom_minimum_size.y = 48
 	panel.add_child(selection)
 	country_preview = TextureRect.new()
 	country_preview.custom_minimum_size = Vector2(180, 140)
@@ -197,6 +205,7 @@ func saves_screen() -> void:
 func rename_screen(path: String, title: String) -> void:
 	shell("RENOMBRAR PARTIDA", "El nombre del personaje se conserva.")
 	var entry := LineEdit.new()
+	entry.custom_minimum_size.y = 48
 	entry.text = title
 	entry.max_length = 40
 	panel.add_child(entry)
@@ -214,6 +223,7 @@ func delete_screen(path: String) -> void:
 func options_screen() -> void:
 	shell("OPCIONES", "Tiempo del mundo")
 	var speed := OptionButton.new()
+	speed.custom_minimum_size.y = 48
 	for title in ["Rápido · 30 s por hora", "Normal · 60 s por hora", "Tranquilo · 120 s por hora"]:
 		speed.add_item(title)
 	speed.selected = 1
@@ -225,3 +235,10 @@ func credits_screen() -> void:
 	shell("CRÉDITOS", "VIDA / LIFE · Agustín Wojtyszyn")
 	label("Hecho con Godot 4. Arte generado con PixelLab.", 16)
 	button("Volver", main_screen)
+
+func layout_safe_area() -> void:
+	if not is_instance_valid(safe_margin): return
+	var area := InputManager.safe_rect(get_viewport_rect().size)
+	var viewport_size := get_viewport_rect().size
+	for entry in [["left", area.position.x], ["top", area.position.y], ["right", viewport_size.x - area.end.x], ["bottom", viewport_size.y - area.end.y]]:
+		safe_margin.add_theme_constant_override("margin_" + entry[0], int(entry[1]) + 20)

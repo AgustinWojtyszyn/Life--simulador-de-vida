@@ -2,11 +2,11 @@ extends Node2D
 
 # Static drawing is cached by Godot; no per-frame tile generation.
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 2400, 1600), Color("b5ae95"))
+	draw_rect(Rect2(0, 0, 2400, 2400), Color("b5ae95"))
 	paving(Rect2(20, 24, 2360, 366))
-	paving(Rect2(20, 574, 2360, 1006))
+	paving(Rect2(20, 574, 2360, 1806))
 	# Two intersecting streets, with a darker gutter and a raised stone curb.
-	for road in [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(WorldManager.district.side_street_x, 16, WorldManager.district.side_street_width, 1568)]:
+	for road in DistrictBlocks.roads(WorldManager.district):
 		draw_rect(road.grow(9), Color("787d79"))
 		draw_rect(road.grow(5), Color("e3d7b7"))
 		draw_rect(road.grow(1), Color("575f65"))
@@ -17,6 +17,16 @@ func _draw() -> void:
 	var sw := WorldManager.district.side_street_width
 	for at in [Vector2(842, 1120), Vector2(sx - 10, 384), Vector2(sx - 10, 1120)]:
 		draw_rect(Rect2(at, Vector2(158 if at.x == 842 else sw + 20, 190 if at.y == 384 else 140)), Color("424e59"))
+	for y in [1840, 2210]:
+		for x in [852.0, sx]:
+			var w := 138.0 if x == 852.0 else sw
+			draw_rect(Rect2(x - 10, y - 10, w + 20, 140 if y == 1840 else 120), Color("424e59"))
+		for x in range(32, 2370, 44):
+			if not (x > 810 and x < 1020) and not (x > sx - 30 and x < sx + sw + 30):
+				draw_rect(Rect2(x, y + 59, 22, 2), Color("c9b783"))
+		for x in [810, 1010, int(sx - 40), int(sx + sw + 20)]:
+			for stripe in range(y + 12, y + 90, 18):
+				draw_rect(Rect2(x, stripe, 26, 9), Color("dcd8c2"))
 	for x in range(32, 2370, 44):
 		if not (x > 820 and x < 1010) and not (x > sx - 30 and x < sx + sw + 30):
 			draw_rect(Rect2(x, 1189, 22, 2), Color("c9b783"))

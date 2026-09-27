@@ -1,10 +1,14 @@
-# Android · Fase 1
+# Android
 
 La misma escena `app.tscn` y los mismos sistemas funcionan en PC y Android.
 El preset `Android` usa Compatibility, ARM64 y APK sin plugins ni permisos de red.
 Orientación horizontal, UI con anchors/contenedores, joystick multitouch y botón
 contextual independiente. Al perder foco se limpia el joystick; al suspenderse
-se guarda en `user://`. Las zonas táctiles respetan el área segura del dispositivo.
+se guarda en `user://`. Controles, HUD y paneles comparten el área segura del dispositivo.
+El diseño se mantiene horizontal; menús y diario admiten scroll táctil.
+Los botones principales tienen un mínimo de 48 unidades.
+
+Cambios y pruebas actuales: [ITERATION_ANDROID_CITY.md](ITERATION_ANDROID_CITY.md).
 
 Para probar los controles en escritorio:
 

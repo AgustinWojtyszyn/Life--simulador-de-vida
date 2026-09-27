@@ -1,6 +1,6 @@
 extends Node2D
 
-const MAP_SIZE := Vector2(2400, 1600)
+const MAP_SIZE := Vector2(2400, 2400)
 const Regional := preload("res://scripts/data/regional_assets.gd")
 const CityProp := preload("res://scripts/city_prop.gd")
 const Ground := preload("res://scripts/city_ground.gd")
@@ -16,6 +16,9 @@ var solid_rects: Array[Rect2] = []
 var building_bounds: Array[Rect2] = []
 var protected_content: Array[Rect2] = []
 var placed_prop_bounds: Array[Rect2] = []
+var entrance_clearance: Array[Rect2] = []
+# Keep the diagonal plaza promenade clear at ground level, including its edges.
+const PEDESTRIAN_CORRIDORS := [Rect2(344, 616, 71, 82), Rect2(387, 670, 90, 95), Rect2(449, 737, 65, 90), Rect2(486, 799, 80, 88)]
 var city_objects: Array[Node2D] = []
 var occluders: Array[Sprite2D] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
@@ -32,20 +35,23 @@ func _ready() -> void:
 	# Render thousands of static ground marks only once, then reuse one GPU texture.
 	var ground_view := SubViewport.new()
 	ground_view.name = "GroundCache"
-	ground_view.size = Vector2i(MAP_SIZE)
+	var ground_scale := 0.5 if InputManager.touch_enabled else 1.0
+	ground_view.size = Vector2i(MAP_SIZE * ground_scale)
 	ground_view.disable_3d = true
 	ground_view.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var ground := Node2D.new()
 	ground.set_script(Ground)
+	ground.scale = Vector2.ONE * ground_scale
 	ground_view.add_child(ground)
 	add_child(ground_view)
 	var ground_sprite := Sprite2D.new()
 	ground_sprite.texture = ground_view.get_texture()
 	ground_sprite.centered = false
+	ground_sprite.scale = Vector2.ONE / ground_scale
 	ground_sprite.z_index = -10
 	add_child(ground_sprite)
-	for rect in [Rect2(0, 0, 2400, 16), Rect2(0, 1584, 2400, 16),
-		Rect2(0, 0, 16, 1600), Rect2(2384, 0, 16, 1600)]:
+	for rect in [Rect2(0, 0, 2400, 16), Rect2(0, 2384, 2400, 16),
+		Rect2(0, 0, 16, 2400), Rect2(2384, 0, 16, 2400)]:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
 	var frontages: Array = Regional.FRONTAGES[WorldManager.country.id]
@@ -94,7 +100,7 @@ func _ready() -> void:
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
 		Vector2(292, 699), Vector2(708, 705), Vector2(122, 906), Vector2(708, 906), Vector2(1390, 932)]:
 		add_asset("vegetation/tree", p, Vector2(100, 133), Rect2(-9, -9, 18, 13))
-	for p in [Vector2(365, 880), Vector2(621, 782), Vector2(716, 610), Vector2(1045, 601)]:
+	for p in [Vector2(530, 660), Vector2(600, 780)]:
 		add_asset("props/bench", p, Vector2(58, 43), Rect2(-23, -12, 46, 12))
 	for p in [Vector2(90, 379), Vector2(510, 379), Vector2(813, 379), Vector2(1018, 379),
 		Vector2(1370, 600), Vector2(814, 600), Vector2(66, 600), Vector2(460, 888)]:
@@ -184,9 +190,9 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		var model: String = {"car": "compact", "coupe": "sedan"}.get(asset.get_file(), asset.get_file())
 		path = "res://assets/vehicles/%s/%s.png" % [model, Vehicle.source_direction(model, facing)]
 	var texture: Texture2D = load(path)
-	var used := Vector2(texture.get_image().get_used_rect().size)
+	var used := Vector2(TextureBounds.used(texture).size)
 	size = used * minf(size.x / used.x, size.y / used.y)
-	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"))
+	pos = valid_prop_position(pos, size, asset.begins_with("vehicles/"), asset == "props/bench")
 	if not pos.is_finite():
 		prop.free()
 		sprite.free()
@@ -195,7 +201,7 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 	prop.set_meta("orientation", facing)
 	sprite.texture = texture
 	sprite.region_enabled = true
-	sprite.region_rect = sprite.texture.get_image().get_used_rect()
+	sprite.region_rect = TextureBounds.used(sprite.texture)
 	sprite.position = Vector2(0, -size.y / 2)
 	sprite.scale = size / sprite.region_rect.size
 	sprite.modulate = tint
@@ -204,6 +210,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		add_prop("tree_bed", pos + Vector2(0, 3), Rect2())
 	if asset == "props/fountain":
 		prop.set_script(Water)
+	if asset == "props/bench":
+		prop.add_to_group("public_benches")
 	if asset == "props/bench" and facing == "south":
 		prop.add_to_group("city_benches")
 	if asset.begins_with("vehicles/"):
@@ -257,13 +265,16 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
-		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing)
+		var spec := Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing) if not slot.has("catalog_index") else CountryCatalog.descriptor(country.id, slot.catalog_index)
 		building.orientation = spec.facing
 		building.building_type = spec.type
 		building.title = spec.title
 		building.country_id = country.id
 		building.variant = BuildingVariants.make(country.id, slot.kind, index)
-		building.interior_type = ("cafe" if spec.type in ["cafe", "bakery", "pizzeria", "diner"] else "shop") if slot.kind == "shop" else ""
+		if spec.has("family"):
+			building.variant["family"] = spec.family
+			building.variant["height"] = spec.height
+		building.interior_type = ("cafe" if spec.type in ["cafe", "bakery", "pizzeria", "diner", "restaurant"] else "shop") if slot.mode == "ENTERABLE" and slot.kind == "shop" else ""
 		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
 		fit_building(building)
@@ -308,14 +319,18 @@ func populate() -> void:
 		[Vector2(358, 630), Vector2(401, 684), Vector2(463, 751), Vector2(500, 813), Vector2(552, 873), Vector2(500, 813), Vector2(463, 751), Vector2(401, 684)],
 		[Vector2(1430, 1030), Vector2(1520, 1072), Vector2(1615, 1088), Vector2(1700, 1050), Vector2(1615, 1088), Vector2(1520, 1072)],
 	]
+	for y in [1806.0, 2176.0]:
+		routes.append([Vector2(90, y), Vector2(780, y), Vector2(780, y + 12), Vector2(90, y + 12)])
+		routes.append([Vector2(1090, y), Vector2(1700, y), Vector2(1700, y + 12), Vector2(1090, y + 12)])
 	var benches := get_tree().get_nodes_in_group("city_benches")
 	if not benches.is_empty():
 		var seat: Vector2 = benches[0].position + Vector2(0, 2)
-		routes[8] = [seat, seat + Vector2(0, 26), seat + Vector2(65, 26), seat + Vector2(0, 26)]
-	for i in WorldManager.district.population:
+		routes[8] = [seat, seat + Vector2(0, 26), seat + Vector2(0, 80), seat + Vector2(0, 26)]
+	for i in WorldManager.district.population + 4:
 		var walker := Node2D.new()
 		walker.set_script(Walker)
-		walker.route.assign(routes[i % routes.size()])
+		var route_index := routes.size() - 4 + i - WorldManager.district.population if i >= WorldManager.district.population else i % (routes.size() - 4)
+		walker.route.assign(routes[route_index])
 		walker.position = walker.route[0] + Vector2((i / routes.size()) * 25, 0)
 		walker.speed = 60.0 + (i % 5) * 6
 		walker.profile = PlayerProfile.new()
@@ -325,7 +340,7 @@ func populate() -> void:
 		walker.profile.hair_color = (i / 3) % 3
 		walker.profile.top = (i + 1) % 3
 		walker.profile.bottom = (i / 2) % 3
-		walker.route_kind = "bench" if i % routes.size() == 8 else "shop" if i % routes.size() == 9 else "crossing" if i % routes.size() == 10 else "walk"
+		walker.route_kind = "bench" if route_index == 8 else "shop" if route_index == 9 else "crossing" if route_index == 10 else "walk"
 		add_child(walker)
 		system.residents.append(walker)
 
@@ -340,9 +355,9 @@ func add_neighbor(id: String, title: String, at: Vector2) -> void:
 	add_child(walker)
 
 func fit_building(building: CityBuilding) -> void:
-	var used := building.facade.get_image().get_used_rect().size
-	var max_width := 190.0
-	var max_height := 238.0
+	var used := TextureBounds.used(building.facade).size
+	var max_width := 170.0 if building.variant.has("family") else 190.0
+	var max_height := float(building.variant.get("height", 238.0)) if building.variant.has("family") else 238.0
 	for road in roads():
 		if road.size.x > 1000 and road.end.y < building.position.y:
 			max_height = minf(max_height, building.position.y - road.end.y - 24)
@@ -367,16 +382,17 @@ func fit_building(building: CityBuilding) -> void:
 	building_bounds.append(Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
 
 func add_building_solid(building: CityBuilding) -> void:
+	entrance_clearance.append(Rect2(building.position + building.door_offset - Vector2(24, 18), Vector2(48, 40)))
 	add_solid(Rect2(building.position + building.footprint.position, building.footprint.size))
 
 func roads() -> Array[Rect2]:
 	return DistrictBlocks.roads(WorldManager.district)
 
-func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Vector2:
+func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false, bench: bool = false) -> Vector2:
 	# Reserve the entire facade envelope, not just its collision strip. This
 	# prevents short props from appearing pasted onto a tall building's front.
 	var offsets := [Vector2.ZERO]
-	if not parked:
+	if not parked and not bench:
 		for distance in [32, 64, 96, 128]:
 			for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP]:
 				offsets.append(direction * distance)
@@ -384,8 +400,13 @@ func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false) -> Ve
 		var candidate: Vector2 = at + offset
 		var visual := Rect2(candidate - Vector2(size.x / 2, size.y), size)
 		var base := Rect2(candidate - Vector2(size.x / 2, 16), Vector2(size.x, 20))
-		if not Rect2(20, 20, 2360, 1560).encloses(visual): continue
+		if not Rect2(20, 20, 2360, 2360).encloses(visual): continue
+		if bench and not bench_zone().any(func(zone: Rect2): return zone.encloses(base.grow(18))): continue
 		var valid := true
+		for corridor in PEDESTRIAN_CORRIDORS:
+			if base.intersects(corridor): valid = false
+		for bounds in entrance_clearance:
+			if base.grow(12).intersects(bounds): valid = false
 		for bounds in building_bounds:
 			if visual.intersects(bounds.grow(8)): valid = false
 		for road in roads():
@@ -467,3 +488,9 @@ func integrate_regional_props() -> void:
 		"jp":
 			add_asset("props/jp/vending_machine", Vector2(772, 378), Vector2(30, 49), Rect2(-13, -12, 26, 12))
 			add_asset("props/jp/bicycle", Vector2(630, 376), Vector2(42, 30), Rect2(-16, -8, 32, 8))
+
+# Only authored public rest areas. Benches are omitted if blocked, never nudged
+# to a facade or a nearby roadway just to fill space.
+func bench_zone() -> Array[Rect2]:
+	var east := WorldManager.district.side_street_x + WorldManager.district.side_street_width
+	return [Rect2(310, 620, 350, 320), Rect2(east + 32, 960, 2360 - east - 32, 160)]

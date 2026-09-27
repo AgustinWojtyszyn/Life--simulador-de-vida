@@ -15,6 +15,9 @@ func _ready() -> void:
 	WeatherSystem.changed.connect(queue_redraw)
 
 func _draw() -> void:
+	if InputManager.touch_enabled:
+		draw_mobile()
+		return
 	var font := ThemeDB.fallback_font
 	var width := get_viewport_rect().size.x
 	var height := get_viewport_rect().size.y
@@ -44,3 +47,17 @@ func panel() -> StyleBoxFlat:
 	style.border_color = Color("50605e")
 	style.set_border_width_all(1)
 	return style
+
+func draw_mobile() -> void:
+	var safe := InputManager.safe_rect(get_viewport_rect().size)
+	var font := ThemeDB.fallback_font
+	var left := safe.position + Vector2(18, 16)
+	draw_style_box(panel(), Rect2(left, Vector2(230, 52)))
+	draw_string(font, left + Vector2(12, 21), WorldManager.country.title + " · " + GameClock.display(), HORIZONTAL_ALIGNMENT_LEFT, 206, 16, Color("f0dfbe"))
+	draw_string(font, left + Vector2(12, 42), WeatherSystem.title(), HORIZONTAL_ALIGNMENT_LEFT, 206, 14, Color("b5c7bf"))
+	var message := interaction_message if not interaction_message.is_empty() else interaction_prompt.replace("E · ", "")
+	if not message.is_empty():
+		var width := minf(410, safe.size.x - 220)
+		var at := Vector2(safe.get_center().x - width / 2, safe.end.y - 60)
+		draw_style_box(panel(), Rect2(at, Vector2(width, 40)))
+		draw_string(font, at + Vector2(10, 26), message, HORIZONTAL_ALIGNMENT_CENTER, width - 20, 16, Color("f3d799"))

@@ -11,7 +11,8 @@ godot --path .
 **Nueva partida → crear personaje → elegir país → tu vivienda → explorar.**
 Argentina, Estados Unidos, Japón, Italia y Brasil tienen una zona inicial jugable.
 El barrio original se conserva dentro de Argentina y se amplía con calles,
-viviendas, comercios y población. Cada región usa fachadas e identidad propias.
+viviendas, comercios y población. Cada país usa fachadas e identidad propias. Hay 16 familias nuevas por país
+además del catálogo anterior, distribuidas en dos manzanas mixtas al sur.
 
 - WASD/flechas para caminar; **E** para la interacción cercana.
 - Puerta de tu casa: entrar/salir. Cama: descansar.
@@ -29,3 +30,5 @@ Los interiores de viviendas son reutilizables y el tránsito aún no realiza gir
 Documentación de arquitectura, límites y pruebas: [docs/PHASE1.md](docs/PHASE1.md).
 Preparación y límites de validación móvil: [docs/ANDROID.md](docs/ANDROID.md).
 Assets anteriores: [assets/README.md](assets/README.md).
+
+Iteración de ciudad y controles táctiles: [docs/ITERATION_ANDROID_CITY.md](docs/ITERATION_ANDROID_CITY.md).

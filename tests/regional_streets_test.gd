@@ -23,18 +23,18 @@ func run() -> void:
 			if object.has_meta("building_type"):
 				facades[object.facade.resource_path] = true
 				check(object.get_child(0).z_index == 0, "Facade must share its ground anchor's Y sort")
-				check(object.building_type != "station", "No station without station art")
+				check(object.building_type != "station" or object.variant.get("family", "") == "service", "Station requires dedicated station art")
 				if object.building_type.begins_with("residential"):
 					check(object.interior_type.is_empty(), "Residential facade must not enter a shop")
 				if object.building_type in ["clinic", "office"]:
-					check(object.facade.resource_path.get_file() == object.building_type + ".png", "Dedicated service facade")
+					check(object.facade.resource_path.get_file().get_basename() == object.building_type, "Dedicated service facade")
 			if object.has_meta("placement_bounds"):
 				var bounds: Rect2 = object.get_meta("placement_bounds")
 				for building in world.building_bounds:
 					check(not bounds.intersects(building), country.id + ": prop intersects facade")
 		for i in world.building_bounds.size():
 			for j in range(i + 1, world.building_bounds.size()):
-				check(not world.building_bounds[i].intersects(world.building_bounds[j]), country.id + ": facade overlaps another facade")
+				check(not world.building_bounds[i].intersects(world.building_bounds[j]), country.id + ": facade overlaps another facade: " + str(i) + "/" + str(j) + " " + str(world.building_bounds[i]) + " " + str(world.building_bounds[j]))
 		for bounds in world.building_bounds:
 			for road in world.roads():
 				check(not bounds.intersects(road), country.id + ": facade extends into road")

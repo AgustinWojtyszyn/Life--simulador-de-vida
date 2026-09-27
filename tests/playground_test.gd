@@ -94,7 +94,7 @@ func run() -> void:
 	for probe in [
 		{"start": Vector2(2358, 480), "action": "move_right", "axis": "x", "expected": 2378.0},
 		{"start": Vector2(910, 40), "action": "move_up", "axis": "y", "expected": 22.0},
-		{"start": Vector2(910, 1560), "action": "move_down", "axis": "y", "expected": 1578.0},
+		{"start": Vector2(910, world.MAP_SIZE.y - 40), "action": "move_down", "axis": "y", "expected": world.MAP_SIZE.y - 22},
 		{"start": Vector2(1060, 720), "action": "move_right", "axis": "x", "expected": 1083.0},
 	]:
 		player.position = probe.start

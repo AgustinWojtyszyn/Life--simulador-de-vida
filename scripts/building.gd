@@ -22,7 +22,7 @@ func _ready() -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = facade
 	sprite.region_enabled = true
-	sprite.region_rect = facade.get_image().get_used_rect()
+	sprite.region_rect = TextureBounds.used(facade)
 	sprite.scale = size / facade.get_size()
 	sprite.position = Vector2(0, -sprite.region_rect.size.y * sprite.scale.y / 2)
 	add_child(sprite)
@@ -45,6 +45,7 @@ func _ready() -> void:
 		add_child(door)
 
 func _draw() -> void:
+	if access == Access.EXTERIOR_ONLY and not is_home: return
 	var width := 108 if is_home else 104
 	draw_rect(Rect2(-width / 2, -7, width, 15), Color("263d40"))
 	draw_string(ThemeDB.fallback_font, Vector2(-width / 2 + 3, 4), "TU HOGAR" if is_home else title, HORIZONTAL_ALIGNMENT_CENTER, width - 6, 9, Color("f0d5a0"))

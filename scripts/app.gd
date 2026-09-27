@@ -75,7 +75,14 @@ func setup_overlay() -> void:
 	pause_button.size = Vector2(68, 42)
 	pause_button.pressed.connect(toggle_pause)
 	root_control.add_child(pause_button)
+	pause_button.size = Vector2(80, 48)
+	var layout_menu := func():
+		var safe := InputManager.safe_rect(root_control.size)
+		pause_button.position = Vector2(safe.end.x - 98, safe.position.y + 80)
+	root_control.resized.connect(layout_menu)
+	layout_menu.call()
 	pause_panel = PanelContainer.new()
+	pause_panel.add_theme_stylebox_override("panel", preload("res://scripts/ui/life_panel.gd").panel_style())
 	pause_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	pause_panel.position = Vector2(-150, -110)
 	pause_panel.custom_minimum_size = Vector2(300, 220)
@@ -91,9 +98,15 @@ func setup_overlay() -> void:
 		else: info.text = SaveSystem.last_error]]:
 		var b := Button.new()
 		b.text = entry[0]
-		b.custom_minimum_size.y = 44
+		b.custom_minimum_size.y = 48
 		b.pressed.connect(entry[1])
 		list.add_child(b)
+	var layout_pause := func():
+		var safe := InputManager.safe_rect(root_control.size)
+		pause_panel.size = Vector2(minf(360, safe.size.x - 40), minf(280, safe.size.y - 40))
+		pause_panel.position = safe.get_center() - pause_panel.size / 2
+	root_control.resized.connect(layout_pause)
+	layout_pause.call()
 	pause_panel.hide()
 	var fade := ColorRect.new()
 	fade.color = Color("112329")
@@ -118,6 +131,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_pause()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(world):
+		toggle_pause()
+	if what == NOTIFICATION_APPLICATION_PAUSED and WorldManager.playing:
+		if not get_tree().paused: toggle_pause()
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		if WorldManager.playing:
 			WorldManager.save_game()

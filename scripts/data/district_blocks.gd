@@ -2,7 +2,7 @@ class_name DistrictBlocks
 extends RefCounted
 
 static func roads(district: DistrictData) -> Array[Rect2]:
-	return [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 1568), Rect2(16, 1130, 2368, 120), Rect2(district.side_street_x, 16, district.side_street_width, 1568)]
+	return [Rect2(16, 394, 2368, 170), Rect2(852, 16, 138, 2368), Rect2(16, 1130, 2368, 120), Rect2(district.side_street_x, 16, district.side_street_width, 2368), Rect2(16, 1840, 2368, 120), Rect2(16, 2210, 2368, 100)]
 
 # Reusable frontage: the street normal determines the view; spacing and seed
 # determine the order of compatible assets. No RNG or edits to landmark IDs.
@@ -45,6 +45,8 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 		var previous: Vector2 = slots[pair[0]].position
 		slots[pair[0]].position = slots[pair[1]].position
 		slots[pair[1]].position = previous
+	# This side-facing lot requires a directional residential family.
+	slots[18].kind = "house"
 	var street_rects := roads(district)
 	for slot in slots:
 		slot["facing"] = AssetOrientation.street_facing(slot.position, street_rects)
@@ -58,4 +60,13 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 		else:
 			slot["asset_index"] = commercial_index
 			commercial_index += 1
+	# Mixed residential/commercial blocks: every catalog sprite has a real
+	# south-facing frontage. Keep 70 px of public sidewalk beyond each anchor.
+	var families := [0, 3, 6, 7, 4, 5, 2, 1, 8, 9, 10, 11, 13, 14, 15, 12]
+	var columns := [135.0, 350.0, 565.0, 745.0, 1120.0, 1355.0, 1580.0, east]
+	for i in families.size():
+		var family: int = families[i]
+		slots.append({"position": Vector2(columns[i % 8], 1770 if i < 8 else 2140),
+			"kind": "house" if family < 6 else "shop", "mode": "EXTERIOR_ONLY" if family < 6 else "ENTERABLE" if family in [6, 7, 8, 9, 10] else "INTERACTABLE",
+			"catalog_index": family, "facing": "south", "street_normal": "south"})
 	return slots

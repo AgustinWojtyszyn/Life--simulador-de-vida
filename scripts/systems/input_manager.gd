@@ -5,7 +5,7 @@ var touch_interaction := false
 var touch_enabled := false
 
 func _ready() -> void:
-	touch_enabled = OS.has_feature("android") or "--touch-test" in OS.get_cmdline_user_args()
+	touch_enabled = OS.has_feature("android") or DisplayServer.is_touchscreen_available() or "--touch-test" in OS.get_cmdline_user_args()
 	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "pause_game": [KEY_ESCAPE]}
 	for action in bindings:
 		if InputMap.has_action(action):
@@ -31,3 +31,12 @@ func reset() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		reset()
+
+# Canvas-space safe area shared by every mobile surface, including menus.
+func safe_rect(canvas_size: Vector2) -> Rect2:
+	var screen := Vector2(DisplayServer.window_get_size())
+	var safe := Rect2(DisplayServer.get_display_safe_area())
+	if not touch_enabled or screen.x <= 0 or screen.y <= 0 or not safe.has_area():
+		return Rect2(Vector2.ZERO, canvas_size)
+	var ratio := canvas_size / screen
+	return Rect2(safe.position * ratio, safe.size * ratio).intersection(Rect2(Vector2.ZERO, canvas_size))
