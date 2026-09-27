@@ -62,19 +62,17 @@ func _draw() -> void:
 	draw_park(Rect2(4040, 1370, 500, 350), 73)
 	draw_park(Rect2(350, 2820, 560, 300), 99)
 
-	# Fine, deterministic wear breaks up large expanses without creating a
-	# giant source texture. This is intentionally sparse for mobile GPUs.
+	# Fine road wear stays intentionally sparse. The previous 3200 marks,
+	# combined with the pavement tile grid, produced tens of thousands of
+	# CanvasItem draw commands every frame on a 4800x3200 district.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 519 + WorldManager.country.id.hash()
-	for i in 3200:
+	for i in 360:
 		var p := Vector2(rng.randf_range(22, world.x - 22), rng.randf_range(22, world.y - 22))
-		var on_road := false
 		for road in all_roads:
 			if road.has_point(p):
-				on_road = true
+				draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color(0.23, 0.28, 0.31, 0.30))
 				break
-		if on_road:
-			draw_rect(Rect2(p, Vector2(1 + i % 2, 1)), Color(0.23, 0.28, 0.31, 0.32))
 
 func inside_vertical_crossing(point: Vector2, roads: Array[Rect2]) -> bool:
 	for road in roads:
@@ -89,16 +87,15 @@ func inside_horizontal_crossing(point: Vector2, roads: Array[Rect2]) -> bool:
 	return false
 
 func paving(rect: Rect2, base: Color) -> void:
+	# Large continuous pavement plus sparse seams: visually textured, but the
+	# render list is ~two orders of magnitude smaller than the old 48x24 grid.
 	draw_rect(rect, base)
-	var light := base.lightened(0.055)
-	var dark := base.darkened(0.035)
-	for y in range(int(rect.position.y), int(rect.end.y), 24):
-		for x in range(int(rect.position.x), int(rect.end.x), 48):
-			var offset := 24 if int(y / 24) % 2 == 1 else 0
-			var tile := Rect2(x + offset, y, 47, 23).intersection(rect)
-			if tile.has_area():
-				draw_rect(tile, light if int(x / 48 + y / 24) % 5 != 0 else dark)
-				draw_line(tile.position, tile.position + Vector2(tile.size.x, 0), base.lightened(0.09))
+	var seam := base.lightened(0.045)
+	var seam_dark := base.darkened(0.025)
+	for y in range(int(rect.position.y) + 64, int(rect.end.y), 96):
+		draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), seam, 1.0)
+	for x in range(int(rect.position.x) + 96, int(rect.end.x), 144):
+		draw_line(Vector2(x, rect.position.y), Vector2(x, rect.end.y), seam_dark, 1.0)
 
 func draw_parking(area: Rect2) -> void:
 	draw_rect(area, Color("e3d7b7"))
@@ -130,7 +127,7 @@ func draw_plaza(area: Rect2) -> void:
 	for bed in beds:
 		draw_rect(bed.grow(3), Color("ddd3b4"))
 		draw_rect(bed, Color("748568"))
-		for i in 160:
+		for i in 28:
 			var p: Vector2 = bed.position + Vector2(rng.randf_range(3, bed.size.x - 3), rng.randf_range(3, bed.size.y - 3))
 			draw_line(p, p + Vector2(2, -1), Color("8d9b72") if i % 2 else Color("627c62"))
 	var path := PackedVector2Array([
@@ -148,7 +145,7 @@ func draw_park(area: Rect2, seed: int) -> void:
 	draw_rect(area, Color("78886b"))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
-	for i in 300:
+	for i in 52:
 		var p: Vector2 = area.position + Vector2(rng.randf_range(3, area.size.x - 3), rng.randf_range(3, area.size.y - 3))
 		draw_line(p, p + Vector2(2, -1), Color("8fa076") if i % 3 else Color("667b62"))
 	var mid := area.get_center()
