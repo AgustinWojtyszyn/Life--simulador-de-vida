@@ -48,10 +48,9 @@ func _ready() -> void:
 		Rect2(0, 0, 16, 1600), Rect2(2384, 0, 16, 1600)]:
 		add_solid(rect)
 	# Northern commercial frontage, a side street, and a second block.
-	add_frontage("cafe", Vector2(195, 318), Vector2(230, 268), Rect2(-87, -64, 166, 58), 0)
-	add_frontage("almacen" if WorldManager.country.id == "ar" else "market", Vector2(445, 320), Vector2(220, 220), Rect2(-83, -58, 160, 53), 1)
-	add_frontage("panaderia" if WorldManager.country.id == "ar" else "cafe", Vector2(704, 315), Vector2(230, 268), Rect2(-87, -64, 166, 58), 2)
-	add_frontage("kiosco" if WorldManager.country.id == "ar" else "market", Vector2(1168, 324), Vector2(264, 264), Rect2(-100, -70, 193, 64), 3)
+	var frontages: Array = Regional.FRONTAGES[WorldManager.country.id]
+	for i in frontages.size():
+		add_frontage(frontages[i], [Vector2(195, 318), Vector2(445, 320), Vector2(704, 315), Vector2(1168, 324)][i], i)
 	build_expansion()
 	if WorldManager.country.id == "ar":
 		integrate_argentina()
@@ -107,6 +106,7 @@ func _ready() -> void:
 	add_prop("sign", Vector2(266, 355), Rect2(-7, -5, 14, 6))
 	add_prop("sign", Vector2(499, 354), Rect2(-7, -5, 14, 6))
 	decorate_expansion()
+	integrate_regional_props()
 	populate()
 	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
 	var layer := CanvasLayer.new()
@@ -147,17 +147,16 @@ func add_solid(rect: Rect2) -> void:
 	add_child(body)
 	solid_rects.append(rect)
 
-func add_frontage(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, index: int) -> void:
+func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	var building := CityBuildingScript.new()
 	building.position = pos
-	building.size = size
 	building.country_id = WorldManager.country.id
 	building.variant = BuildingVariants.make(building.country_id, "shop", index + 13)
 	var spec := Regional.descriptor(building.country_id, asset, index)
 	building.building_type = spec.type
 	building.title = spec.title
-	building.access = CityBuilding.Access.ENTERABLE
-	building.interior_type = "cafe" if spec.type in ["cafe", "diner", "pizzeria", "bakery"] else "shop"
+	building.access = CityBuilding.Access.EXTERIOR_ONLY if spec.type == "office" else CityBuilding.Access.ENTERABLE
+	building.interior_type = "" if spec.type == "office" else "cafe" if spec.type in ["cafe", "diner", "pizzeria", "bakery", "trattoria"] else "shop"
 	building.building_id = "%s_front_%d" % [building.country_id, index]
 	building.facade = load(spec.path)
 	fit_building(building)
@@ -421,3 +420,13 @@ func add_local_resident(title: String, at: Vector2, activity: String) -> void:
 	walker.set_meta("person_name", title)
 	add_child(walker)
 	walker.wait_time = 12.0
+
+func integrate_regional_props() -> void:
+	match WorldManager.country.id:
+		"br":
+			add_asset("props/br/moto", Vector2(615, 376), Vector2(42, 36), Rect2(-16, -10, 32, 10))
+		"it":
+			add_asset("props/it/scooter", Vector2(615, 376), Vector2(42, 36), Rect2(-16, -10, 32, 10))
+		"jp":
+			add_asset("props/jp/vending_machine", Vector2(772, 378), Vector2(30, 49), Rect2(-13, -12, 26, 12))
+			add_asset("props/jp/bicycle", Vector2(630, 376), Vector2(42, 30), Rect2(-16, -8, 32, 8))

@@ -35,6 +35,10 @@ func run() -> void:
 		for bounds in world.building_bounds:
 			for road in world.roads():
 				check(not bounds.intersects(road), country.id + ": facade extends into road")
+		var special: String = {"ar": "panaderia", "br": "padaria", "jp": "konbini", "it": "pizzeria", "us": "coffee_shop"}[country.id]
+		check(facades.has("res://assets/buildings/%s/%s.png" % [country.id, special]), "Regional landmark must be visible: " + special)
+		for prop in {"ar": [], "br": ["Moto"], "jp": ["Vending Machine", "Bicycle"], "it": ["Scooter"], "us": []}[country.id]:
+			check(world.has_node(NodePath(prop)), "Regional prop must be placed: " + prop)
 		if country.id == "ar":
 			for asset in ["almacen", "panaderia", "kiosco"]:
 				check(facades.has("res://assets/buildings/ar/" + asset + ".png"), "Argentina must integrate " + asset)
