@@ -53,13 +53,14 @@ func clear_panel() -> void:
 	get_tree().paused = true
 	InputManager.reset()
 
-func text_line(text: String) -> void:
+func text_line(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.custom_minimum_size.x = maxf(240.0, panel.size.x - 48.0)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 16)
 	body.add_child(label)
+	return label
 
 func action(text: String, callback: Callable) -> void:
 	var button := Button.new()
@@ -86,6 +87,13 @@ func show_journal() -> void:
 	text_line("$%d   Energía %d/100   Bienestar %d/100   Reputación %d" % [LifeSimulation.money, LifeSimulation.energy, LifeSimulation.wellbeing, LifeSimulation.reputation])
 	text_line("Inventario: %d provisiones" % int(LifeSimulation.inventory.get("food", 0)))
 	text_line(MissionSystem.INTRO.title + "\n" + MissionSystem.objective())
+	var music_label := text_line("Banda sonora · ♫ " + AudioSystem.track_name())
+	action("♫ Canción anterior", func():
+		AudioSystem.previous_track()
+		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
+	action("♫ Siguiente canción", func():
+		AudioSystem.next_track()
+		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
 	action("Volver al barrio", close)
 
 func talk(person: String) -> void:
