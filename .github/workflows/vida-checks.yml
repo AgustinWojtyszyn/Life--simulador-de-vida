@@ -21,7 +21,7 @@ jobs:
           version: 4.7.2
           use-dotnet: false
       - name: Import project
-        run: godot --headless --path . --editor --quit-after 2
+        run: godot --headless --path . --import
       - name: Expanded city + mobile smoke
         run: timeout 75s godot --headless --path . -s tests/iteration_smoke_test.gd
       - name: Interactions
