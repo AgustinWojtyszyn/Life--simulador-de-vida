@@ -13,6 +13,7 @@ const BuildingVariants := preload("res://scripts/data/building_variant.gd")
 const CityBuildingScript := preload("res://scripts/building.gd")
 const CountryCatalogScript := preload("res://scripts/data/country_catalog.gd")
 const TextureBoundsScript := preload("res://scripts/data/texture_bounds.gd")
+const TrafficSignalScript := preload("res://scripts/traffic_signal.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var building_bounds: Array[Rect2] = []
@@ -51,6 +52,7 @@ func _ready() -> void:
 		Rect2(map_size.x - 16, 0, 16, map_size.y),
 	]:
 		add_solid(rect)
+	add_traffic_signals()
 	# Northern commercial frontage, a side street, and a second block.
 	var frontages: Array = Regional.FRONTAGES[WorldManager.country.id]
 	for i in frontages.size():
@@ -122,6 +124,7 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	var hud := Control.new()
 	hud.set_script(Hud)
+	hud.world = self
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(hud)
 	add_child(layer)
@@ -130,6 +133,24 @@ func _ready() -> void:
 	interactions.set_script(Interactions)
 	interactions.hud = hud
 	add_child(interactions)
+
+func add_traffic_signals() -> void:
+	var horizontal := DistrictBlocks.horizontal_roads(WorldManager.district)
+	var vertical := DistrictBlocks.vertical_roads(WorldManager.district)
+	for row in horizontal.size():
+		var h: Rect2 = horizontal[row]
+		for column in vertical.size():
+			var v: Rect2 = vertical[column]
+			var signal := Node2D.new()
+			signal.set_script(TrafficSignalScript)
+			signal.name = "Signal_%d_%d" % [row, column]
+			signal.position = Vector2(v.get_center().x, h.get_center().y)
+			signal.horizontal_half = h.size.y * 0.5
+			signal.vertical_half = v.size.x * 0.5
+			# A small row offset creates a green-wave feel instead of every
+			# intersection changing at the exact same instant.
+			signal.cycle_offset = float(row) * 1.8 + float(column) * 0.35
+			add_child(signal)
 
 func add_grid_traffic(regional_models: Array) -> void:
 	# The expanded city must not feel like traffic exists only around spawn.
@@ -178,6 +199,7 @@ func configure_input() -> void:
 		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
 		"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 		"interact": [KEY_E],
+		"toggle_minimap": [KEY_M],
 	}
 	for action in bindings:
 		if InputMap.has_action(action):
