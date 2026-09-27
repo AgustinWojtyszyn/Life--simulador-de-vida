@@ -98,6 +98,8 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				continue
 			if reserved_for_side_facade(x, district):
 				continue
+			if reserved_city_feature(Vector2(x, y)):
+				continue
 			if y < 500 and x < 1380:
 				# The first four authored regional storefronts already occupy it.
 				continue
@@ -135,6 +137,8 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				continue
 			if reserved_for_side_facade(x, district):
 				continue
+			if reserved_city_feature(Vector2(x, y)):
+				continue
 			if road.position.y > 1800 and road.position.y < 2100 and x > 1930 and x < 2770:
 				continue
 			slots.append({"position": Vector2(x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "north", "street_normal": "north"})
@@ -150,10 +154,10 @@ static func starter_slots(district: DistrictData) -> Array[Dictionary]:
 				continue
 			var left_x := road.position.x - 122.0
 			var right_x := road.end.x + 122.0
-			if left_x > 120:
+			if left_x > 120 and not reserved_city_feature(Vector2(left_x, y)):
 				slots.append({"position": Vector2(left_x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "east", "street_normal": "east"})
 				index += 1
-			if right_x < district.world_size.x - 120:
+			if right_x < district.world_size.x - 120 and not reserved_city_feature(Vector2(right_x, y)):
 				slots.append({"position": Vector2(right_x, y), "kind": "house", "mode": "EXTERIOR_ONLY", "asset_index": index, "facing": "west", "street_normal": "west"})
 				index += 1
 
@@ -164,3 +168,12 @@ static func reserved_for_side_facade(x: float, district: DistrictData) -> bool:
 		if x >= road.position.x - 300.0 and x <= road.end.x + 300.0:
 			return true
 	return false
+
+static func reserved_city_feature(at: Vector2) -> bool:
+	# Keep authored civic spaces free of procedural facades. These regions are
+	# intentionally occupied by the starter plaza, parking and Argentina's
+	# full-block sports complex.
+	var starter_plaza := Rect2(35, 585, 790, 400)
+	var starter_parking := Rect2(980, 600, 450, 345)
+	var civic_block := Rect2(1900, 2020, 890, 650)
+	return starter_plaza.has_point(at) or starter_parking.has_point(at) or civic_block.has_point(at)
