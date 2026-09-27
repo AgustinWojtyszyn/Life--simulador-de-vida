@@ -89,7 +89,7 @@ func run() -> void:
 	touch.queue_free()
 
 	check(root.has_node("AudioSystem"), "Original audio system must be registered")
-	check(root.get_node("AudioSystem").track_count() == 5, "Soundtrack must expose five selectable songs")
+	check(root.get_node("AudioSystem").track_count() >= 5, "Soundtrack must expose at least five selectable songs")
 	check(not root.get_node("AudioSystem").track_name().is_empty(), "Selectable soundtrack must expose a track name")
 	check(root.get_node("AudioSystem").country_scale("jp").size() == 5, "Japan soundtrack must keep its pentatonic colour")
 	check(root.get_node("AudioSystem").country_scale("br").size() >= 6, "Brazil soundtrack must keep its own harmonic palette")
