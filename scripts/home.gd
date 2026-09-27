@@ -10,15 +10,17 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	for rect in [Rect2(88, 70, 624, 16), Rect2(88, 386, 624, 16), Rect2(88, 70, 16, 332), Rect2(696, 70, 16, 332), Rect2(303, 86, 10, 148), Rect2(566, 86, 10, 116)]:
 		add_solid(rect)
-	furniture("bed", Vector2(190, 245), Vector2(100, 100), Rect2(147, 178, 86, 61))
-	furniture("sofa", Vector2(430, 280), Vector2(134, 90), Rect2(380, 254, 100, 20))
-	furniture("kitchen", Vector2(478, 166), Vector2(160, 100), Rect2(419, 124, 118, 35))
-	furniture("wardrobe", Vector2(267, 171), Vector2(56, 82), Rect2(243, 148, 48, 18))
-	furniture("shelf", Vector2(141, 153), Vector2(50, 68), Rect2(119, 137, 44, 14))
-	furniture("tv", Vector2(350, 242), Vector2(72, 50), Rect2(320, 226, 60, 12))
-	furniture("desk", Vector2(537, 248), Vector2(64, 68), Rect2(511, 228, 50, 14))
-	furniture("dining", Vector2(443, 345), Vector2(74, 59), Rect2(415, 320, 56, 19))
-	furniture("bathroom", Vector2(636, 185), Vector2(106, 89), Rect2(589, 110, 92, 42))
+	# Furniture now alternates authored diagonal views instead of every object
+	# leaning from the same upper-right to lower-left axis.
+	furniture("bed", Vector2(190, 245), Vector2(100, 100), Rect2(147, 178, 86, 61), "south-west")
+	furniture("sofa", Vector2(430, 280), Vector2(134, 90), Rect2(380, 254, 100, 20), "south-east")
+	furniture("kitchen", Vector2(478, 166), Vector2(160, 100), Rect2(419, 124, 118, 35), "south-west")
+	furniture("wardrobe", Vector2(267, 171), Vector2(56, 82), Rect2(243, 148, 48, 18), "south-east")
+	furniture("shelf", Vector2(141, 153), Vector2(50, 68), Rect2(119, 137, 44, 14), "south-west")
+	furniture("tv", Vector2(350, 242), Vector2(72, 50), Rect2(320, 226, 60, 12), "south-west")
+	furniture("desk", Vector2(537, 248), Vector2(64, 68), Rect2(511, 228, 50, 14), "south-east")
+	furniture("dining", Vector2(443, 345), Vector2(74, 59), Rect2(415, 320, 56, 19), "south-west")
+	furniture("bathroom", Vector2(636, 185), Vector2(106, 89), Rect2(589, 110, 92, 42), "south-east")
 	add_target(Vector2(635, 219), "Ducharte", "shower", "shower")
 	add_target(Vector2(417, 202), "Cocinar", "cook", "stove")
 	add_target(Vector2(260, 245), "Descansar en tu cama", "rest", WorldManager.profile.home_id + "_bed")
@@ -55,14 +57,19 @@ func add_solid(rect: Rect2) -> void:
 	add_child(body)
 	solid_rects.append(rect)
 
-func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2) -> void:
+func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2, facing := "south-east") -> void:
 	var node := Node2D.new()
 	node.position = at
+	node.set_meta("orientation", facing)
+	node.set_meta("interior_asset", asset)
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/interior/%s.png" % asset)
 	sprite.centered = false
 	sprite.position = Vector2(-size.x / 2, -size.y)
 	sprite.scale = size / sprite.texture.get_size()
+	# Interior props contain no signage, so a horizontal authored mirror is a
+	# safe second isometric view. We never rotate the sprite upside-down.
+	sprite.flip_h = facing in ["south-west", "west", "north-west"]
 	node.add_child(sprite)
 	add_child(node)
 	city_objects.append(node)
@@ -91,6 +98,13 @@ func _draw() -> void:
 			draw_rect(Rect2(x, y, 15, 15), Color("d2dbcb"))
 	draw_rect(Rect2(342, 273, 170, 54), Color("547b78"))
 	draw_rect(Rect2(347, 278, 160, 44), Color("709a90"), false, 2)
+	# Smaller material changes and wall details keep the home from reading as
+	# one repeated diagonal asset sheet.
+	draw_rect(Rect2(124, 128, 146, 5), Color("d9c7a6"))
+	draw_rect(Rect2(330, 126, 204, 5), Color("d9c7a6"))
+	draw_rect(Rect2(603, 100, 66, 8), Color("7fa0a1"))
+	draw_circle(Vector2(380, 180), 12, Color(0.95, 0.82, 0.55, 0.18))
+	draw_circle(Vector2(514, 317), 11, Color(0.95, 0.82, 0.55, 0.14))
 	draw_rect(Rect2(303, 86, 10, 148), Color("ded1b1"))
 	draw_rect(Rect2(566, 86, 10, 116), Color("ded1b1"))
 	draw_rect(Rect2(363, 375, 54, 15), Color("598381"))
