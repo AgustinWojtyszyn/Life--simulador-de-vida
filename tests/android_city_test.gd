@@ -40,7 +40,6 @@ func run() -> void:
 				if object.facade is AtlasTexture:
 					check(object.facade.atlas.resource_path == "res://assets/catalog/%s.png" % country.id, "No foreign-country catalog fallback")
 				check(object.orientation == "south", "Catalog fronts are authored south-facing")
-		print("CATALOG ", country.id, " ", families.size(), " ", families.keys())
 		check(families.size() == 16, country.id + " must place all 16 catalog families")
 
 		var seats := 0
