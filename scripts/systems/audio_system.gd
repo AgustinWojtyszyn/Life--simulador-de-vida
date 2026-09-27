@@ -131,7 +131,7 @@ func play_sfx(kind: String, at := Vector2.ZERO) -> void:
 	var player := AudioStreamPlayer2D.new()
 	player.stream = sfx_cache[kind]
 	player.position = at
-	player.volume_db = -8.0 if kind == "brake" else -6.0
+	player.volume_db = -10.0 if kind == "horn" else -8.0 if kind == "brake" else -6.0
 	player.max_distance = 680.0
 	player.attenuation = 1.8
 	WorldManager.active_world.add_child(player)
@@ -366,7 +366,7 @@ func make_engine_loop(heavy: bool) -> AudioStreamWAV:
 	return wav
 
 func make_sfx(kind: String) -> AudioStreamWAV:
-	var duration: float = float({"brake": 0.30, "tap": 0.08, "interact": 0.14, "kick": 0.22}.get(kind, 0.18))
+	var duration: float = float({"brake": 0.30, "horn": 0.24, "tap": 0.08, "interact": 0.14, "kick": 0.22}.get(kind, 0.18))
 	var frames := int(SAMPLE_RATE * duration)
 	var bytes := PackedByteArray()
 	bytes.resize(frames * 2)
@@ -377,6 +377,11 @@ func make_sfx(kind: String) -> AudioStreamWAV:
 		match kind:
 			"brake":
 				sample = (sin(TAU * (980.0 - 520.0 * t / duration) * t) + sin(TAU * 1420.0 * t) * 0.22) * life * 0.10
+			"horn":
+				var attack := clampf(t / 0.025, 0.0, 1.0)
+				var release := clampf((duration - t) / 0.055, 0.0, 1.0)
+				var envelope := attack * release
+				sample = (sin(TAU * 392.0 * t) * 0.11 + sin(TAU * 494.0 * t) * 0.075) * envelope
 			"tap":
 				sample = sin(TAU * 520.0 * t) * life * 0.14
 			"interact":
