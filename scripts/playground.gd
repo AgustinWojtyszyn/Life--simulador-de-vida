@@ -179,8 +179,8 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	building.orientation = spec.facing
 	building.building_type = spec.type
 	building.title = spec.title
-	building.access = CityBuilding.Access.EXTERIOR_ONLY if spec.type == "office" else CityBuilding.Access.ENTERABLE
-	building.interior_type = "" if spec.type == "office" else "cafe" if spec.type in ["cafe", "diner", "pizzeria", "bakery", "trattoria"] else "shop"
+	building.access = CityBuilding.Access.ENTERABLE if spec.type in WorldManager.PUBLIC_INTERIORS else CityBuilding.Access.EXTERIOR_ONLY
+	building.interior_type = spec.type if spec.type in WorldManager.PUBLIC_INTERIORS else ""
 	building.building_id = "%s_front_%d" % [building.country_id, index]
 	building.facade = load(spec.path)
 	fit_building(building)
@@ -283,8 +283,8 @@ func build_expansion() -> void:
 		building.title = spec.title
 		building.country_id = country.id
 		building.variant = BuildingVariants.make(country.id, slot.kind, index)
-		building.interior_type = ("cafe" if spec.type in ["cafe", "bakery", "pizzeria", "diner"] else "shop") if slot.kind == "shop" else ""
-		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
+		building.interior_type = spec.type if spec.type in WorldManager.PUBLIC_INTERIORS and slot.mode == "ENTERABLE" else ""
+		building.access = CityBuilding.Access.ENTERABLE if slot.mode == "ENTERABLE" and not building.interior_type.is_empty() else CityBuilding.Access.INTERACTABLE if slot.mode == "INTERACTABLE" else CityBuilding.Access.EXTERIOR_ONLY
 		building.facade = load(spec.path)
 		fit_building(building)
 		add_child(building)
