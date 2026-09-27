@@ -16,6 +16,7 @@ func show_menu() -> void:
 	get_tree().paused = false
 	InputManager.reset()
 	WorldManager.playing = false
+	AudioSystem.stop_world()
 	if is_instance_valid(world):
 		world.queue_free()
 		world = null
@@ -31,6 +32,7 @@ func switch_world() -> void:
 		return
 	changing = true
 	InputManager.reset()
+	InputManager.refresh_device_mode()
 	if is_instance_valid(menu):
 		menu.queue_free()
 		menu = null
@@ -40,7 +42,7 @@ func switch_world() -> void:
 		remove_child(world)
 		world.queue_free()
 	get_tree().paused = false
-	var scene := HomeSystem.INTERIOR_SCENE if WorldManager.location == "home" else "res://scenes/shop.tscn" if WorldManager.location in ["shop", "cafe"] else "res://scenes/playground.tscn"
+	var scene := HomeSystem.INTERIOR_SCENE if WorldManager.location == "home" else "res://scenes/shop.tscn" if WorldManager.location != "street" else "res://scenes/playground.tscn"
 	world = load(scene).instantiate()
 	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(world)
@@ -51,6 +53,7 @@ func switch_world() -> void:
 	var environment := preload("res://scripts/world_environment.gd").new()
 	world.add_child(environment)
 	setup_overlay()
+	AudioSystem.start_world(WorldManager.country.id)
 	changing = false
 
 func setup_overlay() -> void:
@@ -70,29 +73,38 @@ func setup_overlay() -> void:
 	overlay.add_child(root_control)
 	var pause_button := Button.new()
 	pause_button.text = "Menú"
+	pause_button.add_theme_font_size_override("font_size", 17 if InputManager.touch_enabled else 14)
 	pause_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	pause_button.position = Vector2(-84, 70)
-	pause_button.size = Vector2(68, 42)
-	pause_button.pressed.connect(toggle_pause)
+	pause_button.position = Vector2(-118, 76) if InputManager.touch_enabled else Vector2(-94, 72)
+	pause_button.size = Vector2(98, 52) if InputManager.touch_enabled else Vector2(76, 44)
+	pause_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	pause_button.pressed.connect(func():
+		AudioSystem.play_ui()
+		toggle_pause())
 	root_control.add_child(pause_button)
 	pause_panel = PanelContainer.new()
 	pause_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	pause_panel.position = Vector2(-150, -110)
-	pause_panel.custom_minimum_size = Vector2(300, 220)
+	var panel_size := Vector2(380, 280) if InputManager.touch_enabled else Vector2(330, 235)
+	pause_panel.position = -panel_size / 2.0
+	pause_panel.custom_minimum_size = panel_size
 	root_control.add_child(pause_panel)
 	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 12)
+	list.add_theme_constant_override("separation", 14)
 	pause_panel.add_child(list)
 	var info := Label.new()
 	info.text = "VIDA · Tu partida"
+	info.add_theme_font_size_override("font_size", 21 if InputManager.touch_enabled else 17)
 	list.add_child(info)
 	for entry in [["Seguir jugando", func(): toggle_pause()], ["Guardar partida", func(): info.text = "Partida guardada" if WorldManager.save_game() else SaveSystem.last_error], ["Guardar y volver al menú", func():
 		if WorldManager.save_game(): show_menu()
 		else: info.text = SaveSystem.last_error]]:
 		var b := Button.new()
 		b.text = entry[0]
-		b.custom_minimum_size.y = 44
-		b.pressed.connect(entry[1])
+		b.custom_minimum_size.y = 54 if InputManager.touch_enabled else 44
+		b.add_theme_font_size_override("font_size", 18 if InputManager.touch_enabled else 15)
+		b.pressed.connect(func():
+			AudioSystem.play_ui()
+			entry[1].call())
 		list.add_child(b)
 	pause_panel.hide()
 	var fade := ColorRect.new()
