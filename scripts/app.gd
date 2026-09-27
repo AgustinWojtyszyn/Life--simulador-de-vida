@@ -33,6 +33,7 @@ func switch_world() -> void:
 	changing = true
 	InputManager.reset()
 	InputManager.refresh_device_mode()
+	WorldManager.settings["touch_controls"] = InputManager.touch_enabled
 	if is_instance_valid(menu):
 		menu.queue_free()
 		menu = null
