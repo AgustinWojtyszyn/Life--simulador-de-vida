@@ -58,8 +58,14 @@ func act(action: String) -> String:
 		"shower":
 			GameClock.advance(15)
 			wellbeing = minf(100, wellbeing + 10)
+		"play_football":
+			if energy < 8: return "Necesitás un poco más de energía para jugar."
+			GameClock.advance(35)
+			energy = maxf(0, energy - 8)
+			wellbeing = minf(100, wellbeing + 14)
+			reputation += 1
 	changed.emit()
-	return {"eat": "Comiste y recuperaste energía.", "cook": "Cocinaste tus provisiones. ¡Buen provecho!", "fridge": "Preparaste una comida con tus provisiones.", "coffee": "Un café y una pausa. Pagaste $5.", "pc": "Completaste un encargo en la PC. Ganaste $20.", "tv": "Disfrutaste un programa. Te sentís mejor.", "shower": "Una ducha para empezar de nuevo."}.get(action, "")
+	return {"eat": "Comiste y recuperaste energía.", "cook": "Cocinaste tus provisiones. ¡Buen provecho!", "fridge": "Preparaste una comida con tus provisiones.", "coffee": "Un café y una pausa. Pagaste $5.", "pc": "Completaste un encargo en la PC. Ganaste $20.", "tv": "Disfrutaste un programa. Te sentís mejor.", "shower": "Una ducha para empezar de nuevo.", "play_football": "Jugaste un rato en la cancha. Subieron tu bienestar y tu reputación."}.get(action, "")
 
 func to_dict() -> Dictionary:
 	return {"money": money, "energy": energy, "wellbeing": wellbeing, "reputation": reputation, "inventory": inventory.duplicate(true)}
