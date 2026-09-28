@@ -261,6 +261,13 @@ func add_frontage(asset: String, pos: Vector2, index: int) -> void:
 	building.building_id = "%s_front_%d" % [building.country_id, index]
 	building.facade = load(spec.path)
 	fit_building(building)
+	# Frontages are authored first, but still go through the same visual-space
+	# validation as procedural buildings. This prevents a bad asset/scale from
+	# poisoning every later placement.
+	if not building_visual_valid(building):
+		push_warning("Skipped overlapping frontage: " + building.building_id)
+		building.free()
+		return
 	building_bounds.append(building.get_meta("visual_bounds"))
 	add_child(building)
 	city_objects.append(building)
@@ -521,16 +528,21 @@ func fit_building(building: CityBuilding) -> void:
 		factor = minf(factor, 128.0 / building.facade.get_size().x)
 	building.size = building.facade.get_size() * factor
 	var normal := AssetOrientation.vector(building.orientation)
-	var width := used.x * factor
-	var depth := minf(64.0, used.y * factor * 0.32)
-	building.footprint = Rect2(Vector2(-width * 0.46, -depth), Vector2(width * 0.92, depth - 4))
+	# Reserve the final rendered size, including deterministic residential
+	# variation. Previously validation used the unvaried size while _ready()
+	# enlarged/shrank the Sprite2D afterwards, allowing visible facade overlap.
+	var variation := CityBuildingScript.visual_variation(building.building_type, building.variant, building.is_home)
+	var width := used.x * factor * variation.x
+	var visual_height := used.y * factor * variation.y
+	var depth := minf(64.0, visual_height * 0.32)
+	building.footprint = Rect2(Vector2(-width * 0.46, -depth), Vector2(width * 0.92, maxf(4.0, depth - 4)))
 	if normal.y > 0.3:
 		building.door_offset = Vector2(normal.x * width * 0.22, 16)
 	elif normal.y < -0.3:
 		building.door_offset = Vector2(normal.x * width * 0.22, -depth - 16)
 	else:
 		building.door_offset = Vector2(normal.x * (width * 0.46 + 16), -depth * 0.5)
-	building.set_meta("visual_bounds", Rect2(building.position - Vector2(used.x * factor / 2, used.y * factor), Vector2(used) * factor))
+	building.set_meta("visual_bounds", Rect2(building.position - Vector2(width / 2.0, visual_height), Vector2(width, visual_height)))
 
 func building_visual_valid(building: CityBuilding) -> bool:
 	var bounds: Rect2 = building.get_meta("visual_bounds")
