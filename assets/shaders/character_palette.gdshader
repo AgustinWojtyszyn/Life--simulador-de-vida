@@ -17,9 +17,9 @@ void fragment() {
 	bool face_zone = p.y > 0.12 && p.y < 0.48 && p.x > 0.20 && p.x < 0.80;
 	// Hair detection: stricter to avoid marking face as hair.
 	bool hair = !skin && !face_zone && p.y < 0.40 && c.r > c.b * 1.20 && light < 0.48;
-	# Fringe must NEVER cover the face zone. The old fringe logic painted
-	# female faces black when hair_style was 1 or 2. Now fringe is strictly
-	# limited to the forehead area above the face and only for hair_style 2.
+	// Fringe must NEVER cover the face zone. The old fringe logic painted
+	// female faces black when hair_style was 1 or 2. Now fringe is strictly
+	// limited to the forehead area above the face and only for hair_style 2.
 	bool fringe = skin && hair_style == 2 && p.y < 0.22 && p.y > 0.08 && p.x > 0.25 && p.x < 0.75;
 	if (hair || fringe) c.rgb = hair_color.rgb * (0.60 + light);
 	else if (skin) c.rgb = skin_color.rgb * (0.55 + light * 0.60);

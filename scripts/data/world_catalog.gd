@@ -36,3 +36,19 @@ static func countries() -> Array[CountryData]:
 		country.cities.append(city)
 		result.append(country)
 	return result
+
+# Country resources remain a compatibility / asset library only.
+static func vida_city() -> CityData:
+	var city := CityData.new()
+	city.id = "vida"
+	city.title = "VIDA"
+	for row in [["centro", "Centro / financiero"], ["residencial", "Residencial"], ["comercial", "Comercial"], ["industrial", "Industrial"], ["logistico", "Logístico"], ["salud", "Salud"], ["tecnologico", "Tecnológico"], ["periferia", "Periferia"]]:
+		var district := DistrictData.new()
+		district.id = row[0]
+		district.title = row[1]
+		district.available = district.id == "centro"
+		district.district_style_weights = {"ar": 30, "it": 20, "jp": 15, "us": 25, "br": 10}
+		if district.available:
+			district.building_slots = DistrictBlocks.starter_slots(district)
+		city.districts.append(district)
+	return city

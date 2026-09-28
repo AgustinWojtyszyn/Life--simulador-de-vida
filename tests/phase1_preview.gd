@@ -16,8 +16,6 @@ func run() -> void:
 	await capture("menu")
 	app.menu.create_screen()
 	await capture("creator")
-	app.menu.country_screen()
-	await capture("countries")
 	for id in ["ar", "us", "jp", "it", "br"]:
 		var p := PlayerProfile.new()
 		p.player_name = "Alex"

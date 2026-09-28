@@ -2,10 +2,8 @@ extends Control
 
 signal play_requested
 var draft := PlayerProfile.new()
-var chosen := "ar"
 var panel: VBoxContainer
 var preview: CharacterVisual
-var country_preview: TextureRect
 var name_edit: LineEdit
 var error_label: Label
 var busy := false
@@ -165,36 +163,8 @@ func create_screen() -> void:
 		if busy:
 			return
 		busy = true
-		WorldManager.new_game(draft, "ar"))
+		WorldManager.new_game(draft))
 	button("Volver", main_screen)
-
-func country_screen() -> void:
-	shell("ELEGÍ DÓNDE EMPEZAR", "Una vivienda propia te espera en cada destino.")
-	var selection := OptionButton.new()
-	selection.custom_minimum_size.y = 58 if InputManager.touch_enabled else 46
-	panel.add_child(selection)
-	country_preview = TextureRect.new()
-	country_preview.custom_minimum_size = Vector2(180, 140)
-	country_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	country_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	panel.add_child(country_preview)
-	var info := label("", 15)
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for country in WorldManager.countries:
-		selection.add_item(country.title)
-	selection.item_selected.connect(func(i: int):
-		var country: CountryData = WorldManager.countries[i]
-		chosen = country.id
-		country_preview.texture = load(country.facade)
-		info.text = country.cities[0].title + " · " + country.description)
-	selection.select(["ar", "us", "jp", "it", "br"].find(chosen))
-	selection.item_selected.emit(selection.selected)
-	button("Comenzar mi vida", func():
-		if busy:
-			return
-		busy = true
-		WorldManager.new_game(draft, chosen))
-	button("Volver al personaje", create_screen)
 
 func saves_screen() -> void:
 	shell("PARTIDAS GUARDADAS", "Cada vida conserva su propia historia.")
@@ -202,7 +172,7 @@ func saves_screen() -> void:
 		var data: Dictionary = slot.data
 		var profile_data: Dictionary = data.profile
 		label(str(data.get("slot_name", profile_data.player_name)), 20)
-		label("%s · %s · Día %d · %s" % [profile_data.player_name, profile_data.city_id, int(float(data.get("clock", {}).get("minutes", 480)) / 1440) + 1, data.get("modified_at", "Partida anterior")], 12)
+		label("%s · %s · Día %d · %s" % [profile_data.player_name, "VIDA", int(float(data.get("clock", {}).get("minutes", 480)) / 1440) + 1, data.get("modified_at", "Partida anterior")], 12)
 		button("Jugar", func():
 			if SaveSystem.select_slot(slot.path): resume_game())
 		button("Renombrar", func(): rename_screen(slot.path, str(data.get("slot_name", profile_data.player_name))))

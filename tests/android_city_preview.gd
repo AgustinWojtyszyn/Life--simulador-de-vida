@@ -18,8 +18,6 @@ func run() -> void:
 	await process_frame
 	app.menu.create_screen()
 	await capture("res://build/mobile/character.png")
-	app.menu.country_screen()
-	await capture("res://build/mobile/country.png")
 	var wm := root.get_node("WorldManager")
 	# Preview never creates or writes a player save.
 	for country in ["ar", "jp", "it", "br", "us"]:

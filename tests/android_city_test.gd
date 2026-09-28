@@ -38,11 +38,11 @@ func run() -> void:
 				families[object.variant.family] = true
 				check(object.facade is AtlasTexture, "Country catalog must use shared atlas textures")
 				if object.facade is AtlasTexture:
-					check(object.facade.atlas.resource_path == "res://assets/catalog/%s.png" % country.id, "No foreign-country catalog fallback")
+					check(object.facade.atlas.resource_path == "res://assets/catalog/%s.png" % object.country_id, "Facade belongs to its architectural pool")
 				check(object.orientation == "south", "Catalog fronts are authored south-facing")
-		if families.size() != 16:
+		if families.size() < 16:
 			print("CATALOG DIAGNOSTIC ", country.id, ": ", families.keys())
-		check(families.size() == 16, country.id + " must place all 16 catalog families")
+		check(families.size() >= 16, "Mixed city keeps catalog variety")
 
 		var seats := 0
 		for object in world.city_objects:
@@ -69,16 +69,7 @@ func run() -> void:
 		check(scroll != null and scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED, "Character creator has no horizontal mobile scroll")
 		for node in app.menu.find_children("*", "OptionButton", true, false):
 			check(node.size.y >= 48, "Touch choices are at least 48 canvas units")
-		app.menu.country_screen()
-		await frames()
-		var countries: OptionButton
-		for node in app.menu.panel.get_children():
-			if node is OptionButton:
-				countries = node
-		check(countries != null and countries.item_count == 5, "Selection is countries, never provinces")
-		if countries != null:
-			countries.item_selected.emit(2)
-			check(app.menu.chosen == "jp", "Country picker operates by touch selection")
+		check(not app.menu.has_method("country_screen"), "No country picker on mobile")
 
 	var controls: Control = load("res://scripts/ui/touch_controls.gd").new()
 	app.add_child(controls)

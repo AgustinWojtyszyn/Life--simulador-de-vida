@@ -3,6 +3,7 @@ extends Node
 signal travel_requested
 var countries: Array[CountryData] = []
 var profile := PlayerProfile.new()
+var city: CityData
 var country: CountryData
 var district: DistrictData
 var location := "home"
@@ -17,23 +18,50 @@ var active_poi: Dictionary = {}
 
 func _ready() -> void:
 	countries = preload("res://scripts/data/world_catalog.gd").countries()
+	city = preload("res://scripts/data/world_catalog.gd").vida_city()
 	select_country("ar")
 
 func select_country(id: String) -> void:
+	# Legacy entry point: all old locations now resolve to VIDA. Keep origin and
+	# home identity in the profile so loading never discards player data.
 	for item in countries:
-		if item.id == id:
+		if item.id == "ar":
 			country = item
-			district = item.cities[0].districts[0]
-			profile.country_id = id
-			profile.city_id = item.cities[0].id
-			profile.district_id = district.id
-			profile.home_id = id + "_home"
-			return
+	profile.country_id = id if id in ["ar", "jp", "it", "br", "us"] else "ar"
+	select_district(profile.district_id)
 
-func new_game(new_profile: PlayerProfile, id: String) -> void:
+func select_district(id: String) -> bool:
+	var target := city.find_district(id)
+	if target == null:
+		target = city.find_district("centro")
+	if not target.available:
+		return false
+	district = target
+	profile.city_id = city.id
+	profile.district_id = district.id
+	return true
+
+func activate_district(id: String) -> bool:
+	var target := city.find_district(id)
+	if target == null or not target.available: return false
+	if target == district: return true
+	if playing and not save_game(): return false
+	select_district(id)
+	location = "street"
+	active_poi = {}
+	return_position = Vector2.ZERO
+	spawn_position = district.home_position + Vector2(0, 34)
+	# App frees the previous world, so inactive districts run no NPC/traffic.
+	travel_requested.emit()
+	return true
+
+func new_game(new_profile: PlayerProfile, id: String = "ar") -> void:
 	SaveSystem.new_slot()
 	profile = new_profile
+	profile.district_id = "centro"
+	profile.home_id = id + "_home"
 	select_country(id)
+	active_poi = {}
 	location = "home"
 	return_position = Vector2.ZERO
 	spawn_position = HomeSystem.INTERIOR_SPAWN
@@ -52,6 +80,9 @@ func continue_game() -> bool:
 		return false
 	profile = PlayerProfile.from_dict(data.profile)
 	select_country(profile.country_id)
+	if district == null or district.id != profile.district_id:
+		select_district("centro")
+	active_poi = data.get("active_poi", {}) if data.get("active_poi") is Dictionary else {}
 	location = data.location
 	var return_data: Array = data.get("return_position", [])
 	return_position = Vector2(float(return_data[0]), float(return_data[1])) if return_data.size() == 2 else Vector2.ZERO
@@ -72,7 +103,7 @@ func travel(destination: String) -> void:
 		return
 	var previous := location
 	location = destination
-	var home := HomeSystem.starter_home(country)
+	var home := HomeSystem.starter_home(country, district)
 	if destination == "home":
 		spawn_position = home.interior_spawn
 	elif destination in PUBLIC_INTERIORS:
@@ -91,7 +122,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "active_poi": active_poi, "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result

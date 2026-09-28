@@ -39,7 +39,7 @@ func run() -> void:
 	app.menu.create_screen()
 	await frames(2)
 	app.menu.name_edit.text = ""
-	click("Continuar → Elegir país")
+	click("Comenzar mi vida")
 	check(not app.menu.error_label.text.is_empty(), "Creator must reject an empty name")
 	app.menu.name_edit.text = "Alex"
 	var options: Array[Node] = app.menu.find_children("*", "OptionButton", true, false)
@@ -48,9 +48,7 @@ func run() -> void:
 		options[i].select(chosen[i])
 		options[i].item_selected.emit(chosen[i])
 	check(app.menu.preview.sprite.texture.resource_path.contains("female"), "Creator must preview selected gender")
-	click("Continuar → Elegir país")
-	await frames(2)
-	check(manager.countries.size() == 5, "Country selection must provide five countries")
+	check(not app.menu.has_method("country_screen"), "New life has no country selector")
 	var selected: PlayerProfile = app.menu.draft
 	for id in ["ar", "us", "jp", "it", "br"]:
 		if id == "ar":
@@ -115,7 +113,7 @@ func run() -> void:
 	var stick := InputEventScreenTouch.new()
 	stick.index = 0
 	stick.pressed = true
-	stick.position = touch.stick_center + Vector2(42, 0)
+	stick.position = touch.stick_center + Vector2(touch.radius * .85, 0)
 	touch._input(stick)
 	var action := InputEventScreenTouch.new()
 	action.index = 1

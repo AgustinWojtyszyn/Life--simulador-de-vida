@@ -41,7 +41,7 @@ func _draw() -> void:
 	draw_rect(Rect2(identity.position + Vector2(13, 13) * s, Vector2(4, 36) * s), Color("dfb575"))
 	draw_string(font, identity.position + Vector2(27, 31) * s, "VIDA", HORIZONTAL_ALIGNMENT_LEFT, -1, int(22 * s), Color("f5ecd7"))
 	draw_string(font, identity.position + Vector2(92, 27) * s, WorldManager.district.title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, int(10 * s), Color("d8ccaf"))
-	draw_string(font, identity.position + Vector2(92, 47) * s, ("Tu vivienda · " if WorldManager.location == "home" else "") + WorldManager.country.title, HORIZONTAL_ALIGNMENT_LEFT, -1, int(10 * s), Color("9dafaa"))
+	draw_string(font, identity.position + Vector2(92, 47) * s, ("Tu vivienda · " if WorldManager.location == "home" else "") + WorldManager.city.title, HORIZONTAL_ALIGNMENT_LEFT, -1, int(10 * s), Color("9dafaa"))
 
 	var clock_width := 126.0 * s
 	var clock_rect := Rect2(safe.end.x - margin - clock_width, safe.position.y + margin, clock_width, 46 * s)

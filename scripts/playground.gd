@@ -366,16 +366,17 @@ func build_expansion() -> void:
 		building.position = slot.position
 		building.building_id = country.id + "_building_" + str(index)
 		building.is_home = slot.kind == "home"
+		var pool := data.asset_pool_at(slot.position)
 		var spec: Dictionary
 		if slot.has("catalog_index"):
-			spec = CountryCatalogScript.descriptor(country.id, int(slot.get("catalog_index", 0)))
+			spec = CountryCatalogScript.descriptor(pool, int(slot.get("catalog_index", 0)))
 		else:
-			spec = Regional.descriptor(country.id, slot.kind, int(slot.get("asset_index", index)), slot.facing)
+			spec = Regional.descriptor(pool, slot.kind, int(slot.get("asset_index", index)), slot.facing)
 		building.orientation = spec.facing
 		building.building_type = spec.type
 		building.title = spec.title
-		building.country_id = country.id
-		building.variant = BuildingVariants.make(country.id, slot.kind, index)
+		building.country_id = pool
+		building.variant = BuildingVariants.make(pool, slot.kind, index)
 		if spec.has("family"):
 			building.variant["family"] = spec.family
 			building.variant["height"] = spec.height

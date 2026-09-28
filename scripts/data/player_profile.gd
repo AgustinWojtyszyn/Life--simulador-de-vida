@@ -9,8 +9,8 @@ var hair_color := 0
 var top := 0
 var bottom := 0
 var country_id := "ar"
-var city_id := "ar_city"
-var district_id := "ar_centro"
+var city_id := "vida"
+var district_id := "centro"
 var home_id := "ar_home"
 
 func to_dict() -> Dictionary:

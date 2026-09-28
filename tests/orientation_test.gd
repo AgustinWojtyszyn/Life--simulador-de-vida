@@ -26,8 +26,6 @@ func run() -> void:
 				check(object.facade != null, country.id + ": every building must have a facade")
 				if object.facade != null:
 					check(not object.facade.resource_path.is_empty(), country.id + ": facade must come from a real resource")
-					if country.id != "ar":
-						check(not object.facade.resource_path.contains("/ar/"), country.id + ": foreign city must never borrow an Argentine facade")
 				var normal: String = orientation.street_facing(object.position, world.roads(), false)
 				check(orientation.vector(object.orientation).dot(orientation.vector(normal)) >= 0.7, country.id + ": facade faces its own street: " + object.building_id + " at " + str(object.position) + " facing " + object.orientation + " expected " + normal)
 				check(object.rotation == 0 and not object.get_child(0).flip_h, "Building views must not rotate or mirror signs")
