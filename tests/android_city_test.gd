@@ -95,6 +95,7 @@ func run() -> void:
 	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
 	controls.layout_controls()
 	check(inputs.movement() == Vector2.ZERO and controls.stick_finger == -1, "Resize releases touch ownership")
+	check(controls.stick_center.y < controls.size.y - 80.0 and controls.action_center.y < controls.size.y - 70.0, "Touch controls stay clear of Android gesture/navigation edge")
 	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
 	paused = true
 	controls._process(0.016)
