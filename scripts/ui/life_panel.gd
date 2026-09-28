@@ -87,6 +87,13 @@ func show_journal() -> void:
 	text_line("$%d   Energía %d/100   Bienestar %d/100   Reputación %d" % [LifeSimulation.money, LifeSimulation.energy, LifeSimulation.wellbeing, LifeSimulation.reputation])
 	text_line("Inventario: %d provisiones" % int(LifeSimulation.inventory.get("food", 0)))
 	text_line(MissionSystem.INTRO.title + "\n" + MissionSystem.objective())
+	# ── Estado laboral (compacto) ─────────────────────────────────────────
+	if EmploymentSystem.employed:
+		var work_line := "TRABAJO · " + EmploymentSystem.role_title() + " — " + EmploymentSystem.company_name()
+		if ShiftSystem.active:
+			work_line += "\nTurno activo · Obj: " + ShiftSystem.current_objective()
+		text_line(work_line)
+	# ─────────────────────────────────────────────────────────────────────
 	var music_label := text_line("Banda sonora · ♫ " + AudioSystem.track_name())
 	action("♫ Canción anterior", func():
 		AudioSystem.previous_track()
@@ -109,6 +116,7 @@ func talk(person: String) -> void:
 
 
 
+
 static func panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("192e34")
@@ -120,3 +128,65 @@ static func panel_style() -> StyleBoxFlat:
 	style.content_margin_top = 16
 	style.content_margin_bottom = 16
 	return style
+
+# ── B2B: empleo ──────────────────────────────────────────────────────────────
+
+## Muestra diálogo para aceptar el primer empleo.
+func show_hire_dialogue(company_id: String, workplace_id: String, role_id: String) -> void:
+	clear_panel()
+	var cat: Node = get_node_or_null("/root/CompanyCatalog")
+	var company_name := company_id
+	var role_title := role_id
+	if cat != null:
+		var company := cat.find_company(company_id)
+		var role := cat.find_role(company_id, workplace_id, role_id)
+		if company != null:
+			company_name = company.display_name
+		if role != null:
+			role_title = role.title
+	text_line("NEXOVIAL S.A. · Consulta de empleo")
+	text_line("Puesto disponible: " + role_title)
+	text_line("Sueldo por turno: $" + str(cat.find_role(company_id, workplace_id, role_id).base_salary if cat != null and cat.find_role(company_id, workplace_id, role_id) != null else "?"))
+	text_line("Turno: 09:00 – 13:00 · Sede Central, Centro")
+	action("Aceptar empleo", func():
+		var ok := EmploymentSystem.hire(company_id, workplace_id, role_id)
+		close()
+		if is_instance_valid(WorldManager.active_world):
+			var interactions: Node = WorldManager.active_world.get_node_or_null("Interactions")
+			if interactions != null:
+				interactions.say("¡Bienvenido a " + company_name + "! Iniciá tu turno en la entrada." if ok else "No se pudo procesar el empleo.")
+	)
+	action("Ahora no", close)
+
+## Muestra el estado laboral actual.
+func show_work_status() -> void:
+	clear_panel()
+	if not EmploymentSystem.employed:
+		text_line("No tenés empleo actualmente.")
+		action("Cerrar", close)
+		return
+	text_line("TRABAJO")
+	text_line(EmploymentSystem.role_title() + " — " + EmploymentSystem.company_name())
+	if ShiftSystem.active:
+		text_line("Turno activo")
+		text_line("Objetivo: " + ShiftSystem.current_objective())
+	else:
+		text_line("Sin turno activo · Iniciá el turno en la entrada")
+	text_line("Experiencia: " + str(EmploymentSystem.work_experience) + " · Reputación laboral: " + str(EmploymentSystem.work_reputation))
+	action("Cerrar", close)
+
+## Muestra el resultado del turno finalizado.
+func show_shift_result(result: Dictionary) -> void:
+	if result.is_empty():
+		return
+	clear_panel()
+	text_line("TURNO COMPLETADO")
+	text_line("Pago: $" + str(result.get("pay", 0)))
+	text_line("Experiencia: +" + str(result.get("experience", 0)))
+	var rep: int = result.get("reputation", 0)
+	text_line("Reputación: " + ("+" if rep >= 0 else "") + str(rep))
+	var done: int = result.get("objectives_done", 0)
+	var total: int = result.get("objectives_total", 1)
+	text_line("Objetivos: %d / %d" % [done, total])
+	action("Cerrar", close)
+

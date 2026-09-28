@@ -15,6 +15,9 @@ InputManager="*res://scripts/systems/input_manager.gd"
 SaveSystem="*res://scripts/systems/save_system.gd"
 WorldManager="*res://scripts/systems/world_manager.gd"
 AudioSystem="*res://scripts/systems/audio_system.gd"
+CompanyCatalog="*res://scripts/systems/company_catalog.gd"
+EmploymentSystem="*res://scripts/systems/employment_system.gd"
+ShiftSystem="*res://scripts/systems/shift_system.gd"
 MCPBridge="*res://addons/godot_mcp/mcp_bridge.gd"
 
 [display]
