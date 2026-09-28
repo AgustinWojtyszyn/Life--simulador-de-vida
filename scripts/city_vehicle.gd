@@ -140,6 +140,8 @@ func free_distance() -> float:
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
 			# Increased minimum gap for better separation and progressive braking
 			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
+			if other.current_speed < 1.0:
+				speed_factor += 0.18
 			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
 			gap = minf(gap, ahead - min_gap)
 	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
