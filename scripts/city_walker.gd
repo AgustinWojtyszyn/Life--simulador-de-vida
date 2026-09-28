@@ -21,13 +21,19 @@ var route_kind := "walk"
 var activity := "walk"
 var activity_time := 0.0
 var blocked_time := 0.0
+var path := PackedVector2Array()
+var path_index := 1
+var replan_time := 0.0
+var navigation: RefCounted
+var progress_position := Vector2.ZERO
+var progress_time := 0.0
+var failed_paths := 0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = 4
-	# Only collide with world (1) and other residents (4), NOT player (2).
-	# This prevents the player from pushing NPCs around.
-	collision_mask = 5
+	# PLAYER=1, NPC=4, WORLD=8. Traffic yields to pedestrians.
+	collision_mask = 1 | 4 | 8
 	var collider := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(12, 8)
@@ -45,11 +51,14 @@ func _ready() -> void:
 	visual.profile = profile
 	add_child(visual)
 	sprite = visual.sprite
+	call_deferred("setup_navigation")
 
 func _physics_process(delta: float) -> void:
 	if indoor_time > 0:
+		velocity = Vector2.ZERO
 		indoor_time = maxf(0, indoor_time - delta)
 		visible = indoor_time == 0
+		collision_layer = 4 if visible else 0
 		if indoor_time == 0:
 			activity = "walk"
 			state = State.EXIT_BUILDING
@@ -83,151 +92,137 @@ func _physics_process(delta: float) -> void:
 		var pop_system := get_tree().get_nodes_in_group("population_system")
 		var traffic: Array[Node] = pop_system[0].get_traffic_registry() if not pop_system.is_empty() else get_tree().get_nodes_in_group("city_traffic")
 		for vehicle in traffic:
-			if absf(vehicle.position.x - position.x) < 170:
+			if vehicle.position.distance_to(position) < 170 and Geometry2D.get_closest_point_to_segment(vehicle.position, position, goal).distance_to(vehicle.position) < vehicle.half_width + 18:
 				velocity = Vector2.ZERO
 				state = State.WAIT_CROSSING
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	# Yield to oncoming walkers (deterministic priority, brief 0.3-0.6s)
-	for other in get_nearby_residents(90.0):
-		if other == self or not is_instance_valid(other) or not other.visible:
-			continue
-		if is_facing_oncoming(other) and should_yield_to(other):
-			velocity = Vector2.ZERO
-			visual.animate_motion(Vector2.ZERO, 0)
-			wait_time = maxf(wait_time, 0.5)
-			return
-	# Avoid player with soft steering
-	var world := WorldManager.active_world
-	var player_avoid := Vector2.ZERO
-	if is_instance_valid(world):
-		var player := world.get_node_or_null("Player") as Node2D
-		if is_instance_valid(player) and player.visible:
-			var to_player: Vector2 = player.position - position
-			var dist_sq := to_player.length_squared()
-			if dist_sq < 70.0 * 70.0 and dist_sq > 0.01:
-				var dist := sqrt(dist_sq)
-				var dir_to_player := to_player / dist
-				var my_dir := velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
-				if my_dir != Vector2.ZERO and my_dir.dot(dir_to_player) > 0.3:
-					var side := Vector2(-dir_to_player.y, dir_to_player.x)
-					player_avoid = side * (1.0 - dist / 70.0) * 50.0
-	var remaining := position.distance_to(goal)
+	if navigation == null:
+		return
+	replan_time = maxf(0.0, replan_time - delta)
+	if path.is_empty():
+		if replan_time <= 0.0:
+			rebuild_path()
+		stop_walking()
+		return
+	while path_index < path.size() and position.distance_to(path[path_index]) < 3.0:
+		path_index += 1
+	if path_index >= path.size():
+		arrive()
+		return
+	var target := path[path_index]
+	var remaining := position.distance_to(target)
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
-	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
-	var desired := position.direction_to(goal) * desired_speed
-	var separation := crowd_separation()
-	if separation.length_squared() > 0.001:
-		desired += separation * minf(48.0, desired_speed * 0.75)
-	desired += player_avoid
-	desired = desired.limit_length(desired_speed * 1.2)
-	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
-	var intended := velocity * delta
-	if intended.length() > remaining:
-		velocity = position.direction_to(goal) * remaining / maxf(delta, 0.0001)
-		intended = goal - position
-	# When close to goal, stop without checking walker_position_clear
-	if position.distance_to(goal) < 5.0:
-		velocity = Vector2.ZERO
-		crossing = false
-		wait_time = maxf(wait_time, 0.3)
-		visual.animate_motion(Vector2.ZERO, 0)
+	var desired := position.direction_to(target) * minf(pace, remaining / maxf(delta, 0.0001))
+	# Plan around actual occupied space, including stationary actors. Keep the
+	# chosen side until that path is blocked; no alternating separation nudges.
+	var obstructed := false
+	for actor in nearby_actors():
+		var ahead: Vector2 = actor.position - position
+		var forward := desired.normalized()
+		if ahead.dot(forward) > 0.0 and ahead.dot(forward) < 46.0 and absf(ahead.cross(forward)) < 20.0:
+			obstructed = true
+			break
+	if obstructed and replan_time <= 0.0:
+		rebuild_path()
+		stop_walking()
 		return
-	var candidate := position + intended
-	var parent := get_parent()
-	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
-		# Blocked: stop and wait. NO teleporting, NO lateral displacement.
-		velocity = Vector2.ZERO
-		crossing = false
-		wait_time = maxf(wait_time, 0.3)
-		visual.animate_motion(Vector2.ZERO, 0)
-		# Try next destination
-		destination = (destination + 1) % route.size()
-		if destination == 0:
-			destination = 1
-		return
-	blocked_time = maxf(0.0, blocked_time - delta * 2.0)
+	velocity = velocity.move_toward(desired, 280.0 * delta)
+	if velocity.length() * delta > remaining:
+		velocity = position.direction_to(target) * remaining / delta
+	if not navigation.segment_clear(position, position + velocity * delta):
+		velocity = desired if navigation.segment_clear(position, position + desired * delta) else Vector2.ZERO
 	var before := position
 	move_and_slide()
 	var movement := position - before
 	visual.animate_motion(movement, movement.length())
-	if position.distance_to(goal) < 1:
-		velocity = Vector2.ZERO
-		crossing = false
-		visits += 1
-		destination = (destination + 1) % route.size()
-		choose_activity()
-		if route_kind == "shop" and destination == 1 and visits > 1:
-			state = State.ENTER_BUILDING
-			indoor_time = 12.0 + personality * 4.0
-			visible = false
+	progress_time += delta
+	if progress_time >= 0.75:
+		blocked_time = blocked_time + progress_time if position.distance_to(progress_position) < 4.0 else 0.0
+		progress_position = position
+		progress_time = 0.0
+		if blocked_time >= 0.75:
+			path.clear()
+			stop_walking()
+			if blocked_time >= 4.0:
+				destination = (destination + 1) % route.size()
+				blocked_time = 0.0
 
-func crowd_separation() -> Vector2:
-	var push := Vector2.ZERO
-	const PERSONAL_SPACE := 24.0
-	# Use spatial grid for O(1) neighbor queries instead of O(n) scan
-	var nearby: Array = []
-	var pop_system := get_tree().get_nodes_in_group("population_system")
-	if not pop_system.is_empty():
-		nearby = pop_system[0].call("get_nearby_npcs", position, PERSONAL_SPACE)
-	else:
-		# Fallback to full scan if population system not available
-		nearby = get_tree().get_nodes_in_group("city_residents")
-	for other in nearby:
-		if other == self or not is_instance_valid(other) or not other.visible:
-			continue
-		var away: Vector2 = position - other.position
-		var distance_sq := away.length_squared()
-		if distance_sq >= PERSONAL_SPACE * PERSONAL_SPACE:
-			continue
-		if distance_sq < 0.01:
-			var side := -1.0 if get_instance_id() < other.get_instance_id() else 1.0
-			away = Vector2(side, 0.35)
-		var distance := maxf(1.0, away.length())
-		# Deterministic priority: lower instance_id yields to higher one.
-		# This prevents two NPCs from endlessly trying to dodge each other.
-		var priority_factor := 1.0 if get_instance_id() > other.get_instance_id() else 0.3
-		push += away / distance * (1.0 - distance / PERSONAL_SPACE) * priority_factor
-	return push
-
-func is_facing_oncoming(other: Node2D) -> bool:
-	# Check if another walker is approaching head-on
-	if not is_instance_valid(other) or not other.visible:
-		return false
-	var to_other: Vector2 = other.position - position
-	if to_other.length_squared() > 90.0 * 90.0:
-		return false
-	# Both must be moving toward each other
-	var my_dir: Vector2 = velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
-	var other_dir: Vector2 = (other.velocity as Vector2).normalized() if other.velocity.length_squared() > 0.01 else Vector2.ZERO
-	if my_dir == Vector2.ZERO or other_dir == Vector2.ZERO:
-		return false
-	return my_dir.dot(other_dir) < -0.5
-
-func get_nearby_residents(radius: float) -> Array:
-	# Use spatial grid for O(1) neighbor queries
-	var pop_system := get_tree().get_nodes_in_group("population_system")
-	if not pop_system.is_empty():
-		return pop_system[0].call("get_nearby_npcs", position, radius)
-	return get_tree().get_nodes_in_group("city_residents")
-
-func should_yield_to(other: Node2D) -> bool:
-	# Deterministic priority: lower instance_id yields
-	return get_instance_id() < other.get_instance_id()
-
-func apply_crowd_separation(delta: float) -> void:
-	var push := crowd_separation()
-	if push.length_squared() < 0.001:
+func setup_navigation() -> void:
+	if not "pedestrian_navigation" in get_parent():
 		return
-	var nudge := push.normalized() * minf(20.0, push.length() * 28.0)
-	var candidate := position + nudge * delta
-	var parent := get_parent()
-	if not parent.has_method("walker_position_clear") or bool(parent.call("walker_position_clear", candidate)):
-		var previous_velocity := velocity
-		velocity = nudge
-		move_and_slide()
-		velocity = previous_velocity
+	navigation = get_parent().pedestrian_navigation
+	for i in route.size():
+		var point: Vector2 = navigation.nearest(route[i])
+		if point.is_finite():
+			route[i] = point
+	var spawn: Vector2 = navigation.nearest(position)
+	if spawn.is_finite():
+		# Resolve spawn overlaps once, before the first walking frame. Movement
+		# never teleports an actor out of a crowd.
+		var occupied: Array[Vector2] = []
+		for other in get_tree().get_nodes_in_group("city_residents"):
+			if other != self and other.navigation != null and other.visible:
+				occupied.append(other.position)
+		var chosen := spawn
+		var found := false
+		for ring in range(5):
+			for direction in 8:
+				var candidate := spawn + Vector2.RIGHT.rotated(direction * PI / 4.0) * ring * 24.0
+				if not navigation.open(navigation.cell(candidate)):
+					continue
+				if occupied.any(func(at: Vector2): return at.distance_to(candidate) < 24.0):
+					continue
+				chosen = candidate
+				found = true
+				break
+			if found:
+				break
+		position = chosen
+	progress_position = position
+
+func nearby_actors() -> Array:
+	var actors: Array = []
+	var systems := get_tree().get_nodes_in_group("population_system")
+	var residents: Array = systems[0].get_nearby_npcs(position, 100.0) if not systems.is_empty() else get_tree().get_nodes_in_group("city_residents")
+	for other in residents:
+		if other != self and is_instance_valid(other) and other.visible and position.distance_to(other.position) < 100.0:
+			actors.append(other)
+	var player := get_parent().get_node_or_null("Player") as Node2D
+	if is_instance_valid(player) and player.visible and position.distance_to(player.position) < 110.0:
+		actors.append(player)
+	return actors
+
+func rebuild_path() -> void:
+	path = navigation.path(position, route[destination], nearby_actors())
+	path_index = 1
+	replan_time = 0.6 + personality * 0.09
+	if path.is_empty():
+		failed_paths += 1
+		if failed_paths >= 4:
+			destination = (destination + 1) % route.size()
+			failed_paths = 0
+	else:
+		failed_paths = 0
+
+func stop_walking() -> void:
+	velocity = Vector2.ZERO
+	visual.animate_motion(Vector2.ZERO, 0)
+
+func arrive() -> void:
+	stop_walking()
+	path.clear()
+	crossing = false
+	blocked_time = 0.0
+	visits += 1
+	destination = (destination + 1) % route.size()
+	choose_activity()
+	if route_kind == "shop" and destination == 1 and visits > 1:
+		state = State.ENTER_BUILDING
+		indoor_time = 12.0 + personality * 4.0
+		visible = false
+		collision_layer = 0
 
 func choose_activity() -> void:
 	# Activities only happen at specific destinations, never randomly while walking
@@ -245,9 +240,7 @@ func choose_activity() -> void:
 		activity = "wait"
 		state = State.WAIT_CROSSING
 	else:
-		# Walking NPCs just keep walking - no random activities
-		activity = "walk"
-		state = State.WALK
+		# Walking NPCs just keep walking - no random activities in the middle of the street
 		return
 	wait_time = 3.0 + float((visits + personality) % 6)
 	if WeatherSystem.state == "rain": wait_time *= 0.4

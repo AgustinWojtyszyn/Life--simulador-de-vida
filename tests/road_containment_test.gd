@@ -31,6 +31,9 @@ func run() -> void:
 			for vehicle in vehicles:
 				if not is_instance_valid(vehicle):
 					continue
+				# Straight-lane recycling occurs beyond the visible map edges.
+				if vehicle.route_points.is_empty() and (vehicle.position.x < 16 or vehicle.position.x > world.map_size.x - 16):
+					continue
 				# Check if vehicle is on road or intersection
 				if not is_on_road_or_intersection(vehicle.position, world):
 					road_violations += 1

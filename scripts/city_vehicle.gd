@@ -54,13 +54,26 @@ static func source_direction(vehicle_model: String, facing: String) -> String:
 	# Reviewed corrections for mislabeled legacy source files; never mirror text.
 	if vehicle_model == "compact" and facing in ["east", "west"]:
 		return "west" if facing == "east" else "east"
-	if vehicle_model == "taxi" and facing in ["south-east", "south-west", "north-east", "north-west"]:
-		return facing.replace("east", "TEMP").replace("west", "east").replace("TEMP", "west")
 	return facing
+
+static func art_family(vehicle_model: String) -> String:
+	# sports_v2 contains near-duplicate diagonal front views, not eight angles.
+	# The original yellow coupe has a clean, complete directional family.
+	# Taxi/classic sources also contain mixed models and duplicate views; use
+	# the coherent sedan geometry with their own paint and driving profiles.
+	return {"sports_v2": "sports", "classic": "sedan", "taxi": "sedan"}.get(vehicle_model, vehicle_model)
+
+static func apply_paint(target: Sprite2D, vehicle_model: String) -> void:
+	if vehicle_model not in ["taxi", "classic"]:
+		return
+	var paint := ShaderMaterial.new()
+	paint.shader = preload("res://assets/shaders/vehicle_paint.gdshader")
+	paint.set_shader_parameter("paint", Color("f4c432") if vehicle_model == "taxi" else Color("b86c39"))
+	target.material = paint
 
 static func has_directional_art(vehicle_model: String) -> bool:
 	for facing in DIRECTIONS:
-		if not ResourceLoader.exists("res://assets/vehicles/%s/%s.png" % [vehicle_model, facing]):
+		if not ResourceLoader.exists("res://assets/vehicles/%s/%s.png" % [art_family(vehicle_model), facing]):
 			return false
 	return true
 
@@ -71,10 +84,11 @@ func _ready() -> void:
 	add_to_group("city_traffic")
 	sprite = Sprite2D.new()
 	add_child(sprite)
+	apply_paint(sprite, model)
 	if has_directional_art(model):
 		for facing in DIRECTIONS:
 			var source := source_direction(model, facing)
-			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [model, source])
+			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [art_family(model), source])
 			directional_art.append(texture)
 			art_bounds.append(texture.get_image().get_used_rect())
 	var driving := profile_for(model)
@@ -200,8 +214,6 @@ func has_honk_target() -> bool:
 	return false
 
 func _physics_process(delta: float) -> void:
-	if current_speed == 0.0 and position.x > 330.0 and position.x < 350.0:
-		print("PHYSICS_DEBUG: name=", name, " speed=", current_speed, " gap=", cached_gap, " pos=", position, " route_points=", route_points.size())
 	horn_cooldown = maxf(0.0, horn_cooldown - delta)
 	# Proximity scans are the expensive part of traffic AI: each vehicle checks
 	# every other vehicle and resident. Reuse the result for a few physics ticks,
@@ -243,8 +255,6 @@ func _physics_process(delta: float) -> void:
 	# Waiting at a red light or behind a pedestrian is valid. Never teleport
 	# through a queue after a timeout: the same rules apply to every model.
 	var step := minf(current_speed * delta, gap)
-	if position.x > 330.0 and position.x < 350.0 and current_speed == 0.0:
-		print("STRAIGHT_DEBUG: name=", name, " step=", step, " gap=", gap, " pos=", position)
 	cached_gap = maxf(0.0, cached_gap - step)
 	var previous := position
 	if route_points.is_empty():
@@ -263,7 +273,15 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 func update_art() -> void:
-	var index := posmod(roundi(heading / (PI / 4.0)), 8)
+	# Correct facing index calculation for all angles including negative
+	# Map heading [-π, π] to index [0, 7] correctly
+	var angle_deg := rad_to_deg(heading)
+	# Normalize to [0, 360)
+	if angle_deg < 0.0:
+		angle_deg += 360.0
+	# Each direction covers 45 degrees, centered on the cardinal direction
+	# East=0°, SE=45°, S=90°, SW=135°, W=180°, NW=225°, N=270°, NE=315°
+	var index := posmod(roundi(angle_deg / 45.0), 8)
 	if index == facing_index:
 		return
 	facing_index = index
@@ -277,17 +295,9 @@ func update_art() -> void:
 	sprite.region_enabled = true
 	sprite.region_rect = art_bounds[index]
 	sprite.scale = Vector2.ONE * visual_scale
-	# Coherent pivot: the wheel contact point must be identical for all 8
-	# orientations. We anchor the bottom-center of the used-rect to a fixed
-	# ground point, so the car never floats or jumps when turning.
-	var bounds: Rect2 = art_bounds[index]
-	# Horizontal center of the used-rect, relative to the sprite origin
-	var center_x := bounds.position.x + bounds.size.x * 0.5
-	# The sprite is drawn with its bottom edge at y=0 (ground level).
-	# offset shifts the sprite so that:
-	#   - horizontally: the center of the used-rect aligns with x=0
-	#   - vertically: the bottom of the used-rect sits at y=0
-	sprite.offset = Vector2(-center_x, -bounds.size.y)
+	# With region_enabled, Sprite2D centers the REGION, not the source PNG.
+	# Half its height puts the visible bottom at the shared ground pivot.
+	sprite.offset = Vector2(0, -art_bounds[index].size.y * 0.5)
 	sprite.position = Vector2.ZERO
 
 func _draw() -> void:

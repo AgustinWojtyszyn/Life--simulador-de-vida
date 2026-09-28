@@ -74,17 +74,16 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func add_destination_label() -> void:
-	# World-space label that renders BELOW characters (z_index = -1).
-	# The label follows the building's transform, camera, and y-sort correctly.
-	# It never covers the player or NPCs because it has a negative z_index.
+	# Keep facade and sign in the same y-sorted subtree, using the building's
+	# ground pivot. Actors in front cover both; actors behind cover neither.
 	var width: float = 118.0 if is_home else 112.0
 	var plate := Label.new()
 	plate.text = "TU HOGAR" if is_home else title
 	if access == Access.ENTERABLE and not is_home:
 		plate.text += "  •"
-	plate.position = Vector2(-width * 0.5, -10)
+	plate.position = Vector2(-width * 0.5, -26)
 	plate.size = Vector2(width, 18)
-	plate.z_index = -1
+	plate.z_index = 0
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	plate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

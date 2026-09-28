@@ -48,6 +48,7 @@ func apply_profile(value: PlayerProfile) -> void:
 	palette.set_shader_parameter("top_color", TOPS[profile.top])
 	palette.set_shader_parameter("bottom_color", BOTTOMS[profile.bottom])
 	palette.set_shader_parameter("hair_style", profile.hair)
+	palette.set_shader_parameter("face_bounds", Vector4(0.20, 0.32, 0.60, 0.26) if profile.gender == "male" else Vector4(0.20, 0.12, 0.60, 0.36))
 	set_art("idle", facing, 0)
 
 func animate_motion(direction: Vector2, traveled: float) -> void:

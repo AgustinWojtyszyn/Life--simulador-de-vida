@@ -62,9 +62,9 @@ static func descriptor(country: String, kind: String, index: int, facing: String
 	if asset == "mixed_old":
 		path = "res://assets/buildings/%s/mixed_old.png" % country
 	# Explicit asset selection BEFORE any fallback logic
-	if country == "ar" and asset == "almacen":
+	if country == "ar" and asset in ["almacen", "market"]:
 		path = "res://assets/buildings/ar/almacen_new.png"
-	elif not ResourceLoader.exists(path):
+	if not ResourceLoader.exists(path):
 		var alt_path := "res://assets/buildings/%s/%s.png" % [country, asset]
 		if ResourceLoader.exists(alt_path):
 			path = alt_path

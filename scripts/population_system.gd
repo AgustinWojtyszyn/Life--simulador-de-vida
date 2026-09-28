@@ -13,7 +13,8 @@ var registry_timer := 0.0
 func _ready() -> void:
 	add_to_group("population_system")
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_update_spatial_grid()
 	timer -= delta
 	if timer > 0:
 		return
@@ -23,12 +24,12 @@ func _process(delta: float) -> void:
 		registry_timer = 0.5
 		_update_registries()
 	var player: Node2D = get_parent().get_node("Player")
-	_update_spatial_grid()
 	for npc in residents:
 		var close := npc.position.distance_squared_to(player.position) < 850.0 * 850.0
 		var awake := (GameClock.hour() >= 6 and GameClock.hour() < 22) or npc.get_index() % 4 == 0 or npc.has_meta("person_id")
 		npc.set_physics_process((close and awake) or npc.indoor_time > 0)
 		npc.visible = close and awake and npc.indoor_time <= 0
+		npc.collision_layer = 4 if npc.visible else 0
 
 func _update_registries() -> void:
 	# Update central registries every 0.5s to avoid repeated global scans
@@ -42,14 +43,18 @@ func _update_registries() -> void:
 			signal_registry.append(node)
 
 func get_traffic_registry() -> Array[Node]:
+	if traffic_registry.is_empty():
+		_update_registries()
 	return traffic_registry
 
 func get_signal_registry() -> Array[Node]:
+	if signal_registry.is_empty():
+		_update_registries()
 	return signal_registry
 
 func _update_spatial_grid() -> void:
 	spatial_grid.clear()
-	for npc in residents:
+	for npc in get_tree().get_nodes_in_group("city_residents"):
 		if not is_instance_valid(npc) or not npc.visible:
 			continue
 		var cell := Vector2i(npc.position / CELL_SIZE)

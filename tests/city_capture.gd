@@ -7,7 +7,7 @@ func capture() -> void:
 	var world: Node2D = load("res://scenes/playground.tscn").instantiate()
 	root.add_child(world)
 	var player: CharacterBody2D = world.get_node("Player")
-	for view in [{"name": "street", "position": Vector2(520, 330)}, {"name": "plaza", "position": Vector2(520, 712)}, {"name": "crossing", "position": Vector2(990, 470)}, {"name": "parking", "position": Vector2(1150, 780)}]:
+	for view in [{"name": "street", "position": Vector2(520, 330)}, {"name": "kiosk", "position": Vector2(1168, 350)}, {"name": "plaza", "position": Vector2(520, 712)}, {"name": "crossing", "position": Vector2(990, 470)}, {"name": "parking", "position": Vector2(1150, 780)}]:
 		player.position = view.position
 		player.get_node("Camera2D").reset_smoothing()
 		for i in 20:

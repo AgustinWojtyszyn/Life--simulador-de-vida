@@ -26,6 +26,7 @@ var texture_used_cache: Dictionary = {}
 var road_cache: Array[Rect2] = []
 var occlusion_clock := 0.0
 # Waypoint network for pedestrian navigation
+var pedestrian_navigation := preload("res://scripts/pedestrian_navigation.gd").new()
 var waypoints: Array[Vector2] = []
 var waypoint_connections: Array[Array] = []
 # Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
@@ -138,6 +139,7 @@ func _ready() -> void:
 	# retain their interactions and authored seated character poses.
 	add_asset("props/bench", Vector2(360, 670), Vector2(58, 43), Rect2(-12, -18, 24, 18), Color.WHITE, "east")
 	add_asset("props/bench", Vector2(600, 870), Vector2(58, 43), Rect2(-12, -18, 24, 18), Color.WHITE, "west")
+	pedestrian_navigation.setup(self)
 	populate()
 	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
 	var layer := CanvasLayer.new()
@@ -287,7 +289,8 @@ func add_asset(asset: String, pos: Vector2, size: Vector2, footprint: Rect2, tin
 		path = AssetOrientation.family_path("res://assets/oriented/props/bench", facing)
 	if asset.begins_with("vehicles/"):
 		var model: String = {"car": "compact", "coupe": "sedan"}.get(asset.get_file(), asset.get_file())
-		path = "res://assets/vehicles/%s/%s.png" % [model, Vehicle.source_direction(model, facing)]
+		path = "res://assets/vehicles/%s/%s.png" % [Vehicle.art_family(model), Vehicle.source_direction(model, facing)]
+		Vehicle.apply_paint(sprite, model)
 	var texture: Texture2D = load(path)
 	var used := Vector2(TextureBoundsScript.used(texture).size)
 	size = used * minf(size.x / used.x, size.y / used.y)
@@ -563,7 +566,10 @@ func populate() -> void:
 		walker.profile.hair_color = int(i / 3) % 3
 		walker.profile.top = (i + 1) % 3
 		walker.profile.bottom = int(i / 2) % 3
-		walker.route_kind = "bench" if i == WorldManager.district.population - 1 else "shop" if i % 9 == 0 else "crossing" if i % 11 == 0 else "walk"
+		walker.route_kind = "bench" if i == WorldManager.district.population - 1 and not benches.is_empty() else "shop" if i % 9 == 0 else "crossing" if i % 11 == 0 else "walk"
+		if walker.route_kind == "bench":
+			walker.route.assign(routes.back())
+			walker.position = walker.route[1]
 		add_child(walker)
 		system.residents.append(walker)
 
@@ -652,16 +658,19 @@ func build_road_circuit() -> Array[Vector2]:
 	var vertical := DistrictBlocks.vertical_roads(WorldManager.district)
 	if horizontal.is_empty() or vertical.is_empty():
 		return []
-	# Use the first horizontal road and the first two vertical roads for a compact circuit
-	var h1: Rect2 = horizontal[0]
-	var v1: Rect2 = vertical[0]
-	var v2: Rect2 = vertical[1] if vertical.size() > 1 else vertical[0]
-	# Use street centers for proper lane positioning - tighter turns with closer roads
+	if horizontal.size() < 2 or vertical.size() < 2:
+		return []
+	var top: Rect2 = horizontal[0]
+	var bottom: Rect2 = horizontal[1]
+	var left: Rect2 = vertical[0]
+	var right: Rect2 = vertical[1]
+	# Clockwise lane centers, all on real roads. The old y + 200 return leg
+	# cut across the block instead of following the next avenue.
 	return [
-		Vector2(v1.get_center().x, h1.get_center().y),
-		Vector2(v1.get_center().x, h1.get_center().y + 200),
-		Vector2(v2.get_center().x, h1.get_center().y + 200),
-		Vector2(v2.get_center().x, h1.get_center().y),
+		Vector2(left.get_center().x - 24, top.get_center().y - 24),
+		Vector2(left.get_center().x - 24, bottom.get_center().y + 24),
+		Vector2(right.get_center().x + 24, bottom.get_center().y + 24),
+		Vector2(right.get_center().x + 24, top.get_center().y - 24),
 	]
 
 func road_contains_vehicle(pos: Vector2, half_width: float) -> bool:

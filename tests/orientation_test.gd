@@ -77,10 +77,12 @@ func run() -> void:
 			for other in get_nodes_in_group("city_traffic"):
 				other.remove_from_group("city_traffic")
 			car.player = null
-			for at in range(0, int(car.curve.get_baked_length()), 19):
+			for at in range(0, int(car.curve.get_baked_length()), 3):
 				car.progress = float(at)
 				car.position = car.curve.sample_baked(car.progress)
 				car.current_speed = 100.0
+				car.proximity_clock = 1.0
+				car.cached_gap = 10000.0
 				car._physics_process(1.0 / 60.0)
 				if car.motion_vector.length() < 0.01: continue
 				var facing: String = car.DIRECTIONS[car.facing_index]
@@ -89,7 +91,7 @@ func run() -> void:
 				check(car.sprite.rotation == 0, "No rotated vehicle PNGs")
 				check(car.sprite.position == Vector2.ZERO, "Turning keeps the same ground centre")
 				var frame_bounds: Rect2 = car.art_bounds[car.facing_index]
-				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y), "Directional frames share one wheel/ground anchor")
+				check(car.sprite.get_rect().end.is_equal_approx(Vector2(frame_bounds.size.x * 0.5, 0)), "Region bottom-center is the common ground anchor")
 			if seen.size() != 8:
 				var missing := []
 				for dir in ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]:
