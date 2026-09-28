@@ -23,7 +23,6 @@ var directional_art: Array[Texture2D] = []
 var collider := CollisionShape2D.new()
 var facing_index := -1
 var motion_vector := Vector2.ZERO
-var body_height := 14.0
 var visual_scale := 1.0
 var braking := BRAKING
 var braking_sound_active := false
@@ -59,6 +58,7 @@ static func source_direction(vehicle_model: String, facing: String) -> String:
 	return facing
 
 static func has_directional_art(vehicle_model: String) -> bool:
+	vehicle_model = VehicleGrounding.art_model(vehicle_model)
 	for facing in DIRECTIONS:
 		if not ResourceLoader.exists("res://assets/vehicles/%s/%s.png" % [vehicle_model, facing]):
 			return false
@@ -73,8 +73,9 @@ func _ready() -> void:
 	add_child(sprite)
 	if has_directional_art(model):
 		for facing in DIRECTIONS:
-			var source := source_direction(model, facing)
-			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [model, source])
+			var family := VehicleGrounding.art_model(model)
+			var source := source_direction(family, facing)
+			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [family, source])
 			directional_art.append(texture)
 			art_bounds.append(texture.get_image().get_used_rect())
 	var driving := profile_for(model)
@@ -90,7 +91,6 @@ func _ready() -> void:
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(half_width * 2.0, 20)
 	collider.shape = shape
-	collider.position.y = -10
 	add_child(collider)
 	heading = 0.0 if direction > 0 else PI
 	if not route_points.is_empty():
@@ -98,6 +98,7 @@ func _ready() -> void:
 		progress = curve.get_closest_offset(position)
 		position = curve.sample_baked(progress)
 		heading = tangent(progress).angle()
+	collider.rotation = heading
 	update_art()
 
 func build_curve() -> void:
@@ -139,8 +140,9 @@ func free_distance() -> float:
 			ahead = fposmod(ahead, route_length())
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
 			# Increased minimum gap for better separation and progressive braking
-			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
-			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
+			# Braking distance is already handled by safe_speed. A speed-dependent
+			# standstill gap makes the target move while braking and causes creep.
+			var min_gap: float = half_width + other.half_width + 30.0
 			gap = minf(gap, ahead - min_gap)
 	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
 	if is_instance_valid(player):
@@ -148,7 +150,7 @@ func free_distance() -> float:
 	for pedestrian in pedestrians:
 		if not pedestrian.is_visible_in_tree():
 			continue
-		var relative: Vector2 = pedestrian.position - (position - Vector2(0, 10))
+		var relative: Vector2 = pedestrian.position - position
 		var ahead := relative.dot(forward)
 		if ahead >= -half_width - 6.0 and absf(relative.cross(forward)) < 24.0:
 			gap = minf(gap, ahead - half_width - 20.0)
@@ -250,18 +252,15 @@ func update_art() -> void:
 		return
 	sprite.texture = directional_art[index]
 	sprite.flip_h = model == "suv" and DIRECTIONS[index] == "west"
-	sprite.region_enabled = true
-	sprite.region_rect = art_bounds[index]
-	sprite.scale = Vector2.ONE * visual_scale
-	# Keep the wheel contact point fixed while swapping directional PNGs.
-	# The offset centers the used-rect horizontally and anchors the bottom
-	# edge to the body so the car never appears to have a second car behind.
-	var bounds: Rect2 = art_bounds[index]
-	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -bounds.size.y)
-	sprite.position = Vector2(0, -body_height)
+	VehicleGrounding.apply(sprite, model, index, art_bounds[index], visual_scale)
 
 func _draw() -> void:
-	var forward := forward_vector()
-	draw_set_transform(Vector2(1, -6), 0, Vector2(lerpf(0.42, 1.0, absf(forward.x)), lerpf(0.66, 0.24, absf(forward.x))))
-	draw_circle(Vector2.ZERO, half_width, Color(0.08, 0.13, 0.18, 0.26))
+	if facing_index < 0 or art_bounds.size() != 8: return
+	# Project the contact shadow from this frame, not the unprojected collider
+	# length: a north/south sprite is foreshortened by the authored camera.
+	var bounds := art_bounds[facing_index]
+	var ground_anchor := VehicleGrounding.anchor(model, facing_index, bounds)
+	var radii := Vector2(bounds.size.x * .42, bounds.size.y - ground_anchor.y) * visual_scale
+	draw_set_transform(Vector2.ZERO, 0, radii)
+	draw_circle(Vector2.ZERO, 1, Color(0.08, 0.13, 0.18, 0.20))
 	draw_set_transform(Vector2.ZERO)
