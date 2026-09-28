@@ -28,7 +28,8 @@ func layout_controls() -> void:
 	var scale_factor := clampf(minf(logical.x / 800.0, logical.y / 450.0), 1.0, 1.35)
 	radius = 72.0 * scale_factor
 	action_radius = 50.0 * scale_factor
-	var bottom_lift := clampf(safe.size.y * 0.08, 34.0, 64.0)\n\tstick_center = Vector2(safe.position.x + radius + 30, safe.end.y - radius - bottom_lift)
+	var bottom_lift := clampf(safe.size.y * 0.08, 34.0, 64.0)
+	stick_center = Vector2(safe.position.x + radius + 30, safe.end.y - radius - bottom_lift)
 	action_center = Vector2(safe.end.x - action_radius - 30, safe.end.y - action_radius - bottom_lift)
 	journal_center = action_center + Vector2(0, -(action_radius * 2.0 + 28.0))
 	queue_redraw()
