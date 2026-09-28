@@ -13,12 +13,13 @@ func check(ok: bool, message: String) -> void:
 func base_save(location: String) -> Dictionary:
 	return {
 		"version": SaveSystem.VERSION,
-		"profile": {"country_id": "ar"},
+		"profile": {"country_id": "ar", "city_id": "san_juan", "district_id": "barrio_del_sol", "player_name": "Test"},
 		"location": location,
 		"position": [200.0, 180.0],
 		"return_position": [320.0, 240.0],
-		"state": {"rested": false},
-		"life": {},
+		"state": {"rested": true},
+		"clock": {"minutes": 1234.0, "played_seconds": 99.0, "speed": 1.0},
+		"life": {"money": 137, "energy": 63.0, "wellbeing": 71.0, "reputation": 4, "inventory": {"food": 2}},
 	}
 
 func run() -> void:
@@ -34,6 +35,11 @@ func run() -> void:
 		check(SaveSystem.write_save(payload), "Save write must succeed for: " + location)
 		var loaded := SaveSystem.read_save()
 		check(not loaded.is_empty() and loaded.get("location") == location, "Save/load must round-trip location: " + location)
+		check(loaded.get("profile", {}).get("district_id") == "barrio_del_sol", "Save/load must preserve district identity")
+		check(loaded.get("position") == [200.0, 180.0], "Save/load must preserve player position")
+		check(loaded.get("state", {}).get("rested", false), "Save/load must preserve basic life state")
+		check(int(loaded.get("life", {}).get("money", 0)) == 137 and int(loaded.get("life", {}).get("inventory", {}).get("food", 0)) == 2, "Save/load must preserve economy and inventory")
+		check(is_equal_approx(float(loaded.get("clock", {}).get("minutes", 0.0)), 1234.0), "Save/load must preserve game time")
 	check(not SaveSystem.valid(base_save("definitely_not_a_place")), "Unknown locations must remain invalid")
 
 	GameClock.restore({"minutes": 480.0})
@@ -61,6 +67,7 @@ func run() -> void:
 
 	check(InteriorCatalog.type_for("gym") == InteriorCatalog.Type.GYM, "Gym must keep its own interior type")
 	check(InteriorCatalog.type_for("pharmacy") == InteriorCatalog.Type.PHARMACY, "Pharmacy must keep its own interior type")
+	check(InteriorCatalog.type_for("clinic") == InteriorCatalog.Type.CLINIC, "Clinic must keep its own interior type instead of silently becoming a hospital")
 	check(InteriorCatalog.type_for("supermarket") == InteriorCatalog.Type.SUPERMARKET, "Supermarket must keep its own interior type")
 	check(InteriorCatalog.type_for("gas_station") == InteriorCatalog.Type.GAS_STATION, "Gas station must keep its own interior type")
 
