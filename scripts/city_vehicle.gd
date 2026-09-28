@@ -260,10 +260,10 @@ func update_art() -> void:
 	# edge to the body so the car never appears to have a second car behind.
 	var bounds: Rect2 = art_bounds[index]
 	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -bounds.size.y)
-	sprite.position = Vector2(0, 0)
+	sprite.position = Vector2(0, -body_height)
 
 func _draw() -> void:
 	var forward := forward_vector()
-	draw_set_transform(Vector2(1, 1), 0, Vector2(lerpf(0.38, 0.82, absf(forward.x)), lerpf(0.52, 0.20, absf(forward.x))))
+	draw_set_transform(Vector2(1, -6), 0, Vector2(lerpf(0.42, 1.0, absf(forward.x)), lerpf(0.66, 0.24, absf(forward.x))))
 	draw_circle(Vector2.ZERO, half_width, Color(0.08, 0.13, 0.18, 0.26))
 	draw_set_transform(Vector2.ZERO)
