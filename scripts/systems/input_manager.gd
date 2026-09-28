@@ -3,6 +3,7 @@ extends Node
 var touch_vector := Vector2.ZERO
 var touch_interaction := false
 var touch_enabled := false
+var portrait_warning := false
 
 func _ready() -> void:
 	refresh_device_mode()
@@ -33,6 +34,19 @@ func refresh_device_mode() -> void:
 		or DisplayServer.is_touchscreen_available()
 		or "--touch-test" in OS.get_cmdline_user_args()
 	)
+
+func is_landscape(canvas_size: Vector2) -> bool:
+	return canvas_size.x >= canvas_size.y
+
+func gameplay_safe_rect(canvas_size: Vector2) -> Rect2:
+	var safe := safe_rect(canvas_size)
+	if not touch_enabled:
+		return safe
+	# Some Android/WebView builds report an empty/full safe area even though the
+	# gesture/navigation edges still consume touches. Keep a conservative inset.
+	var side_guard := clampf(canvas_size.x * 0.018, 12.0, 28.0)
+	var bottom_guard := clampf(canvas_size.y * 0.035, 14.0, 26.0)
+	return safe.grow_individual(-side_guard, -8.0, -side_guard, -bottom_guard)
 
 func movement() -> Vector2:
 	return (Input.get_vector("move_left", "move_right", "move_up", "move_down") + touch_vector).limit_length()
