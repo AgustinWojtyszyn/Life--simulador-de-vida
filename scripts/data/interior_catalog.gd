@@ -2,7 +2,7 @@ class_name InteriorCatalog
 extends RefCounted
 
 # Explicit building data selects a layout; node names never select gameplay.
-enum Type { HOME, CAFE, BAKERY, ICE_CREAM_SHOP, GROCERY, SUPERMARKET, BOOKSTORE, GRILL, RESTAURANT, GYM, HOSPITAL, PHARMACY, OFFICE, GAS_STATION, WORKSHOP }
+enum Type { HOME, CAFE, BAKERY, ICE_CREAM_SHOP, GROCERY, SUPERMARKET, BOOKSTORE, GRILL, RESTAURANT, GYM, HOSPITAL, CLINIC, PHARMACY, OFFICE, GAS_STATION, WORKSHOP }
 const TYPES := {
 	"home": Type.HOME, "cafe": Type.CAFE, "bakery": Type.BAKERY,
 	"ice_cream_shop": Type.ICE_CREAM_SHOP, "market": Type.GROCERY,
@@ -12,7 +12,7 @@ const TYPES := {
 	"grill": Type.GRILL, "parrilla": Type.GRILL, "restaurant": Type.RESTAURANT,
 	"diner": Type.RESTAURANT, "pizzeria": Type.RESTAURANT, "trattoria": Type.RESTAURANT,
 	"gym": Type.GYM, "hospital": Type.HOSPITAL, "hospital_ward": Type.HOSPITAL,
-	"clinic": Type.HOSPITAL, "pharmacy": Type.PHARMACY, "office": Type.OFFICE,
+	"clinic": Type.CLINIC, "pharmacy": Type.PHARMACY, "office": Type.OFFICE,
 	"gas_station": Type.GAS_STATION, "workshop": Type.WORKSHOP,
 }
 
