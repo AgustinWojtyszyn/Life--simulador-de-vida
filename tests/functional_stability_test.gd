@@ -13,7 +13,7 @@ func check(ok: bool, message: String) -> void:
 func base_save(location: String) -> Dictionary:
 	return {
 		"version": SaveSystem.VERSION,
-		"profile": {"country_id": "ar", "city_id": "san_juan", "district_id": "barrio_del_sol", "player_name": "Test"},
+		"profile": {"country_id": "ar", "city_id": "ar_city", "district_id": "ar_centro", "player_name": "Test"},
 		"location": location,
 		"position": [200.0, 180.0],
 		"return_position": [320.0, 240.0],
@@ -36,7 +36,7 @@ func run() -> void:
 		check(SaveSystem.write_save(payload), "Save write must succeed for: " + location)
 		var loaded := SaveSystem.read_save()
 		check(not loaded.is_empty() and loaded.get("location") == location, "Save/load must round-trip location: " + location)
-		check(loaded.get("profile", {}).get("district_id") == "barrio_del_sol", "Save/load must preserve district identity")
+		check(loaded.get("profile", {}).get("district_id") == "ar_centro", "Save/load must preserve district identity")
 		check(loaded.get("position") == [200.0, 180.0], "Save/load must preserve player position")
 		check(loaded.get("state", {}).get("rested", false), "Save/load must preserve basic life state")
 		check(int(loaded.get("life", {}).get("money", 0)) == 137 and int(loaded.get("life", {}).get("inventory", {}).get("food", 0)) == 2, "Save/load must preserve economy and inventory")
