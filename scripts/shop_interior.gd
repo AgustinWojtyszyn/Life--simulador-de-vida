@@ -29,6 +29,7 @@ func _ready() -> void:
 			if WorldManager.country.id == "ar": setup_grill()
 			else: setup_restaurant()
 		InteriorCatalog.Type.HOSPITAL: setup_hospital()
+		InteriorCatalog.Type.CLINIC: setup_clinic()
 		InteriorCatalog.Type.OFFICE: setup_office()
 		InteriorCatalog.Type.WORKSHOP: setup_workshop()
 		InteriorCatalog.Type.SUPERMARKET: setup_supermarket()
