@@ -29,7 +29,7 @@ func _ready() -> void:
 	sprite.hide() # Retained for old scene references; visible body uses directional walk frames.
 	$Camera2D.position_smoothing_speed = 12.0
 	# Mobile keeps the resident legible without changing desktop framing.
-	$Camera2D.zoom = Vector2.ONE * (1.12 if InputManager.touch_enabled else 1.0)
+	$Camera2D.zoom = Vector2.ONE * (1.22 if InputManager.touch_enabled else 1.0)
 
 
 func _physics_process(delta: float) -> void:
