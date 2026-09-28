@@ -165,7 +165,7 @@ func setup_gym() -> void:
 		furniture("desk", Vector2(x, 220), Vector2(82, 72), Rect2(x - 34, 198, 68, 20), "south")
 	furniture("sofa_front", Vector2(250, 335), Vector2(122, 70), Rect2(204, 313, 92, 22), "south-east")
 	furniture("checkout", Vector2(600, 205), Vector2(112, 82), Rect2(551, 177, 98, 25), "south-west")
-	add_target(Vector2(335, 255), "Entrenar un rato", "rest", "gym_training")
+	add_target(Vector2(335, 255), "Entrenar un rato", "exercise", "gym_training")
 	add_target(Vector2(580, 238), "Hablar en recepción", "shop", "gym_reception")
 	add_resident("trainer", "Entrenador", Vector2(635, 170), true)
 
