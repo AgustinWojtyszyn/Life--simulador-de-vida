@@ -22,7 +22,7 @@ func _ready() -> void:
 	# Top-down movement: treat every collision as a wall, not as a floor/slope.
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = 1
-	collision_mask = 7 # world + traffic + residents
+	collision_mask = 3 # world + traffic; residents remain soft crowd obstacles
 	visual = CharacterVisual.new()
 	visual.profile = WorldManager.profile
 	add_child(visual)
