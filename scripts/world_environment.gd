@@ -10,7 +10,7 @@ func _ready() -> void:
 	WeatherSystem.changed.connect(refresh)
 	if WorldManager.location == "street":
 		rain = CPUParticles2D.new()
-		rain.amount = 160
+		rain.amount = 90 if InputManager.touch_enabled else 160
 		rain.lifetime = 0.65
 		rain.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 		rain.emission_rect_extents = Vector2(620, 380)

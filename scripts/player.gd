@@ -22,14 +22,14 @@ func _ready() -> void:
 	# Top-down movement: treat every collision as a wall, not as a floor/slope.
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = 1
-	collision_mask = 7 # world + traffic + residents
+	collision_mask = 3 # world + traffic; residents remain soft crowd obstacles
 	visual = CharacterVisual.new()
 	visual.profile = WorldManager.profile
 	add_child(visual)
 	sprite.hide() # Retained for old scene references; visible body uses directional walk frames.
 	$Camera2D.position_smoothing_speed = 12.0
 	# Mobile keeps the resident legible without changing desktop framing.
-	$Camera2D.zoom = Vector2.ONE * (1.12 if InputManager.touch_enabled else 1.0)
+	$Camera2D.zoom = Vector2.ONE * (1.22 if InputManager.touch_enabled else 1.0)
 
 
 func _physics_process(delta: float) -> void:
@@ -115,7 +115,7 @@ func stand(at: Vector2) -> void:
 	if not is_inside_tree():
 		return
 	collision_layer = 1
-	collision_mask = 7
+	collision_mask = 3
 	facing = Vector2.DOWN
 	sprite.texture = SOUTH
 	sprite.position.y = -14

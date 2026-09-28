@@ -44,6 +44,7 @@ func run() -> void:
 		check(car.get_parent() == world, "Traffic must participate in world Y sorting")
 		check(car.directional_art.size() == 8, "Every moving car must have eight authored directions")
 		check(is_zero_approx(car.sprite.rotation), "Vehicle textures must never rotate")
+		check(absf(car.visual_ground_y()) <= 1.0, "Every moving vehicle frame must touch its road origin")
 	await frames(60)
 	for i in cars.size():
 		check((cars[i].position.x - starts[i].x) * cars[i].direction > 15, "Both lanes must actually move")

@@ -25,6 +25,7 @@ var facing_index := -1
 var motion_vector := Vector2.ZERO
 var body_height := 14.0
 var visual_scale := 1.0
+var ground_contact_y: Array[float] = []
 var braking := BRAKING
 var braking_sound_active := false
 var horn_cooldown := 0.0
@@ -76,7 +77,10 @@ func _ready() -> void:
 			var source := source_direction(model, facing)
 			var texture: Texture2D = load("res://assets/vehicles/%s/%s.png" % [model, source])
 			directional_art.append(texture)
-			art_bounds.append(texture.get_image().get_used_rect())
+			var image := texture.get_image()
+			var bounds := image.get_used_rect()
+			art_bounds.append(bounds)
+			ground_contact_y.append(detect_ground_contact_y(image, bounds))
 	var driving := profile_for(model)
 	driver_acceleration = driving.acceleration + float(get_index() % 3) * 3.0
 	braking = driving.braking
@@ -99,6 +103,29 @@ func _ready() -> void:
 		position = curve.sample_baked(progress)
 		heading = tangent(progress).angle()
 	update_art()
+
+func detect_ground_contact_y(image: Image, bounds: Rect2) -> float:
+	# Ground every authored direction from the actual lowest opaque vehicle pixel.
+	# PNG canvases and transparent padding differ between models/directions, so a
+	# fixed half-height anchor makes some cars appear suspended above the road.
+	var bottom := int(bounds.position.y + bounds.size.y - 1)
+	var top := int(bounds.position.y)
+	var left := int(bounds.position.x)
+	var right := int(bounds.position.x + bounds.size.x - 1)
+	for y in range(bottom, top - 1, -1):
+		var opaque := 0
+		for x in range(left, right + 1):
+			if image.get_pixel(x, y).a > 0.12:
+				opaque += 1
+		# Ignore isolated antialias/noise pixels, but accept real tyre/body rows.
+		if opaque >= 2:
+			return float(y + 1)
+	return float(bounds.position.y + bounds.size.y)
+
+func visual_ground_y() -> float:
+	if facing_index < 0 or facing_index >= ground_contact_y.size():
+		return 0.0
+	return sprite.position.y + (ground_contact_y[facing_index] + sprite.offset.y) * visual_scale
 
 func build_curve() -> void:
 	curve.clear_points()
@@ -208,6 +235,8 @@ func _physics_process(delta: float) -> void:
 	var speed_ratio := current_speed / maxf(cruise_speed, 1.0)
 	var effective_braking := braking * (0.7 + 0.6 * speed_ratio)
 	var safe_speed := minf(desired, sqrt(2.0 * effective_braking * gap))
+	if gap < 1.0:
+		safe_speed = 0.0
 	# Additional smoothing for very close distances
 	if gap < 30.0:
 		safe_speed = minf(safe_speed, gap * 2.0)
@@ -257,11 +286,13 @@ func update_art() -> void:
 	# The offset centers the used-rect horizontally and anchors the bottom
 	# edge to the body so the car never appears to have a second car behind.
 	var bounds: Rect2 = art_bounds[index]
-	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -bounds.size.y)
-	sprite.position = Vector2(0, -body_height)
+	sprite.offset = Vector2(-bounds.position.x - bounds.size.x * 0.5, -ground_contact_y[index])
+	# Node origin is the road contact point. The detected lowest opaque row is
+	# translated exactly onto it, independent of PNG canvas size/padding.
+	sprite.position = Vector2.ZERO
 
 func _draw() -> void:
 	var forward := forward_vector()
-	draw_set_transform(Vector2(1, -6), 0, Vector2(lerpf(0.42, 1.0, absf(forward.x)), lerpf(0.66, 0.24, absf(forward.x))))
+	draw_set_transform(Vector2(1, 1), 0, Vector2(lerpf(0.40, 0.92, absf(forward.x)), lerpf(0.56, 0.22, absf(forward.x))))
 	draw_circle(Vector2.ZERO, half_width, Color(0.08, 0.13, 0.18, 0.26))
 	draw_set_transform(Vector2.ZERO)

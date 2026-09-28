@@ -26,7 +26,8 @@ func layout() -> void:
 
 func _process(delta: float) -> void:
 	refresh_clock += delta
-	if refresh_clock < 0.12:
+	var interval := 0.25 if InputManager.touch_enabled else 0.12
+	if refresh_clock < interval:
 		return
 	refresh_clock = 0.0
 	if is_instance_valid(world):

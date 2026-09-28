@@ -95,6 +95,9 @@ func run() -> void:
 	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
 	controls.layout_controls()
 	check(inputs.movement() == Vector2.ZERO and controls.stick_finger == -1, "Resize releases touch ownership")
+	var gameplay_safe: Rect2 = inputs.gameplay_safe_rect(controls.size)
+	check(gameplay_safe.has_point(controls.stick_center) and gameplay_safe.has_point(controls.action_center), "Touch controls remain inside conservative Android safe area")
+	check(controls.stick_center.y < gameplay_safe.end.y - 80.0 and controls.action_center.y < gameplay_safe.end.y - 70.0, "Touch controls stay clear of Android gesture/navigation edge")
 	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
 	paused = true
 	controls._process(0.016)
