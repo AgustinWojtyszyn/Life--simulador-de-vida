@@ -67,6 +67,7 @@ func continue_game() -> bool:
 	profile = PlayerProfile.from_dict(data.profile)
 	select_country(profile.country_id)
 	location = data.location
+	active_poi = data.get("active_poi", {}).duplicate(true) if data.get("active_poi", {}) is Dictionary else {}
 	var return_data: Array = data.get("return_position", [])
 	return_position = Vector2(float(return_data[0]), float(return_data[1])) if return_data.size() == 2 else Vector2.ZERO
 	var limit := Vector2(800, 450) if location != "street" else district.world_size
@@ -89,6 +90,8 @@ func travel(destination: String) -> void:
 		return
 	var previous := location
 	location = destination
+	if destination in ["home", "street"]:
+		active_poi = {}
 	var home := HomeSystem.starter_home(country)
 	if destination == "home":
 		spawn_position = home.interior_spawn
@@ -108,7 +111,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "active_poi": active_poi.duplicate(true), "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result
