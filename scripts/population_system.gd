@@ -5,6 +5,10 @@ var timer := 0.0
 # Spatial grid for efficient neighbor queries
 var spatial_grid: Dictionary = {}  # Vector2i(cell) -> Array[Node2D]
 const CELL_SIZE := 128.0
+# Central registry for traffic and signals to avoid repeated global scans
+var traffic_registry: Array[Node] = []
+var signal_registry: Array[Node] = []
+var registry_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("population_system")
@@ -14,6 +18,10 @@ func _process(delta: float) -> void:
 	if timer > 0:
 		return
 	timer = 0.4
+	registry_timer -= 0.4
+	if registry_timer <= 0.0:
+		registry_timer = 0.5
+		_update_registries()
 	var player: Node2D = get_parent().get_node("Player")
 	_update_spatial_grid()
 	for npc in residents:
@@ -21,6 +29,23 @@ func _process(delta: float) -> void:
 		var awake := (GameClock.hour() >= 6 and GameClock.hour() < 22) or npc.get_index() % 4 == 0 or npc.has_meta("person_id")
 		npc.set_physics_process((close and awake) or npc.indoor_time > 0)
 		npc.visible = close and awake and npc.indoor_time <= 0
+
+func _update_registries() -> void:
+	# Update central registries every 0.5s to avoid repeated global scans
+	traffic_registry.clear()
+	for node in get_tree().get_nodes_in_group("city_traffic"):
+		if is_instance_valid(node):
+			traffic_registry.append(node)
+	signal_registry.clear()
+	for node in get_tree().get_nodes_in_group("traffic_signals"):
+		if is_instance_valid(node):
+			signal_registry.append(node)
+
+func get_traffic_registry() -> Array[Node]:
+	return traffic_registry
+
+func get_signal_registry() -> Array[Node]:
+	return signal_registry
 
 func _update_spatial_grid() -> void:
 	spatial_grid.clear()

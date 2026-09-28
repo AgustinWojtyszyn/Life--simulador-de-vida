@@ -46,9 +46,14 @@ func _ready() -> void:
 	interactions.hud = hud
 	add_child(interactions)
 
+# Collision layers: PLAYER=1, TRAFFIC=2, NPC=4, WORLD=8
+const LAYER_WORLD := 8
+
 func add_solid(rect: Rect2) -> void:
 	var body := StaticBody2D.new()
 	body.position = rect.get_center()
+	body.collision_layer = LAYER_WORLD
+	body.collision_mask = 0
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
 	shape.size = rect.size

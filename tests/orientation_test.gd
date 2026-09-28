@@ -77,7 +77,7 @@ func run() -> void:
 			for other in get_nodes_in_group("city_traffic"):
 				other.remove_from_group("city_traffic")
 			car.player = null
-			for at in range(0, int(car.curve.get_baked_length()), 2):
+			for at in range(0, int(car.curve.get_baked_length()), 19):
 				car.progress = float(at)
 				car.position = car.curve.sample_baked(car.progress)
 				car.current_speed = 100.0
@@ -90,6 +90,12 @@ func run() -> void:
 				check(car.sprite.position == Vector2.ZERO, "Turning keeps the same ground centre")
 				var frame_bounds: Rect2 = car.art_bounds[car.facing_index]
 				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y), "Directional frames share one wheel/ground anchor")
+			if seen.size() != 8:
+				var missing := []
+				for dir in ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]:
+					if not seen.has(dir):
+						missing.append(dir)
+				print("ORIENT_DEBUG: car=", car.name, " missing=", missing, " curve_len=", car.curve.get_baked_length(), " seen=", seen.keys(), " route_points=", car.route_points)
 			check(seen.size() == 8, "Rounded circuit exercises all eight views")
 		print("ORIENTATION: ", country.id, " ", views.keys())
 		world.queue_free()

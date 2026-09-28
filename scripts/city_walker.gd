@@ -77,28 +77,28 @@ func _physics_process(delta: float) -> void:
 	activity = "walk"
 	state = State.WALK
 	var goal := route[destination]
-	# Wait at the curb, then finish the crossing; cars also yield to residents.
+	# Wait at the curb for crossing
 	if route_kind == "crossing" and not crossing and absf(goal.y - position.y) > 80:
-		for vehicle in get_tree().get_nodes_in_group("city_traffic"):
+		# Use central registry for traffic check
+		var pop_system := get_tree().get_nodes_in_group("population_system")
+		var traffic: Array[Node] = pop_system[0].get_traffic_registry() if not pop_system.is_empty() else get_tree().get_nodes_in_group("city_traffic")
+		for vehicle in traffic:
 			if absf(vehicle.position.x - position.x) < 170:
 				velocity = Vector2.ZERO
 				state = State.WAIT_CROSSING
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	# Check for oncoming walkers and yield deterministically.
-	# Only yield if we're the lower-priority walker AND the other walker
-	# is actually moving toward us (not just standing still).
+	# Yield to oncoming walkers (deterministic priority, brief 0.3-0.6s)
 	for other in get_nearby_residents(90.0):
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		if is_facing_oncoming(other) and should_yield_to(other):
-			# Yield: stop briefly and let the other pass
 			velocity = Vector2.ZERO
 			visual.animate_motion(Vector2.ZERO, 0)
-			wait_time = maxf(wait_time, 0.4)
+			wait_time = maxf(wait_time, 0.5)
 			return
-	# Avoid player: if player is directly ahead, steer around them
+	# Avoid player with soft steering
 	var world := WorldManager.active_world
 	var player_avoid := Vector2.ZERO
 	if is_instance_valid(world):
@@ -106,14 +106,13 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(player) and player.visible:
 			var to_player: Vector2 = player.position - position
 			var dist_sq := to_player.length_squared()
-			if dist_sq < 80.0 * 80.0 and dist_sq > 0.01:
+			if dist_sq < 70.0 * 70.0 and dist_sq > 0.01:
 				var dist := sqrt(dist_sq)
 				var dir_to_player := to_player / dist
 				var my_dir := velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
-				# If player is ahead, add lateral avoidance
 				if my_dir != Vector2.ZERO and my_dir.dot(dir_to_player) > 0.3:
 					var side := Vector2(-dir_to_player.y, dir_to_player.x)
-					player_avoid = side * (1.0 - dist / 80.0) * 60.0
+					player_avoid = side * (1.0 - dist / 70.0) * 50.0
 	var remaining := position.distance_to(goal)
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
 	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
@@ -128,21 +127,25 @@ func _physics_process(delta: float) -> void:
 	if intended.length() > remaining:
 		velocity = position.direction_to(goal) * remaining / maxf(delta, 0.0001)
 		intended = goal - position
+	# When close to goal, stop without checking walker_position_clear
+	if position.distance_to(goal) < 5.0:
+		velocity = Vector2.ZERO
+		crossing = false
+		wait_time = maxf(wait_time, 0.3)
+		visual.animate_motion(Vector2.ZERO, 0)
+		return
 	var candidate := position + intended
 	var parent := get_parent()
 	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
 		# Blocked: stop and wait. NO teleporting, NO lateral displacement.
-		# The NPC waits briefly, then picks a different destination.
 		velocity = Vector2.ZERO
 		crossing = false
-		blocked_time += delta
 		wait_time = maxf(wait_time, 0.3)
 		visual.animate_motion(Vector2.ZERO, 0)
-		# If blocked for too long, skip to next destination (coherent navigation)
-		if blocked_time > 1.5:
-			destination = (destination + 1) % route.size()
-			blocked_time = 0.0
-			wait_time = 0.35
+		# Try next destination
+		destination = (destination + 1) % route.size()
+		if destination == 0:
+			destination = 1
 		return
 	blocked_time = maxf(0.0, blocked_time - delta * 2.0)
 	var before := position
@@ -227,12 +230,25 @@ func apply_crowd_separation(delta: float) -> void:
 		velocity = previous_velocity
 
 func choose_activity() -> void:
+	# Activities only happen at specific destinations, never randomly while walking
 	if route_kind == "football":
 		wait_time = 0.4 + personality * 0.15
 		return
-	var options := ["phone", "drink", "look", "rest", "chat", "eat"]
-	activity = "sit" if route_kind == "bench" and destination == 1 else "browse" if route_kind == "shop" and destination == 1 else "wait" if route_kind == "crossing" else options[(visits + profile.skin + profile.top) % options.size()]
-	state = {"sit": State.SIT, "phone": State.PHONE, "drink": State.DRINK, "eat": State.EAT, "look": State.LOOK_AROUND, "rest": State.REST, "chat": State.CHAT, "browse": State.SHOP, "wait": State.WAIT_CROSSING}.get(activity, State.IDLE)
+	# Only assign activities at valid destinations (bench, shop, crossing)
+	if route_kind == "bench" and destination == 1:
+		activity = "sit"
+		state = State.SIT
+	elif route_kind == "shop" and destination == 1:
+		activity = "browse"
+		state = State.SHOP
+	elif route_kind == "crossing":
+		activity = "wait"
+		state = State.WAIT_CROSSING
+	else:
+		# Walking NPCs just keep walking - no random activities
+		activity = "walk"
+		state = State.WALK
+		return
 	wait_time = 3.0 + float((visits + personality) % 6)
 	if WeatherSystem.state == "rain": wait_time *= 0.4
 	activity_time = 0.0

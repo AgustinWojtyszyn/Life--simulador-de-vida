@@ -69,11 +69,11 @@ func _ready() -> void:
 		var size := Vector2(98, 70) if parked_models[i] == "van" else Vector2(90, 60)
 		add_asset("vehicles/" + parked_models[i], parked_positions[i], size, Rect2(-37, -19, 74, 18), Color.WHITE, "east" if i % 2 else "west")
 	var regional_models: Array = {
-		"ar": ["compact", "taxi", "van", "sedan", "hatchback", "pickup", "classic", "compact", "sedan", "taxi", "van", "sports"],
-		"jp": ["hatchback", "compact", "van", "sedan", "suv", "taxi", "compact", "hatchback", "van", "sports", "sedan", "classic"],
-		"us": ["pickup", "suv", "sedan", "van", "compact", "taxi", "pickup", "van", "suv", "sports", "sedan", "classic"],
-		"it": ["compact", "hatchback", "sedan", "van", "taxi", "suv", "compact", "classic", "hatchback", "sports", "sedan", "van"],
-		"br": ["compact", "pickup", "sedan", "suv", "hatchback", "van", "compact", "taxi", "sedan", "pickup", "sports", "classic"],
+		"ar": ["compact", "taxi", "van", "sedan", "hatchback", "pickup", "classic", "compact", "sedan", "taxi", "van", "sports_v2"],
+		"jp": ["hatchback", "compact", "van", "sedan", "suv", "taxi", "compact", "hatchback", "van", "sports_v2", "sedan", "classic"],
+		"us": ["pickup", "suv", "sedan", "van", "compact", "taxi", "pickup", "van", "suv", "sports_v2", "sedan", "classic"],
+		"it": ["compact", "hatchback", "sedan", "van", "taxi", "suv", "compact", "classic", "hatchback", "sports_v2", "sedan", "van"],
+		"br": ["compact", "pickup", "sedan", "suv", "hatchback", "van", "compact", "taxi", "sedan", "pickup", "sports_v2", "classic"],
 	}[WorldManager.country.id]
 	# Spawn 2 sub-lanes per traffic lane direction: offset ±12px laterally
 	# so cars are visually separated and less likely to form single-file jams.
@@ -100,10 +100,8 @@ func _ready() -> void:
 				vehicle.route_right = map_size.x + 140.0
 				vehicle.player = $Player
 				add_child(vehicle)
-	# A second circuit turns through both intersections and the southern street.
-	# Chamfered waypoints keep vehicles in paved space through each turn.
-	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
-	var circuit: Array[Vector2] = [Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)]
+	# Circuit generated from actual street geometry
+	var circuit: Array[Vector2] = build_road_circuit()
 	for i in 2:
 		# A circuit requires genuine directional art; never rotate the legacy PNG.
 		if not Vehicle.has_directional_art(regional_models[i]):
@@ -113,8 +111,8 @@ func _ready() -> void:
 		vehicle.name = "Circuit_%s" % i
 		vehicle.model = regional_models[i]
 		vehicle.route_points = circuit
-		vehicle.route_index = 1 if i == 0 else 7
-		vehicle.position = Vector2(958, 680) if i == 0 else Vector2(east_lane, 950)
+		vehicle.route_index = 1 if i == 0 else 2
+		vehicle.position = circuit[0] if i == 0 else circuit[2]
 		vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 12.0
 		vehicle.player = $Player
 		add_child(vehicle)
@@ -195,12 +193,10 @@ func add_grid_traffic(regional_models: Array) -> void:
 			add_child(vehicle)
 
 func add_expansion_traffic(regional_models: Array) -> void:
-	var circuit: Array[Vector2] = [
-		Vector2(2842, 1190),
-		Vector2(2842, 1962),
-		Vector2(3822, 1962),
-		Vector2(3822, 1190),
-	]
+	# Use the same road-based circuit for expansion traffic
+	var circuit: Array[Vector2] = build_road_circuit()
+	if circuit.is_empty():
+		return
 	for i in 2:
 		var model: String = regional_models[(i + 2) % regional_models.size()]
 		if not Vehicle.has_directional_art(model):
@@ -210,7 +206,7 @@ func add_expansion_traffic(regional_models: Array) -> void:
 		vehicle.name = "EastCircuit_%s" % i
 		vehicle.model = model
 		vehicle.route_points = circuit
-		vehicle.position = Vector2(2842, 1330 + i * 320)
+		vehicle.position = circuit[0] if i == 0 else circuit[2]
 		vehicle.cruise_speed = Vehicle.profile_for(model).speed - 18.0
 		vehicle.player = $Player
 		add_child(vehicle)
@@ -649,6 +645,40 @@ func add_building_solid(building: CityBuilding) -> void:
 func roads() -> Array[Rect2]:
 	return road_cache
 
+func build_road_circuit() -> Array[Vector2]:
+	# Circuit uses actual street geometry centers for proper road following
+	# Use the closest intersections for tight turns that exercise all 8 orientations
+	var horizontal := DistrictBlocks.horizontal_roads(WorldManager.district)
+	var vertical := DistrictBlocks.vertical_roads(WorldManager.district)
+	if horizontal.is_empty() or vertical.is_empty():
+		return []
+	# Use the first horizontal road and the first two vertical roads for a compact circuit
+	var h1: Rect2 = horizontal[0]
+	var v1: Rect2 = vertical[0]
+	var v2: Rect2 = vertical[1] if vertical.size() > 1 else vertical[0]
+	# Use street centers for proper lane positioning - tighter turns with closer roads
+	return [
+		Vector2(v1.get_center().x, h1.get_center().y),
+		Vector2(v1.get_center().x, h1.get_center().y + 200),
+		Vector2(v2.get_center().x, h1.get_center().y + 200),
+		Vector2(v2.get_center().x, h1.get_center().y),
+	]
+
+func road_contains_vehicle(pos: Vector2, half_width: float) -> bool:
+	# Check if vehicle footprint is within road or intersection area
+	for road in road_cache:
+		if road.grow(half_width + 10).has_point(pos):
+			return true
+	# Check intersections
+	for h_road in road_cache:
+		if h_road.size.x > 1000:  # Horizontal
+			for v_road in road_cache:
+				if v_road.size.y > 1000:  # Vertical
+					var center := Vector2(v_road.get_center().x, h_road.get_center().y)
+					if pos.distance_to(center) < 80 + half_width:
+						return true
+	return false
+
 func valid_prop_position(at: Vector2, size: Vector2, parked: bool = false, bench: bool = false) -> Vector2:
 	# Benches are public-space furniture: never nudge them beside a facade just
 	# to force placement. Invalid authored seats are omitted instead.
@@ -736,19 +766,16 @@ func integrate_argentina() -> void:
 		target.action = "buy_food"
 		stand.add_child(target)
 
-	# Keep the bus behaviour that already feels right, but let the second line
-	# serve the expanded eastern neighbourhood.
+	# Buses use road-based circuits
 	for i in 2:
 		var bus := Vehicle.new()
 		bus.name = "Colectivo" if i == 0 else "Colectivo2"
 		bus.model = "colectivo"
-		if i == 0:
-			var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
-			bus.route_points.assign([Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)])
-			bus.position = Vector2(1450, 512)
-		else:
-			bus.route_points.assign([Vector2(2842, 1190), Vector2(2842, 1962), Vector2(3822, 1962), Vector2(3822, 1190)])
-			bus.position = Vector2(2842, 1510)
+		var circuit: Array[Vector2] = build_road_circuit()
+		if circuit.is_empty():
+			continue
+		bus.route_points.assign(circuit)
+		bus.position = circuit[0] if i == 0 else circuit[2]
 		bus.direction = 1.0
 		bus.cruise_speed = Vehicle.profile_for("colectivo").speed
 		bus.player = $Player

@@ -35,12 +35,12 @@ var cached_gap := 99999.0
 var lane_offset := 0.0
 
 const CATEGORIES := {
-	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0},
-	"van": {"speed": 174.0, "acceleration": 58.0, "braking": 220.0, "half_length": 43.0},
-	"pickup": {"speed": 188.0, "acceleration": 68.0, "braking": 240.0, "half_length": 38.0},
-	"sports": {"speed": 260.0, "acceleration": 140.0, "braking": 340.0, "half_length": 34.0},
-	"classic": {"speed": 148.0, "acceleration": 45.0, "braking": 180.0, "half_length": 38.0},
-	"truck": {"speed": 140.0, "acceleration": 38.0, "braking": 160.0, "half_length": 48.0},
+	"colectivo": {"speed": 158.0, "acceleration": 36.0, "braking": 155.0, "half_length": 55.0, "turn_radius": 32.0},
+	"van": {"speed": 174.0, "acceleration": 58.0, "braking": 220.0, "half_length": 43.0, "turn_radius": 26.0},
+	"pickup": {"speed": 188.0, "acceleration": 68.0, "braking": 240.0, "half_length": 38.0, "turn_radius": 24.0},
+	"sports_v2": {"speed": 260.0, "acceleration": 140.0, "braking": 340.0, "half_length": 34.0, "turn_radius": 20.0},
+	"classic": {"speed": 148.0, "acceleration": 45.0, "braking": 180.0, "half_length": 38.0, "turn_radius": 24.0},
+	"truck": {"speed": 140.0, "acceleration": 38.0, "braking": 160.0, "half_length": 48.0, "turn_radius": 30.0},
 }
 
 static func profile_for(vehicle_model: String) -> Dictionary:
@@ -103,13 +103,16 @@ func _ready() -> void:
 func build_curve() -> void:
 	curve.clear_points()
 	curve.bake_interval = 2.0
+	# Turn radius based on vehicle profile (colectivo needs wider turns)
+	var profile := profile_for(model)
+	var base_radius: float = float(profile.get("turn_radius", 28.0))
 	# Trim each waypoint into a tangent-continuous cubic corner. Handles never
 	# exceed adjacent segment lengths, so even narrow streets stay in bounds.
 	for i in route_points.size():
 		var corner := route_points[i]
 		var incoming := corner - route_points[posmod(i - 1, route_points.size())]
 		var outgoing := route_points[(i + 1) % route_points.size()] - corner
-		var radius := minf(50.0, minf(incoming.length(), outgoing.length()) * 0.40)
+		var radius := minf(base_radius, minf(incoming.length(), outgoing.length()) * 0.40)
 		var before := corner - incoming.normalized() * radius
 		var after := corner + outgoing.normalized() * radius
 		curve.add_point(before, Vector2.ZERO, incoming.normalized() * radius * 0.5523)
@@ -130,7 +133,10 @@ func forward_vector() -> Vector2:
 func free_distance() -> float:
 	var gap := route_length()
 	var forward := forward_vector()
-	for other in get_tree().get_nodes_in_group("city_traffic"):
+	# Use central registry instead of global scan
+	var pop_system := get_tree().get_nodes_in_group("population_system")
+	var traffic: Array[Node] = pop_system[0].get_traffic_registry() if not pop_system.is_empty() else get_tree().get_nodes_in_group("city_traffic")
+	for other in traffic:
 		if other == self:
 			continue
 		var relative: Vector2 = other.position - position
@@ -147,7 +153,8 @@ func free_distance() -> float:
 				ahead = to_other.length()
 			else:
 				ahead = -1.0
-		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
+		# Only consider vehicles in the same lane (narrower cross threshold)
+		if ahead > 0 and absf(relative.cross(forward)) < 15.0:
 			# Increased minimum gap for better separation and progressive braking
 			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
 			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
@@ -165,7 +172,8 @@ func free_distance() -> float:
 			gap = minf(gap, ahead - half_width - 20.0)
 	# Signals participate in the same cached proximity pass as cars and
 	# pedestrians, so red lights do not add per-frame work.
-	for traffic_signal in get_tree().get_nodes_in_group("traffic_signals"):
+	var signals: Array[Node] = pop_system[0].get_signal_registry() if not pop_system.is_empty() else get_tree().get_nodes_in_group("traffic_signals")
+	for traffic_signal in signals:
 		if not traffic_signal.has_method("blocking_distance"):
 			continue
 		var signal_gap: float = traffic_signal.blocking_distance(position, forward)
@@ -192,6 +200,8 @@ func has_honk_target() -> bool:
 	return false
 
 func _physics_process(delta: float) -> void:
+	if current_speed == 0.0 and position.x > 330.0 and position.x < 350.0:
+		print("PHYSICS_DEBUG: name=", name, " speed=", current_speed, " gap=", cached_gap, " pos=", position, " route_points=", route_points.size())
 	horn_cooldown = maxf(0.0, horn_cooldown - delta)
 	# Proximity scans are the expensive part of traffic AI: each vehicle checks
 	# every other vehicle and resident. Reuse the result for a few physics ticks,
@@ -219,28 +229,22 @@ func _physics_process(delta: float) -> void:
 	var speed_ratio := current_speed / maxf(cruise_speed, 1.0)
 	var effective_braking := braking * (0.7 + 0.6 * speed_ratio)
 	var safe_speed := minf(desired, sqrt(2.0 * effective_braking * gap))
-	# Additional smoothing for very close distances
+	# Smooth approach for close distances: linear deceleration near target
 	if gap < 30.0:
 		safe_speed = minf(safe_speed, gap * 2.0)
-	# Prevent acceleration when a stopped vehicle is close ahead
-	if gap < 50.0 and safe_speed > current_speed:
-		safe_speed = current_speed
 	# Full stop when very close to a stopped vehicle ahead
 	if gap < 20.0 and current_speed < 30.0:
 		safe_speed = 0.0
-	# Additional smoothing for very close distances
-	if gap < 30.0:
-		safe_speed = minf(safe_speed, gap * 2.0)
 	var braking_now := safe_speed < current_speed - 24.0 and current_speed > 55.0
 	if braking_now and not braking_sound_active:
 		AudioSystem.play_sfx("brake", position)
 	braking_sound_active = braking_now
-	# Do not spawn periodic per-car engine clips. A cluster of nearby vehicles
-	# used to create a machine-gun-like audio pattern and unnecessary audio nodes.
 	current_speed = move_toward(current_speed, safe_speed, (effective_braking if current_speed > safe_speed else driver_acceleration) * delta)
 	# Waiting at a red light or behind a pedestrian is valid. Never teleport
 	# through a queue after a timeout: the same rules apply to every model.
 	var step := minf(current_speed * delta, gap)
+	if position.x > 330.0 and position.x < 350.0 and current_speed == 0.0:
+		print("STRAIGHT_DEBUG: name=", name, " step=", step, " gap=", gap, " pos=", position)
 	cached_gap = maxf(0.0, cached_gap - step)
 	var previous := position
 	if route_points.is_empty():

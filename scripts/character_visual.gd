@@ -127,18 +127,9 @@ func animate_activity(state: String, delta: float) -> void:
 		set_art(state, "south", int(activity_phase * 7.0) % 9)
 		return
 
-	# Procedural fallback for actions whose full sprite sheet has not been
-	# authored yet. This keeps cooking, TV, shopping, showering and football
-	# visibly active instead of freezing the character in place.
+	# Procedural fallback: only swap textures, never modify position/rotation/scale
+	# to keep NPCs perfectly still during idle (no jitter, no drift).
 	set_art("idle", "south", 0)
-	var bob: float = sin(activity_phase * 7.0)
-	var lean: float = sin(activity_phase * 4.2)
-	sprite.position = base_sprite_position + Vector2(lean * 1.4, -absf(bob) * 2.2)
-	sprite.rotation = lean * (0.06 if state in ["kick", "eat", "browse"] else 0.035)
-	if state == "kick":
-		sprite.scale = base_sprite_scale * (Vector2.ONE + Vector2(absf(bob) * 0.05, -absf(bob) * 0.03))
-	elif state in ["pc", "tv", "browse"]:
-		sprite.scale = base_sprite_scale * Vector2(1.0 + lean * 0.015, 1.0)
 	pose = state
 
 func reset_pose_transform() -> void:

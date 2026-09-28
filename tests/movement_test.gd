@@ -80,7 +80,12 @@ func run() -> void:
 	for i in 60: walker._physics_process(1.0 / 60)
 	check(walker.velocity.length() > 65, "NPC reaches a natural varied pace")
 	walker.position = Vector2(295, 100)
-	for i in 60: walker._physics_process(1.0 / 60)
+	for i in 60:
+		walker._physics_process(1.0 / 60)
+		if i % 10 == 0:
+			print("MOVE_FRAME: i=", i, " pos.x=", walker.position.x, " vel=", walker.velocity, " dest=", walker.destination, " wait=", walker.wait_time)
+	if walker.position.x > 300.01 or walker.wait_time <= 0:
+		print("MOVE_DEBUG: pos.x=", walker.position.x, " wait_time=", walker.wait_time, " velocity=", walker.velocity, " destination=", walker.destination)
 	check(walker.position.x <= 300.01 and walker.wait_time > 0, "NPC brakes and pauses without overshooting")
 	print("MOVEMENT: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

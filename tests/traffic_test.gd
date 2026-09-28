@@ -75,8 +75,13 @@ func run() -> void:
 	player.position = Vector2(590, car.position.y - 90.0)
 	car.proximity_clock = 0.0
 	var stopped_x: float = car.position.x
+	print("TRAFFIC_DEBUG: START stopped_x=", stopped_x, " speed=", car.current_speed, " gap=", car.cached_gap, " route_points=", car.route_points.size(), " physics_process=", car.can_process())
 	for i in 60:
 		car._physics_process(1.0 / 60.0)
+		if i % 10 == 0:
+			print("TRAFFIC_DEBUG: i=", i, " pos.x=", car.position.x, " speed=", car.current_speed, " gap=", car.cached_gap, " route_points=", car.route_points.size())
+	if car.position.x <= stopped_x + 10:
+		print("TRAFFIC_DEBUG: FAILED! stopped_x=", stopped_x, " final_x=", car.position.x, " speed=", car.current_speed, " route_points=", car.route_points.size())
 	check(car.position.x > stopped_x + 10, "Car must resume after the resident leaves")
 	var leader: AnimatableBody2D = same_lane[1]
 	leader.add_to_group("city_traffic")
