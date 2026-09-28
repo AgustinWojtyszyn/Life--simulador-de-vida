@@ -33,7 +33,7 @@ func run() -> void:
 		resident_start[npc.get_instance_id()] = npc.position
 	for car in vehicles:
 		vehicle_start[car.get_instance_id()] = car.position
-	var initial_nodes := root.get_node_count()
+	var initial_nodes := get_node_count()
 
 	for frame in 360:
 		await physics_frame
@@ -56,9 +56,9 @@ func run() -> void:
 	for car in vehicles:
 		if is_instance_valid(car) and car.position.distance_to(vehicle_start.get(car.get_instance_id(), car.position)) > 20.0:
 			moved_vehicles += 1
-	check(moved_residents >= maxi(1, residents.size() / 5), "A meaningful share of NPCs must make progress during soak")
-	check(moved_vehicles >= maxi(1, vehicles.size() / 2), "A meaningful share of vehicles must make progress during soak")
-	check(root.get_node_count() <= initial_nodes + 24, "Soak must not show unbounded node growth")
+	check(moved_residents >= maxi(1, int(residents.size() / 5)), "A meaningful share of NPCs must make progress during soak")
+	check(moved_vehicles >= maxi(1, int(vehicles.size() / 2)), "A meaningful share of vehicles must make progress during soak")
+	check(get_node_count() <= initial_nodes + 24, "Soak must not show unbounded node growth")
 
 	world.queue_free()
 	await process_frame
