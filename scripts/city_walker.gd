@@ -21,9 +21,6 @@ var route_kind := "walk"
 var activity := "walk"
 var activity_time := 0.0
 var blocked_time := 0.0
-var awareness_clock := 0.0
-var nearby_residents: Array[Node] = []
-var nearby_traffic: Array[Node] = []
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -49,21 +46,7 @@ func _ready() -> void:
 	add_child(visual)
 	sprite = visual.sprite
 
-func refresh_awareness() -> void:
-	nearby_residents.clear()
-	nearby_traffic.clear()
-	for other in get_tree().get_nodes_in_group("city_residents"):
-		if other != self and is_instance_valid(other) and other.visible and position.distance_squared_to(other.position) < 120.0 * 120.0:
-			nearby_residents.append(other)
-	for vehicle in get_tree().get_nodes_in_group("city_traffic"):
-		if is_instance_valid(vehicle) and position.distance_squared_to(vehicle.position) < 220.0 * 220.0:
-			nearby_traffic.append(vehicle)
-
 func _physics_process(delta: float) -> void:
-	awareness_clock -= delta
-	if awareness_clock <= 0.0:
-		refresh_awareness()
-		awareness_clock = 0.12 + float(personality) * 0.015
 	if indoor_time > 0:
 		indoor_time = maxf(0, indoor_time - delta)
 		visible = indoor_time == 0
@@ -82,7 +65,7 @@ func _physics_process(delta: float) -> void:
 		# Only apply separation if actually blocked by another NPC, not just
 		# to prevent idle jitter. Check if someone is very close.
 		var needs_separation := false
-		for other in nearby_residents:
+		for other in get_tree().get_nodes_in_group("city_residents"):
 			if other == self or not is_instance_valid(other) or not other.visible:
 				continue
 			if position.distance_squared_to(other.position) < 20.0 * 20.0:
@@ -111,7 +94,7 @@ func _physics_process(delta: float) -> void:
 	var goal := route[destination]
 	# Wait at the curb, then finish the crossing; cars also yield to residents.
 	if route_kind == "crossing" and not crossing and absf(goal.y - position.y) > 80:
-		for vehicle in nearby_traffic:
+		for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 			if absf(vehicle.position.x - position.x) < 170:
 				velocity = Vector2.ZERO
 				state = State.WAIT_CROSSING
@@ -121,7 +104,7 @@ func _physics_process(delta: float) -> void:
 	# Check for oncoming walkers and yield deterministically.
 	# Only yield if we're the lower-priority walker AND the other walker
 	# is actually moving toward us (not just standing still).
-	for other in nearby_residents:
+	for other in get_tree().get_nodes_in_group("city_residents"):
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		if is_facing_oncoming(other) and should_yield_to(other):
@@ -208,7 +191,7 @@ func _physics_process(delta: float) -> void:
 func crowd_separation() -> Vector2:
 	var push := Vector2.ZERO
 	const PERSONAL_SPACE := 24.0
-	for other in nearby_residents:
+	for other in get_tree().get_nodes_in_group("city_residents"):
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		var away: Vector2 = position - other.position
