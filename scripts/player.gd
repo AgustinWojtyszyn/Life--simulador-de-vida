@@ -115,7 +115,7 @@ func stand(at: Vector2) -> void:
 	if not is_inside_tree():
 		return
 	collision_layer = 1
-	collision_mask = 7
+	collision_mask = 3
 	facing = Vector2.DOWN
 	sprite.texture = SOUTH
 	sprite.position.y = -14
