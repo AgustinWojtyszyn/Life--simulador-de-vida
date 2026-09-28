@@ -181,7 +181,7 @@ func free_distance() -> float:
 
 func has_honk_target() -> bool:
 	var forward := forward_vector()
-	for other in get_tree().get_nodes_in_group("city_traffic"):
+	for other in nearby_vehicles:
 		if other == self or not is_instance_valid(other):
 			continue
 		var relative: Vector2 = other.position - position
