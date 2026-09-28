@@ -27,6 +27,15 @@ func action_count_today(action: String) -> int:
 func mark_action(action: String) -> void:
 	var key := "%d:%s" % [GameClock.day(), action]
 	daily_actions[key] = action_count_today(action) + 1
+	prune_daily_actions()
+
+func prune_daily_actions() -> void:
+	# Keep only recent counters. Long-running saves should not grow forever.
+	var oldest_day := maxi(1, GameClock.day() - 2)
+	for key in daily_actions.keys():
+		var day_text := str(key).get_slice(":", 0)
+		if day_text.is_valid_int() and int(day_text) < oldest_day:
+			daily_actions.erase(key)
 
 func act(action: String) -> String:
 	match action:
@@ -40,8 +49,10 @@ func act(action: String) -> String:
 			return "Dormiste ocho horas. Empezás con energía renovada."
 		"rest":
 			GameClock.advance(30)
-			energy = minf(100, energy + 12)
-			wellbeing = minf(100, wellbeing + 5)
+			var first_rest := action_count_today("rest") == 0
+			energy = minf(100, energy + (12 if first_rest else 4))
+			wellbeing = minf(100, wellbeing + (5 if first_rest else 1))
+			mark_action("rest")
 			changed.emit()
 			return "Descansaste un rato. Recuperaste algo de energía."
 		"buy_food":
@@ -88,13 +99,17 @@ func act(action: String) -> String:
 			if energy < 12: return "Necesitás un poco más de energía para entrenar."
 			GameClock.advance(45)
 			energy = maxf(0, energy - 10)
-			wellbeing = minf(100, wellbeing + 10)
+			wellbeing = minf(100, wellbeing + (10 if action_count_today("exercise") == 0 else 3))
+			mark_action("exercise")
 		"play_football":
 			if energy < 8: return "Necesitás un poco más de energía para jugar."
 			GameClock.advance(35)
 			energy = maxf(0, energy - 8)
-			wellbeing = minf(100, wellbeing + 14)
-			reputation += 1
+			var first_match := action_count_today("play_football") == 0
+			wellbeing = minf(100, wellbeing + (14 if first_match else 4))
+			if first_match:
+				reputation += 1
+			mark_action("play_football")
 	changed.emit()
 	return {"eat": "Comiste y recuperaste energía.", "cook": "Cocinaste tus provisiones. ¡Buen provecho!", "fridge": "Preparaste una comida con tus provisiones.", "coffee": "Un café y una pausa. Pagaste $5.", "pc": "Usaste la computadora un rato.", "browse": "Recorriste las estanterías y encontraste algo interesante.", "tv": "Disfrutaste un programa. Te sentís mejor.", "shower": "Una ducha para empezar de nuevo.", "exercise": "Entrenaste un rato. Bajó tu energía y subió tu bienestar.", "play_football": "Jugaste un rato en la cancha. Subieron tu bienestar y tu reputación."}.get(action, "")
 
@@ -108,5 +123,6 @@ func restore(data: Dictionary) -> void:
 	reputation = int(data.get("reputation", 0))
 	inventory = data.get("inventory", {}).duplicate(true) if data.get("inventory", {}) is Dictionary else {}
 	daily_actions = data.get("daily_actions", {}).duplicate(true) if data.get("daily_actions", {}) is Dictionary else {}
+	prune_daily_actions()
 	last_minutes = GameClock.total_minutes
 	changed.emit()
