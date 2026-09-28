@@ -49,6 +49,7 @@ func new_game(new_profile: PlayerProfile, id: String) -> void:
 	profile = new_profile
 	select_country(id)
 	location = "home"
+	active_poi = {}
 	return_position = Vector2.ZERO
 	spawn_position = HomeSystem.INTERIOR_SPAWN
 	basic_state = {"rested": false}
