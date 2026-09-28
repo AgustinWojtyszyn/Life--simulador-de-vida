@@ -84,6 +84,11 @@ func act(action: String) -> String:
 			var shower_gain := 6.0 if action_count_today("shower") == 0 else 1.0
 			wellbeing = minf(100, wellbeing + shower_gain)
 			mark_action("shower")
+		"exercise":
+			if energy < 12: return "Necesitás un poco más de energía para entrenar."
+			GameClock.advance(45)
+			energy = maxf(0, energy - 10)
+			wellbeing = minf(100, wellbeing + 10)
 		"play_football":
 			if energy < 8: return "Necesitás un poco más de energía para jugar."
 			GameClock.advance(35)
@@ -91,7 +96,7 @@ func act(action: String) -> String:
 			wellbeing = minf(100, wellbeing + 14)
 			reputation += 1
 	changed.emit()
-	return {"eat": "Comiste y recuperaste energía.", "cook": "Cocinaste tus provisiones. ¡Buen provecho!", "fridge": "Preparaste una comida con tus provisiones.", "coffee": "Un café y una pausa. Pagaste $5.", "pc": "Usaste la computadora un rato.", "browse": "Recorriste las estanterías y encontraste algo interesante.", "tv": "Disfrutaste un programa. Te sentís mejor.", "shower": "Una ducha para empezar de nuevo.", "play_football": "Jugaste un rato en la cancha. Subieron tu bienestar y tu reputación."}.get(action, "")
+	return {"eat": "Comiste y recuperaste energía.", "cook": "Cocinaste tus provisiones. ¡Buen provecho!", "fridge": "Preparaste una comida con tus provisiones.", "coffee": "Un café y una pausa. Pagaste $5.", "pc": "Usaste la computadora un rato.", "browse": "Recorriste las estanterías y encontraste algo interesante.", "tv": "Disfrutaste un programa. Te sentís mejor.", "shower": "Una ducha para empezar de nuevo.", "exercise": "Entrenaste un rato. Bajó tu energía y subió tu bienestar.", "play_football": "Jugaste un rato en la cancha. Subieron tu bienestar y tu reputación."}.get(action, "")
 
 func to_dict() -> Dictionary:
 	return {"money": money, "energy": energy, "wellbeing": wellbeing, "reputation": reputation, "inventory": inventory.duplicate(true), "daily_actions": daily_actions.duplicate(true)}
