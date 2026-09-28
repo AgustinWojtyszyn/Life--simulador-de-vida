@@ -130,7 +130,7 @@ func on_clock_changed() -> void:
 	automatic_period = period
 	var chosen := automatic_track(current_country)
 	if chosen != track_index:
-		play_track(chosen, true)
+		call_deferred("play_track", chosen, true)
 
 func play_track(index: int, crossfade: bool = true) -> void:
 	if not enabled:
