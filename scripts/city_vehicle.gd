@@ -128,10 +128,22 @@ func route_length() -> float:
 func forward_vector() -> Vector2:
 	return Vector2(direction, 0) if route_points.is_empty() else tangent(progress)
 
+var agent_cache := {}
+var agent_cache_clock := 0.0
+
+func agents(group: String) -> Array:
+	if not agent_cache.has(group):
+		var parent := get_parent()
+		agent_cache[group] = parent.nearby_agents(group, global_position, 800.0) if parent.has_method("nearby_agents") else get_tree().get_nodes_in_group(group)
+	var live := []
+	for agent in agent_cache[group]:
+		if is_instance_valid(agent) and agent.is_inside_tree() and agent.is_in_group(group): live.append(agent)
+	return live
+
 func free_distance() -> float:
 	var gap := route_length()
 	var forward := forward_vector()
-	for other in get_tree().get_nodes_in_group("city_traffic"):
+	for other in agents("city_traffic"):
 		if other == self:
 			continue
 		var relative: Vector2 = other.position - position
@@ -144,7 +156,7 @@ func free_distance() -> float:
 			# standstill gap makes the target move while braking and causes creep.
 			var min_gap: float = half_width + other.half_width + 30.0
 			gap = minf(gap, ahead - min_gap)
-	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
+	var pedestrians: Array = agents("city_residents")
 	if is_instance_valid(player):
 		pedestrians.append(player)
 	for pedestrian in pedestrians:
@@ -154,26 +166,18 @@ func free_distance() -> float:
 		var ahead := relative.dot(forward)
 		if ahead >= -half_width - 6.0 and absf(relative.cross(forward)) < 24.0:
 			gap = minf(gap, ahead - half_width - 20.0)
-	# Signals participate in the same cached proximity pass as cars and
-	# pedestrians, so red lights do not add per-frame work.
-	for traffic_signal in get_tree().get_nodes_in_group("traffic_signals"):
-		if not traffic_signal.has_method("blocking_distance"):
-			continue
-		var signal_gap: float = traffic_signal.blocking_distance(position, forward)
-		if is_finite(signal_gap):
-			gap = minf(gap, signal_gap)
 	return maxf(0.0, gap)
 
 func has_honk_target() -> bool:
 	var forward := forward_vector()
-	for other in get_tree().get_nodes_in_group("city_traffic"):
+	for other in agents("city_traffic"):
 		if other == self or not is_instance_valid(other):
 			continue
 		var relative: Vector2 = other.position - position
 		var ahead := relative.dot(forward)
 		if ahead > 0.0 and ahead < 90.0 and absf(relative.cross(forward)) < 28.0:
 			return true
-	for pedestrian in get_tree().get_nodes_in_group("city_residents"):
+	for pedestrian in agents("city_residents"):
 		if not is_instance_valid(pedestrian) or not pedestrian.visible:
 			continue
 		var relative: Vector2 = pedestrian.position - position
@@ -183,6 +187,10 @@ func has_honk_target() -> bool:
 	return false
 
 func _physics_process(delta: float) -> void:
+	agent_cache_clock -= delta
+	if agent_cache_clock <= 0:
+		agent_cache.clear()
+		agent_cache_clock = .1
 	horn_cooldown = maxf(0.0, horn_cooldown - delta)
 	# Proximity scans are the expensive part of traffic AI: each vehicle checks
 	# every other vehicle and resident. Reuse the result for a few physics ticks,
@@ -193,6 +201,10 @@ func _physics_process(delta: float) -> void:
 		var near_player := is_instance_valid(player) and position.distance_squared_to(player.position) < 900.0 * 900.0
 		proximity_clock = 0.05 if near_player else 0.16
 	var gap := cached_gap
+	# Permissions are live, never cached across phase changes or reservations.
+	var traffic := agents("city_traffic")
+	for signal_node in agents("traffic_signals"):
+		gap = minf(gap, signal_node.clearance_distance(self, traffic))
 	if gap < 46.0 and current_speed < 18.0 and has_honk_target():
 		blocked_time += delta
 		if blocked_time >= 2.0 and horn_cooldown <= 0.0:
@@ -241,6 +253,7 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 func update_art() -> void:
+	collider.rotation = heading
 	var index := posmod(roundi(heading / (PI / 4.0)), 8)
 	if index == facing_index:
 		return
@@ -258,9 +271,7 @@ func _draw() -> void:
 	if facing_index < 0 or art_bounds.size() != 8: return
 	# Project the contact shadow from this frame, not the unprojected collider
 	# length: a north/south sprite is foreshortened by the authored camera.
-	var bounds := art_bounds[facing_index]
-	var ground_anchor := VehicleGrounding.anchor(model, facing_index, bounds)
-	var radii := Vector2(bounds.size.x * .42, bounds.size.y - ground_anchor.y) * visual_scale
-	draw_set_transform(Vector2.ZERO, 0, radii)
+	var shadow := VehicleGrounding.shadow_bounds(model, facing_index, art_bounds[facing_index], visual_scale)
+	draw_set_transform(shadow.get_center(), 0, shadow.size * .5)
 	draw_circle(Vector2.ZERO, 1, Color(0.08, 0.13, 0.18, 0.20))
 	draw_set_transform(Vector2.ZERO)

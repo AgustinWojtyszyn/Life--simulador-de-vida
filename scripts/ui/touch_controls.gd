@@ -25,11 +25,12 @@ func layout_controls() -> void:
 	InputManager.reset()
 	var logical := size
 	var safe := InputManager.safe_rect(logical)
-	var scale_factor := clampf(minf(logical.x / 800.0, logical.y / 450.0), 1.0, 1.35)
+	var scale_factor := clampf(minf(safe.size.x / 800.0, safe.size.y / 450.0), .8, 1.35)
 	radius = 72.0 * scale_factor
 	action_radius = 50.0 * scale_factor
-	stick_center = Vector2(safe.position.x + radius + 24, safe.end.y - radius - 24)
-	action_center = Vector2(safe.end.x - action_radius - 24, safe.end.y - action_radius - 28)
+	var bottom_margin := maxf(radius * .65, safe.size.y * .12)
+	stick_center = Vector2(safe.position.x + radius + 24, safe.end.y - radius - bottom_margin)
+	action_center = Vector2(safe.end.x - action_radius - 24, safe.end.y - action_radius - bottom_margin)
 	journal_center = action_center + Vector2(0, -(action_radius * 2.0 + 28.0))
 	queue_redraw()
 

@@ -42,8 +42,8 @@ func run() -> void:
 		if country.id == "ar":
 			var bus: Node2D = world.get_node("Colectivo")
 			check(bus.directional_art.size() == 8 and not bus.route_points.is_empty(), "Bus has eight real views and a turning route")
-			check(bus.cruise_speed < world.get_node("Traffic_0_0").cruise_speed, "Bus cruises slower than a compact car")
-			check(bus.driver_acceleration < world.get_node("Traffic_0_0").driver_acceleration, "Bus gains speed more gradually")
+			check(bus.cruise_speed < world.get_node("Traffic_0_0_0").cruise_speed, "Bus cruises slower than a compact car")
+			check(bus.driver_acceleration < world.get_node("Traffic_0_0_0").driver_acceleration, "Bus gains speed more gradually")
 		for car in get_nodes_in_group("city_traffic"):
 			car.set_physics_process(false)
 			if car.route_points.is_empty(): continue
@@ -53,6 +53,8 @@ func run() -> void:
 			for other in get_nodes_in_group("city_traffic"):
 				other.remove_from_group("city_traffic")
 			car.player = null
+			for signal_node in get_nodes_in_group("traffic_signals"):
+				signal_node.remove_from_group("traffic_signals")
 			for at in range(0, int(car.curve.get_baked_length()), 19):
 				car.progress = float(at)
 				car.position = car.curve.sample_baked(car.progress)
@@ -63,9 +65,11 @@ func run() -> void:
 				seen[facing] = true
 				check(orientation.vector(facing).dot(car.motion_vector.normalized()) >= 0.923, "Vehicle frame agrees with actual displacement within 22.5 degrees")
 				check(car.sprite.rotation == 0, "No rotated vehicle PNGs")
-				check(car.sprite.position == Vector2(0, -car.body_height), "Turning keeps the same ground centre")
 				var frame_bounds: Rect2 = car.art_bounds[car.facing_index]
-				check(is_equal_approx(car.sprite.offset.y, -frame_bounds.size.y * 0.5), "Directional frames share one wheel/ground anchor")
+				var anchor := VehicleGrounding.anchor(car.model, car.facing_index, frame_bounds)
+				check(car.sprite.to_global(car.sprite.get_rect().position + anchor).distance_to(car.global_position) < .001, "Frame switches preserve wheel plane without vertical jumps")
+				var shadow := VehicleGrounding.shadow_bounds(car.model, car.facing_index, frame_bounds, car.visual_scale)
+				check(shadow.get_center().is_zero_approx() and car.collider.position.is_zero_approx(), "Shadow and collider share ground anchor")
 			check(seen.size() == 8, "Rounded circuit exercises all eight views")
 		print("ORIENTATION: ", country.id, " ", views.keys())
 		world.queue_free()

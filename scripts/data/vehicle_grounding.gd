@@ -34,3 +34,8 @@ static func apply(sprite: Sprite2D, model: String, index: int, bounds: Rect2, sc
 	sprite.offset = -anchor(model, index, bounds)
 	sprite.position = Vector2.ZERO
 	sprite.scale = Vector2.ONE * scale_factor
+
+static func shadow_bounds(model: String, index: int, bounds: Rect2, scale_factor: float) -> Rect2:
+	var contact := anchor(model, index, bounds)
+	var radii := Vector2(bounds.size.x * .42, bounds.size.y - contact.y) * scale_factor
+	return Rect2(-radii, radii * 2)

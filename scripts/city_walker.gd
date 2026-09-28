@@ -21,6 +21,102 @@ var route_kind := "walk"
 var activity := "walk"
 var activity_time := 0.0
 var blocked_time := 0.0
+var progress_distance := INF
+var progress_goal := Vector2.INF
+var detour: Array[Vector2] = []
+var detour_side := 1.0
+var side_memory := 0.0
+var nearby_residents: Array = []
+var nearby_traffic: Array = []
+var neighbor_clock := 0.0
+
+func refresh_neighbors(delta: float) -> void:
+	neighbor_clock -= delta
+	if neighbor_clock > 0: return
+	neighbor_clock = .2
+	var parent := get_parent()
+	nearby_residents = parent.nearby_agents("city_residents", global_position, 180) if parent.has_method("nearby_agents") else get_tree().get_nodes_in_group("city_residents")
+	nearby_traffic = parent.nearby_agents("city_traffic", global_position, 240) if parent.has_method("nearby_agents") else get_tree().get_nodes_in_group("city_traffic")
+
+func walkable(at: Vector2) -> bool:
+	var parent := get_parent()
+	if parent.has_method("walker_position_clear") and not parent.walker_position_clear(at): return false
+	if route_kind != "crossing" and parent.has_method("roads"):
+		for road in parent.roads():
+			if road.grow(8).has_point(at): return false
+	return true
+
+func agents_clear(at: Vector2) -> bool:
+	for other in nearby_residents:
+		if not is_instance_valid(other) or other == self or not other.visible: continue
+		var clearance := Rect2(other.position - Vector2(12.2, 8.2), Vector2(24.4, 16.4))
+		if clearance.has_point(at):
+			# Physics safe margins can leave us just inside this conservative
+			# planning envelope. Permit escape, never deeper penetration.
+			if clearance.has_point(position) and at.distance_squared_to(other.position) > position.distance_squared_to(other.position): continue
+			return false
+	return true
+
+func segment_agents_clear(from: Vector2, to: Vector2) -> bool:
+	var count := maxi(1, ceili(from.distance_to(to) / 4))
+	for i in range(1, count + 1):
+		if not agents_clear(from.lerp(to, float(i) / count)): return false
+	return true
+
+func segment_clear(from: Vector2, to: Vector2) -> bool:
+	# Endpoint/sample checks can miss a thin corner, then steering keeps pushing
+	# into it. Reject the entire segment against inflated solid rectangles.
+	var parent := get_parent()
+	if parent.has_method("walker_position_clear"):
+		var swept := Rect2(from, Vector2.ZERO).expand(to).grow(.01)
+		for solid in parent.solid_rects:
+			var rect: Rect2 = solid.grow(8)
+			if not swept.intersects(rect): continue
+			var corners := [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]
+			for i in 4:
+				if Geometry2D.segment_intersects_segment(from, to, corners[i], corners[(i + 1) % 4]) != null: return false
+	var count := maxi(1, ceili(from.distance_to(to) / 6))
+	for i in range(1, count + 1):
+		if not walkable(from.lerp(to, float(i) / count)): return false
+	return true
+
+func recover_route(goal: Vector2) -> void:
+	var forward := position.direction_to(goal)
+	var side := Vector2(-forward.y, forward.x)
+	var best: Array[Vector2] = []
+	var score := INF
+	var selected_side := detour_side
+	for sign_value in ([detour_side, -detour_side] if walkable(goal) else []):
+		for width in [32.0, 64.0, 96.0, 144.0]:
+			var lateral: Vector2 = position + side * width * sign_value
+			var onward: Vector2 = lateral + forward * minf(112, position.distance_to(goal))
+			if not segment_clear(position, lateral) or not segment_clear(lateral, onward) or not segment_agents_clear(position, lateral) or not segment_agents_clear(lateral, onward): continue
+			var occupied := false
+			for other in nearby_residents:
+				if is_instance_valid(other) and other != self and other.visible and (other.position.distance_to(lateral) < 20 or other.position.distance_to(onward) < 20): occupied = true
+			if occupied: continue
+			var cost: float = onward.distance_to(goal) + width * .25
+			if side_memory > 0 and sign_value != detour_side: cost += 160
+			if cost < score and onward.distance_to(goal) < position.distance_to(goal) + 16:
+				score = cost
+				best.assign([lateral, onward])
+				selected_side = sign_value
+	if not best.is_empty():
+		detour = best
+		detour_side = selected_side
+		side_memory = 4
+	else:
+		# Only select reachable, validated waypoints; never jump position.
+		var nearest := INF
+		for i in route.size():
+			var distance := position.distance_to(route[i])
+			if distance > 12 and distance < nearest and segment_clear(position, route[i]):
+				nearest = distance
+				destination = i
+		detour.clear()
+	blocked_time = 0
+	progress_distance = INF
+	velocity = Vector2.ZERO
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -47,6 +143,8 @@ func _ready() -> void:
 	sprite = visual.sprite
 
 func _physics_process(delta: float) -> void:
+	refresh_neighbors(delta)
+	side_memory = maxf(0, side_memory - delta)
 	if indoor_time > 0:
 		indoor_time = maxf(0, indoor_time - delta)
 		visible = indoor_time == 0
@@ -62,24 +160,6 @@ func _physics_process(delta: float) -> void:
 		return
 	if wait_time > 0:
 		velocity = Vector2.ZERO
-		# Only apply separation if actually blocked by another NPC, not just
-		# to prevent idle jitter. Check if someone is very close.
-		var needs_separation := false
-		for other in get_tree().get_nodes_in_group("city_residents"):
-			if other == self or not is_instance_valid(other) or not other.visible:
-				continue
-			if position.distance_squared_to(other.position) < 20.0 * 20.0:
-				needs_separation = true
-				break
-		# Also check player proximity for separation
-		var world := WorldManager.active_world
-		if is_instance_valid(world):
-			var player := world.get_node_or_null("Player") as Node2D
-			if is_instance_valid(player) and player.visible:
-				if position.distance_squared_to(player.position) < 20.0 * 20.0:
-					needs_separation = true
-		if needs_separation:
-			apply_crowd_separation(delta)
 		wait_time = maxf(0, wait_time - delta)
 		activity_time += delta
 		if activity in ["phone", "drink", "eat", "look", "chat", "browse"]:
@@ -91,44 +171,30 @@ func _physics_process(delta: float) -> void:
 		return
 	activity = "walk"
 	state = State.WALK
-	var goal := route[destination]
+	var goal := route[destination] if detour.is_empty() else detour[0]
+	if goal != progress_goal:
+		progress_goal = goal
+		progress_distance = position.distance_to(goal)
+		blocked_time = 0
+	var distance_now := position.distance_to(goal)
+	if distance_now < progress_distance - 4:
+		progress_distance = distance_now
+		blocked_time = 0
+	else:
+		blocked_time += delta
+	if blocked_time >= 1.4:
+		recover_route(route[destination])
+		goal = route[destination] if detour.is_empty() else detour[0]
 	# Wait at the curb, then finish the crossing; cars also yield to residents.
 	if route_kind == "crossing" and not crossing and absf(goal.y - position.y) > 80:
-		for vehicle in get_tree().get_nodes_in_group("city_traffic"):
-			if absf(vehicle.position.x - position.x) < 170:
+		for vehicle in nearby_traffic:
+			if not is_instance_valid(vehicle): continue
+			if absf(vehicle.position.x - position.x) < 170 and absf(vehicle.position.y - position.y) < 120 and (vehicle.current_speed > 4 or (absf(vehicle.position.x - position.x) < vehicle.half_width + 12 and absf(vehicle.position.y - position.y) < 24)):
 				velocity = Vector2.ZERO
 				state = State.WAIT_CROSSING
 				visual.animate_motion(Vector2.ZERO, 0)
 				return
 		crossing = true
-	# Check for oncoming walkers and yield deterministically.
-	# Only yield if we're the lower-priority walker AND the other walker
-	# is actually moving toward us (not just standing still).
-	for other in get_tree().get_nodes_in_group("city_residents"):
-		if other == self or not is_instance_valid(other) or not other.visible:
-			continue
-		if is_facing_oncoming(other) and should_yield_to(other):
-			# Yield: stop briefly and let the other pass
-			velocity = Vector2.ZERO
-			visual.animate_motion(Vector2.ZERO, 0)
-			wait_time = maxf(wait_time, 0.4)
-			return
-	# Avoid player: if player is directly ahead, steer around them
-	var world := WorldManager.active_world
-	var player_avoid := Vector2.ZERO
-	if is_instance_valid(world):
-		var player := world.get_node_or_null("Player") as Node2D
-		if is_instance_valid(player) and player.visible:
-			var to_player: Vector2 = player.position - position
-			var dist_sq := to_player.length_squared()
-			if dist_sq < 80.0 * 80.0 and dist_sq > 0.01:
-				var dist := sqrt(dist_sq)
-				var dir_to_player := to_player / dist
-				var my_dir := velocity.normalized() if velocity.length_squared() > 0.01 else Vector2.ZERO
-				# If player is ahead, add lateral avoidance
-				if my_dir != Vector2.ZERO and my_dir.dot(dir_to_player) > 0.3:
-					var side := Vector2(-dir_to_player.y, dir_to_player.x)
-					player_avoid = side * (1.0 - dist / 80.0) * 60.0
 	var remaining := position.distance_to(goal)
 	var pace := speed * (1.15 if WeatherSystem.state == "rain" else 1.0)
 	var desired_speed := minf(pace, sqrt(2.0 * 180.0 * remaining))
@@ -136,7 +202,6 @@ func _physics_process(delta: float) -> void:
 	var separation := crowd_separation()
 	if separation.length_squared() > 0.001:
 		desired += separation * minf(48.0, desired_speed * 0.75)
-	desired += player_avoid
 	desired = desired.limit_length(desired_speed * 1.2)
 	velocity = velocity.move_toward(desired, (150.0 + personality * 14.0) * delta)
 	var intended := velocity * delta
@@ -144,44 +209,26 @@ func _physics_process(delta: float) -> void:
 		velocity = position.direction_to(goal) * remaining / maxf(delta, 0.0001)
 		intended = goal - position
 	var candidate := position + intended
-	var parent := get_parent()
-	if parent.has_method("walker_position_clear") and not bool(parent.call("walker_position_clear", candidate)):
-		# Blocked: try lateral nudge to find a way around the obstacle
+	if not segment_clear(position, candidate) or not agents_clear(candidate):
 		velocity = Vector2.ZERO
-		crossing = false
-		blocked_time += delta
-		wait_time = maxf(wait_time, 0.3)
 		visual.animate_motion(Vector2.ZERO, 0)
-		# Try sliding along the obstacle instead of just waiting
-		var slide_dir := Vector2(-desired.y, desired.x).normalized()
-		var slide_candidate := position + slide_dir * 12.0
-		if parent.call("walker_position_clear", slide_candidate):
-			position = slide_candidate
-			visual.animate_motion(slide_dir * 12.0, 12.0)
-			blocked_time = maxf(0.0, blocked_time - delta)
-			return
-		var slide_candidate2 := position - slide_dir * 12.0
-		if parent.call("walker_position_clear", slide_candidate2):
-			position = slide_candidate2
-			visual.animate_motion(-slide_dir * 12.0, 12.0)
-			blocked_time = maxf(0.0, blocked_time - delta)
-			return
-		# If blocked for too long, skip to next destination
-		if blocked_time > 1.5:
-			destination = (destination + 1) % route.size()
-			blocked_time = 0.0
-			wait_time = 0.35
 		return
-	blocked_time = maxf(0.0, blocked_time - delta * 2.0)
 	var before := position
 	move_and_slide()
 	var movement := position - before
 	visual.animate_motion(movement, movement.length())
-	if position.distance_to(goal) < 1:
+	if position.distance_to(goal) < 3:
+		if not detour.is_empty():
+			detour.pop_front()
+			return
 		velocity = Vector2.ZERO
 		crossing = false
 		visits += 1
-		destination = (destination + 1) % route.size()
+		for offset in range(1, route.size() + 1):
+			var next := (destination + offset) % route.size()
+			if walkable(route[next]):
+				destination = next
+				break
 		choose_activity()
 		if route_kind == "shop" and destination == 1 and visits > 1:
 			state = State.ENTER_BUILDING
@@ -191,7 +238,7 @@ func _physics_process(delta: float) -> void:
 func crowd_separation() -> Vector2:
 	var push := Vector2.ZERO
 	const PERSONAL_SPACE := 24.0
-	for other in get_tree().get_nodes_in_group("city_residents"):
+	for other in nearby_residents:
 		if other == self or not is_instance_valid(other) or not other.visible:
 			continue
 		var away: Vector2 = position - other.position
@@ -204,7 +251,7 @@ func crowd_separation() -> Vector2:
 		var distance := maxf(1.0, away.length())
 		# Deterministic priority: lower instance_id yields to higher one.
 		# This prevents two NPCs from endlessly trying to dodge each other.
-		var priority_factor := 1.0 if get_instance_id() > other.get_instance_id() else 0.3
+		var priority_factor := 1.0 if should_yield_to(other) else 0.3
 		push += away / distance * (1.0 - distance / PERSONAL_SPACE) * priority_factor
 	return push
 

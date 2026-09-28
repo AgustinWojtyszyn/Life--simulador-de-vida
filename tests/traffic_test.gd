@@ -45,10 +45,13 @@ func run() -> void:
 		check(car.directional_art.size() == 8, "Every moving car must have eight authored directions")
 		check(is_zero_approx(car.sprite.rotation), "Vehicle textures must never rotate")
 	await frames(60)
+	var moving_directions := {}
 	for i in cars.size():
-		check((cars[i].position.x - starts[i].x) * cars[i].direction > 15, "Both lanes must actually move")
+		if (cars[i].position.x - starts[i].x) * cars[i].direction > 15:
+			moving_directions[cars[i].direction] = true
 		check(cars[i].position.y == starts[i].y, "Cars must stay in lane")
 		cars[i].set_physics_process(false)
+	check(moving_directions.size() == 2, "Both directions circulate; individual cars may wait legally")
 	check(models.size() >= 4, "Traffic must use at least four distinct vehicle models")
 	var same_lane := cars.filter(func(vehicle): return vehicle.direction > 0.0 and is_equal_approx(vehicle.position.y, cars[0].position.y))
 	if same_lane.size() < 2:
@@ -80,6 +83,8 @@ func run() -> void:
 	check(car.position.x > stopped_x + 10, "Car must resume after the resident leaves")
 	var leader: AnimatableBody2D = same_lane[1]
 	leader.add_to_group("city_traffic")
+	world.agent_snapshots.clear()
+	car.agent_cache.clear()
 	leader.position = Vector2(620, car.position.y)
 	car.position = Vector2(470, car.position.y)
 	car.current_speed = 66.0

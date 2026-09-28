@@ -704,3 +704,19 @@ func integrate_regional_props() -> void:
 		"us":
 			for p in [Vector2(3180, 1840), Vector2(4290, 2600)]:
 				add_asset("vehicles/pickup", p, Vector2(104, 67), Rect2(-40, -18, 80, 18), Color.WHITE, "east")
+
+# Shared snapshots: one group lookup per interval for the whole district.
+var agent_snapshots := {}
+var agent_snapshot_frame := -100
+func nearby_agents(group: String, at: Vector2, distance: float) -> Array:
+	var frame := Engine.get_physics_frames()
+	if frame - agent_snapshot_frame >= 6:
+		agent_snapshots.clear()
+		agent_snapshot_frame = frame
+	if not agent_snapshots.has(group):
+		agent_snapshots[group] = get_tree().get_nodes_in_group(group)
+	var nearby := []
+	for agent in agent_snapshots[group]:
+		if is_instance_valid(agent) and agent.is_inside_tree() and agent.is_in_group(group) and agent.global_position.distance_squared_to(at) <= distance * distance:
+			nearby.append(agent)
+	return nearby

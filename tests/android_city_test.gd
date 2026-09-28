@@ -74,8 +74,19 @@ func run() -> void:
 	var controls: Control = load("res://scripts/ui/touch_controls.gd").new()
 	app.add_child(controls)
 	await frames()
+	for dimensions in [Vector2(800, 450), Vector2(960, 432), Vector2(640, 360), Vector2(1280, 540)]:
+		controls.size = dimensions
+		controls.layout_controls()
+		var safe: Rect2 = inputs.safe_rect(dimensions)
+		for entry in [[controls.stick_center, controls.radius], [controls.action_center, controls.action_radius], [controls.journal_center, controls.action_radius * .78]]:
+			var center: Vector2 = entry[0]
+			var extent := Vector2.ONE * float(entry[1])
+			check(safe.encloses(Rect2(center - extent, extent * 2)), "Controls stay inside safe area")
+			check(safe.end.y - center.y - extent.y >= safe.size.y * .10, "Controls retain ergonomic bottom margin")
+	controls.size = Vector2(800, 450)
+	controls.layout_controls()
 	controls.context_available = true
-	touch(controls, 4, controls.stick_center + Vector2(55, 0), true)
+	touch(controls, 4, controls.stick_center + Vector2(controls.radius * .85, 0), true)
 	touch(controls, 8, controls.action_center, true)
 	check(inputs.movement().x > 0.6 and inputs.interact_pressed(), "Move and act simultaneously")
 	check(not inputs.interact_pressed(), "Action fires once per press")
@@ -83,10 +94,10 @@ func run() -> void:
 	check(inputs.movement().x > 0.6, "Releasing action retains joystick ownership")
 	controls._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(inputs.movement() == Vector2.ZERO and controls.stick_finger == -1, "Focus loss releases touch ownership")
-	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
+	touch(controls, 6, controls.stick_center + Vector2(controls.radius * .85, 0), true)
 	controls.layout_controls()
 	check(inputs.movement() == Vector2.ZERO and controls.stick_finger == -1, "Resize releases touch ownership")
-	touch(controls, 6, controls.stick_center + Vector2(55, 0), true)
+	touch(controls, 6, controls.stick_center + Vector2(controls.radius * .85, 0), true)
 	paused = true
 	controls._process(0.016)
 	check(inputs.movement() == Vector2.ZERO, "Opening panels stops walking")

@@ -49,7 +49,7 @@ func refresh_state(force_redraw: bool) -> void:
 func state_for(forward: Vector2) -> String:
 	return horizontal_state if absf(forward.x) >= absf(forward.y) else vertical_state
 
-func blocking_distance(vehicle_position: Vector2, forward: Vector2) -> float:
+func blocking_distance(vehicle_position: Vector2, forward: Vector2, speed: float = 0.0, braking: float = 260.0) -> float:
 	if forward.length_squared() < 0.01:
 		return INF
 	var horizontal := absf(forward.x) >= absf(forward.y)
@@ -71,11 +71,84 @@ func blocking_distance(vehicle_position: Vector2, forward: Vector2) -> float:
 	# Decision logic: if the vehicle can stop before the intersection, it must.
 	# If it's too close to stop safely, it should clear the junction.
 	if state == "amber":
-		# Can the vehicle stop? Assume braking distance = speed^2 / (2 * 260)
-		# For simplicity, use a fixed threshold that works for most speeds
-		if ahead < 70.0:
-			return INF  # Too close to stop, must clear
+		if ahead - 14.0 < speed * speed / (2.0 * maxf(braking, 1.0)) + 5.0:
+			return INF
 	return maxf(0.0, ahead - 14.0)
+
+# One short-lived claim per crossing; no global traffic manager.
+var occupant: WeakRef
+var entered := false
+var claim_position := Vector2.ZERO
+var claim_frame := 0
+
+func junction() -> Rect2:
+	return Rect2(global_position - Vector2(vertical_half, horizontal_half), Vector2(vertical_half, horizontal_half) * 2)
+
+func owner() -> Node2D:
+	var car = occupant.get_ref() if occupant != null else null
+	if not is_instance_valid(car) or not car.is_inside_tree() or not car.is_in_group("city_traffic"):
+		occupant = null
+		return null
+	var inside := junction().grow(car.half_width + 8).has_point(car.global_position)
+	entered = entered or junction().has_point(car.global_position)
+	# Recycle/teleport and an exited rear bumper invalidate a claim immediately.
+	if (not entered and not junction().grow(car.half_width + 120).has_point(car.global_position)) or (entered and not inside) or car.global_position.distance_to(claim_position) > 700 or (not entered and Engine.get_physics_frames() - claim_frame > 180):
+		occupant = null
+		return null
+	return car
+
+func clearance_distance(car: Node2D, traffic: Array) -> float:
+	var holder := owner()
+	if holder == car: return INF # Legal entrant clears even after phase changes.
+	var forward: Vector2 = car.forward_vector()
+	var relative: Vector2 = global_position - car.global_position
+	var horizontal := absf(forward.x) >= absf(forward.y)
+	var lateral := horizontal_half if horizontal else vertical_half
+	if absf(relative.cross(forward)) > lateral + 12: return INF
+	var half_extent := vertical_half if horizontal else horizontal_half
+	var ahead := relative.dot(forward)
+	if ahead < -half_extent - car.half_width or ahead > 420: return INF
+	var stop := maxf(0, ahead - half_extent - car.half_width - 12)
+	if holder != null: return stop
+	if junction().has_point(car.global_position):
+		# Recover an unclaimed entrant (e.g. world spawn) deterministically.
+		# Physical obstacle checks still run in the vehicle; this never grants ghosting.
+		for other in traffic:
+			if is_instance_valid(other) and other != car and junction().has_point(other.global_position) and other.get_instance_id() < car.get_instance_id(): return 0
+		occupant = weakref(car)
+		entered = true
+		claim_position = car.global_position
+		claim_frame = Engine.get_physics_frames()
+		return INF
+	var state := state_for(forward)
+	var can_enter: bool = state == "green" or (state == "amber" and stop < car.current_speed * car.current_speed / (2 * maxf(car.braking, 1)) + 5)
+	if not can_enter: return stop
+	if stop > 100: return INF
+	# Trace the actual route through a turn to its exit, not just the entry axis.
+	var exit_point: Vector2 = car.global_position
+	var exit_forward := forward
+	var found_exit := false
+	var touched := false
+	for distance in range(0, 700, 12):
+		exit_point = car.global_position + forward * distance if car.route_points.is_empty() else car.curve.sample_baked(fposmod(car.progress + distance, car.curve.get_baked_length()))
+		touched = touched or junction().has_point(exit_point)
+		if touched and not junction().grow(car.half_width + 20).has_point(exit_point):
+			exit_forward = forward if car.route_points.is_empty() else car.tangent(car.progress + distance)
+			found_exit = true
+			break
+	if not found_exit: return INF # This route does not cross this junction.
+	for other in traffic:
+		if not is_instance_valid(other) or other == car: continue
+		var delta: Vector2 = other.global_position - exit_point
+		if junction().grow(8).has_point(other.global_position) or (absf(delta.cross(exit_forward)) < 28 and absf(delta.dot(exit_forward)) < car.half_width + other.half_width + 30):
+			return stop
+	# Reserve only near the stop line. Atomic physics order breaks ties.
+	if stop <= 100:
+		occupant = weakref(car)
+		entered = junction().has_point(car.global_position)
+		claim_position = car.global_position
+		claim_frame = Engine.get_physics_frames()
+	return INF
 
 func signal_positions() -> Array[Vector2]:
 	var margin := 28.0
