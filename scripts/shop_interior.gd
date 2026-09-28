@@ -31,6 +31,10 @@ func _ready() -> void:
 		InteriorCatalog.Type.HOSPITAL: setup_hospital()
 		InteriorCatalog.Type.OFFICE: setup_office()
 		InteriorCatalog.Type.WORKSHOP: setup_workshop()
+		InteriorCatalog.Type.SUPERMARKET: setup_supermarket()
+		InteriorCatalog.Type.PHARMACY: setup_pharmacy()
+		InteriorCatalog.Type.GYM: setup_gym()
+		InteriorCatalog.Type.GAS_STATION: setup_gas_station()
 		_: setup_market_like()
 
 	var layer := CanvasLayer.new()
@@ -132,6 +136,46 @@ func setup_restaurant() -> void:
 	add_target(Vector2(560, 248), "Pedir comida", "buy_food", "restaurant_counter")
 	add_resident("host", "Encargado", Vector2(625, 176), true)
 	add_resident("customer", "Cliente", Vector2(430, 300), false)
+
+func setup_supermarket() -> void:
+	for entry in [
+		[Vector2(165, 205), "south-east"], [Vector2(305, 205), "south-west"],
+		[Vector2(165, 305), "south-east"], [Vector2(305, 305), "south-west"],
+		[Vector2(445, 205), "south-east"], [Vector2(445, 305), "south-west"],
+	]:
+		fixture("market_shelf_front", entry[0], Vector2(108, 88), entry[1])
+	furniture("market_fridge", Vector2(645, 175), Vector2(82, 90), Rect2(618, 148, 54, 20), "south-west")
+	furniture("checkout", Vector2(580, 310), Vector2(128, 88), Rect2(524, 278, 112, 28), "south-west")
+	add_target(Vector2(545, 342), "Pagar provisiones · $12", "buy_food", "supermarket_checkout")
+	add_resident("cashier", "Cajero", Vector2(620, 270), true)
+	add_resident("customer", "Cliente", Vector2(370, 335), false)
+
+func setup_pharmacy() -> void:
+	for x in [185, 330, 475]:
+		fixture("market_shelf_front", Vector2(x, 205), Vector2(108, 88), "south")
+	furniture("checkout", Vector2(575, 285), Vector2(132, 92), Rect2(518, 251, 114, 28), "south-west")
+	furniture("shelf", Vector2(650, 160), Vector2(62, 82), Rect2(624, 141, 52, 18), "south-east")
+	add_target(Vector2(555, 320), "Consultar en farmacia", "shop", "pharmacy_counter")
+	add_resident("pharmacist", "Farmacéutico", Vector2(620, 245), true)
+
+func setup_gym() -> void:
+	# Reuse neutral authored props, but arrange them as training stations rather
+	# than falling back to grocery aisles.
+	for x in [190, 335, 480]:
+		furniture("desk", Vector2(x, 220), Vector2(82, 72), Rect2(x - 34, 198, 68, 20), "south")
+	furniture("sofa_front", Vector2(250, 335), Vector2(122, 70), Rect2(204, 313, 92, 22), "south-east")
+	furniture("checkout", Vector2(600, 205), Vector2(112, 82), Rect2(551, 177, 98, 25), "south-west")
+	add_target(Vector2(335, 255), "Entrenar un rato", "rest", "gym_training")
+	add_target(Vector2(580, 238), "Hablar en recepción", "shop", "gym_reception")
+	add_resident("trainer", "Entrenador", Vector2(635, 170), true)
+
+func setup_gas_station() -> void:
+	furniture("checkout", Vector2(565, 220), Vector2(136, 92), Rect2(506, 186, 118, 28), "south-west")
+	for x in [180, 315, 450]:
+		fixture("market_shelf_front", Vector2(x, 275), Vector2(102, 82), "south")
+	furniture("market_fridge", Vector2(650, 165), Vector2(74, 82), Rect2(625, 142, 50, 18), "south-west")
+	add_target(Vector2(545, 255), "Consultar en la estación", "shop", "gas_station_counter")
+	add_resident("attendant", "Playero", Vector2(620, 180), true)
 
 func setup_market_like() -> void:
 	for entry in [
@@ -251,10 +295,13 @@ func furniture(asset: String, at: Vector2, size: Vector2, footprint: Rect2, faci
 func add_resident(id: String, title: String, at: Vector2, employee: bool) -> void:
 	var walker := preload("res://scripts/city_walker.gd").new()
 	walker.position = at
-	walker.route.assign([at, at + Vector2(18, 0), at + Vector2(18, 10), at + Vector2(0, 10)])
+	var roam := 8.0 if employee else 18.0
+	walker.route.assign([at, at + Vector2(roam, 0), at + Vector2(roam, roam * 0.5), at + Vector2(0, roam * 0.5)])
+	walker.route_kind = "employee" if employee else "walk"
 	walker.profile = PlayerProfile.new()
 	walker.profile.gender = "male" if employee else "female"
 	walker.speed = 10
 	walker.set_meta("person_id", id)
 	walker.set_meta("person_name", title)
+	walker.set_meta("employee_role", id if employee else "")
 	add_child(walker)
