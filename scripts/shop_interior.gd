@@ -248,7 +248,8 @@ func add_solid(rect: Rect2) -> void:
 
 func _draw() -> void:
 	var accent: Color = WorldManager.country.accent
-	var medical := InteriorCatalog.type_for(interior_kind) == InteriorCatalog.Type.HOSPITAL
+	var interior_type := InteriorCatalog.type_for(interior_kind)
+	var medical := interior_type in [InteriorCatalog.Type.HOSPITAL, InteriorCatalog.Type.CLINIC]
 	if medical: accent = Color("91c9c3")
 	draw_rect(Rect2(0, 0, 800, 450), Color("172d31"))
 	draw_rect(Rect2(86, 64, 628, 340), Color("d5c3a5"))
@@ -271,8 +272,10 @@ func _draw() -> void:
 func interior_title() -> String:
 	var labels: Dictionary = Regional.LABELS.get(WorldManager.country.id, {})
 	var normalized := "market" if interior_kind in ["shop", "kiosk"] else interior_kind
-	if interior_kind in ["hospital", "clinic", "hospital_ward"]:
+	if interior_kind in ["hospital", "hospital_ward"]:
 		return "HOSPITAL · HABITACIONES" if interior_kind == "hospital_ward" else "HOSPITAL · RECEPCIÓN"
+	if interior_kind == "clinic":
+		return str(labels.get("clinic", "CLÍNICA"))
 	if interior_kind == "ice_cream_shop": return "HELADERÍA"
 	if interior_kind == "grill": return "PARRILLA"
 	return str(labels.get(normalized, normalized.replace("_", " ").capitalize()))
