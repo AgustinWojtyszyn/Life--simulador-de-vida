@@ -17,6 +17,7 @@ func base_save(location: String) -> Dictionary:
 		"location": location,
 		"position": [200.0, 180.0],
 		"return_position": [320.0, 240.0],
+		"active_poi": {"id": "test_shop", "opening_hours": {"open": 8, "close": 20}},
 		"state": {"rested": true},
 		"clock": {"minutes": 1234.0, "played_seconds": 99.0, "speed": 1.0},
 		"life": {"money": 137, "energy": 63.0, "wellbeing": 71.0, "reputation": 4, "inventory": {"food": 2}},
@@ -40,6 +41,7 @@ func run() -> void:
 		check(loaded.get("state", {}).get("rested", false), "Save/load must preserve basic life state")
 		check(int(loaded.get("life", {}).get("money", 0)) == 137 and int(loaded.get("life", {}).get("inventory", {}).get("food", 0)) == 2, "Save/load must preserve economy and inventory")
 		check(is_equal_approx(float(loaded.get("clock", {}).get("minutes", 0.0)), 1234.0), "Save/load must preserve game time")
+		check(loaded.get("active_poi", {}).get("id") == "test_shop", "Save/load must preserve active interior identity")
 	check(not SaveSystem.valid(base_save("definitely_not_a_place")), "Unknown locations must remain invalid")
 
 	GameClock.restore({"minutes": 480.0})
@@ -56,6 +58,9 @@ func run() -> void:
 	check(is_equal_approx(GameClock.total_minutes - before_rest, 30.0), "Sofa rest must be a short activity")
 	check(LifeSimulation.energy > energy_before_rest and LifeSimulation.energy < 100.0, "Sofa rest must recover partially")
 	check(not rest_message.is_empty(), "Rest must provide feedback")
+	var energy_after_first_rest := LifeSimulation.energy
+	LifeSimulation.act("rest")
+	check(LifeSimulation.energy - energy_after_first_rest <= 4.01, "Repeated sofa rest must have diminishing recovery")
 	var before_sleep := GameClock.total_minutes
 	var sleep_message := LifeSimulation.act("sleep")
 	check(is_equal_approx(GameClock.total_minutes - before_sleep, 480.0), "Sleep must advance eight hours")
@@ -65,11 +70,25 @@ func run() -> void:
 	check(not LifeSimulation.act("browse").is_empty(), "Book browsing must have a handled effect and feedback")
 	check(is_equal_approx(GameClock.total_minutes - before_browse, 10.0), "Browsing must consume a small amount of game time")
 
+	LifeSimulation.energy = 100
+	var reputation_before := LifeSimulation.reputation
+	LifeSimulation.act("play_football")
+	var reputation_after_first_match := LifeSimulation.reputation
+	LifeSimulation.act("play_football")
+	check(reputation_after_first_match == reputation_before + 1, "First football activity may award reputation")
+	check(LifeSimulation.reputation == reputation_after_first_match, "Repeated football must not farm reputation")
+
 	check(InteriorCatalog.type_for("gym") == InteriorCatalog.Type.GYM, "Gym must keep its own interior type")
 	check(InteriorCatalog.type_for("pharmacy") == InteriorCatalog.Type.PHARMACY, "Pharmacy must keep its own interior type")
 	check(InteriorCatalog.type_for("clinic") == InteriorCatalog.Type.CLINIC, "Clinic must keep its own interior type instead of silently becoming a hospital")
 	check(InteriorCatalog.type_for("supermarket") == InteriorCatalog.Type.SUPERMARKET, "Supermarket must keep its own interior type")
 	check(InteriorCatalog.type_for("gas_station") == InteriorCatalog.Type.GAS_STATION, "Gas station must keep its own interior type")
+
+	GameClock.restore({"minutes": 12.0 * 60.0})
+	check(AudioSystem.automatic_track("ar") == AudioSystem.country_seed("ar"), "Automatic daytime music must use the country's musical identity")
+	check(AudioSystem.automatic_track("jp") == AudioSystem.country_seed("jp"), "Automatic music must vary by country")
+	GameClock.restore({"minutes": 22.0 * 60.0})
+	check(AudioSystem.automatic_track("ar") == 6, "Automatic night music must select the calm night track")
 
 	var signal := CityTrafficSignal.new()
 	root.add_child(signal)
