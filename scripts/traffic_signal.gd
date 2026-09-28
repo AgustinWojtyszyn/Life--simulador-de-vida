@@ -12,6 +12,7 @@ var cycle_offset := 0.0
 var horizontal_state := "green"
 var vertical_state := "red"
 var update_clock := 0.0
+var simulation_seconds := 0.0
 
 func _ready() -> void:
 	add_to_group("traffic_signals")
@@ -21,6 +22,7 @@ func _ready() -> void:
 	refresh_state(true)
 
 func _process(delta: float) -> void:
+	simulation_seconds += delta
 	update_clock += delta
 	if update_clock < 0.12:
 		return
@@ -28,7 +30,7 @@ func _process(delta: float) -> void:
 	refresh_state(false)
 
 func refresh_state(force_redraw: bool) -> void:
-	var phase := fposmod(Time.get_ticks_msec() / 1000.0 + cycle_offset, CYCLE_SECONDS)
+	var phase := fposmod(simulation_seconds + cycle_offset, CYCLE_SECONDS)
 	var next_h := "red"
 	var next_v := "red"
 	var cursor := 0.0

@@ -26,6 +26,8 @@ jobs:
         run: timeout 75s godot --headless --path . -s tests/iteration_smoke_test.gd
       - name: Android + desktop adaptation
         run: timeout 120s godot --headless --path . -s tests/android_city_test.gd
+      - name: Functional P0/P1 stability
+        run: timeout 75s godot --headless --path . -s tests/functional_stability_test.gd
       - name: Interactions
         run: timeout 75s godot --headless --path . -s tests/interactions_test.gd
       - name: Movement
@@ -34,3 +36,5 @@ jobs:
         run: timeout 75s godot --headless --path . -s tests/traffic_test.gd
       - name: Orientation
         run: timeout 90s godot --headless --path . -s tests/orientation_test.gd
+      - name: Longitudinal stability
+        run: timeout 75s godot --headless --path . -s tests/soak_stability_test.gd

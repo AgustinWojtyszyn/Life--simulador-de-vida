@@ -90,10 +90,13 @@ func show_journal() -> void:
 	var music_label := text_line("Banda sonora · ♫ " + AudioSystem.track_name())
 	action("♫ Canción anterior", func():
 		AudioSystem.previous_track()
-		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
+		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name() + " · manual")
 	action("♫ Siguiente canción", func():
 		AudioSystem.next_track()
-		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
+		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name() + " · manual")
+	action("♫ Música automática", func():
+		AudioSystem.set_auto_music(true)
+		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name() + " · automática")
 	action("Volver al barrio", close)
 
 func talk(person: String) -> void:

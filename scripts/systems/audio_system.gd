@@ -30,9 +30,12 @@ var sfx_cache := {}
 var traffic_voices := []
 var traffic_clock := 0.0
 var traffic_world_id := 0
+var automatic_period := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if not GameClock.changed.is_connected(on_clock_changed):
+		GameClock.changed.connect(on_clock_changed)
 	for i in 2:
 		var player := AudioStreamPlayer.new()
 		player.name = "Music_%d" % i
@@ -43,8 +46,10 @@ func _ready() -> void:
 func start_world(country_id: String) -> void:
 	var country_changed := current_country != country_id
 	current_country = country_id
-	var chosen := int(WorldManager.settings.get("music_track", country_seed(country_id)))
+	var manual := bool(WorldManager.settings.get("music_manual", false))
+	var chosen := int(WorldManager.settings.get("music_track", 0)) if manual else automatic_track(country_id)
 	chosen = posmod(chosen, TRACKS.size())
+	automatic_period = GameClock.period()
 	var current: AudioStreamPlayer = music_players[active_music]
 	if current.playing and chosen == track_index and not country_changed:
 		reset_traffic_world()
@@ -89,10 +94,43 @@ func track_name(index: int = -1) -> String:
 	return str(TRACKS[target]["name"])
 
 func next_track() -> void:
+	WorldManager.settings["music_manual"] = true
 	play_track(track_index + 1, true)
 
 func previous_track() -> void:
+	WorldManager.settings["music_manual"] = true
 	play_track(track_index - 1, true)
+
+func set_auto_music(value: bool) -> void:
+	WorldManager.settings["music_manual"] = not value
+	if value and WorldManager.playing:
+		var chosen := automatic_track(current_country)
+		if chosen != track_index:
+			play_track(chosen, true)
+		automatic_period = GameClock.period()
+
+func automatic_track(country_id: String) -> int:
+	var seed := country_seed(country_id)
+	match GameClock.period():
+		"AMANECER":
+			return posmod(seed + 4, TRACKS.size())
+		"ATARDECER":
+			return posmod(seed + 1, TRACKS.size())
+		"NOCHE":
+			return 6
+		_:
+			return seed
+
+func on_clock_changed() -> void:
+	if not enabled or not WorldManager.playing or bool(WorldManager.settings.get("music_manual", false)):
+		return
+	var period := GameClock.period()
+	if period == automatic_period:
+		return
+	automatic_period = period
+	var chosen := automatic_track(current_country)
+	if chosen != track_index:
+		call_deferred("play_track", chosen, true)
 
 func play_track(index: int, crossfade: bool = true) -> void:
 	if not enabled:

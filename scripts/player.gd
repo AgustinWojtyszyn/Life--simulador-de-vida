@@ -131,11 +131,23 @@ func perform_activity(action: String) -> void:
 		"fridge": "eat",
 		"cook": "eat",
 		"buy_food": "browse",
+		"browse": "browse",
+		"sleep": "idle_live",
 		"rest": "idle_live",
 		"play_football": "kick",
 	}.get(action, action)
 	# Missing bespoke frames no longer make an interaction visually inert.
 	# CharacterVisual supplies a lightweight procedural fallback until a full
 	# authored animation family exists for that activity.
-	action_time = 2.6
+	action_time = {
+		"coffee": 1.4,
+		"shower": 1.6,
+		"browse": 1.8,
+		"buy_food": 1.8,
+		"rest": 2.2,
+		"tv": 2.4,
+		"pc": 2.6,
+		"play_football": 3.0,
+		"sleep": 4.2,
+	}.get(action, 2.0)
 	visual.activity_phase = 0.0

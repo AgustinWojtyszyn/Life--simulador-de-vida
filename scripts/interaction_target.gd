@@ -37,7 +37,7 @@ func perform(player: Node2D) -> String:
 		return ""
 
 	match action:
-		"rest", "tv", "pc", "fridge", "eat", "coffee", "cook", "shower", "buy_food", "play_football":
+		"sleep", "rest", "tv", "pc", "fridge", "eat", "coffee", "cook", "shower", "buy_food", "browse", "exercise", "play_football":
 			var result := LifeSimulation.act(action)
 			if not result.begins_with("Necesitás") and not result.begins_with("Faltan"):
 				player.perform_activity(action)

@@ -11,8 +11,9 @@ var return_position := Vector2.ZERO
 var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
-var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0}
+var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0, "music_manual": false}
 const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini", "ice_cream_shop", "grill", "hospital", "hospital_ward", "supermarket", "pharmacy", "gym", "gas_station"]
+const VALID_LOCATIONS := ["home", "street"] + PUBLIC_INTERIORS
 var active_poi: Dictionary = {}
 
 func _ready() -> void:
@@ -20,12 +21,25 @@ func _ready() -> void:
 	select_country("ar")
 
 func select_country(id: String) -> void:
+	# Preserve a saved city/district when the catalog grows beyond one city per
+	# country. Older saves or unknown ids safely fall back to the first entry.
+	var preferred_city := profile.city_id
+	var preferred_district := profile.district_id
 	for item in countries:
 		if item.id == id:
 			country = item
-			district = item.cities[0].districts[0]
+			var selected_city: CityData = item.cities[0]
+			for candidate in item.cities:
+				if candidate.id == preferred_city:
+					selected_city = candidate
+					break
+			district = selected_city.districts[0]
+			for candidate in selected_city.districts:
+				if candidate.id == preferred_district:
+					district = candidate
+					break
 			profile.country_id = id
-			profile.city_id = item.cities[0].id
+			profile.city_id = selected_city.id
 			profile.district_id = district.id
 			profile.home_id = id + "_home"
 			return
@@ -35,6 +49,7 @@ func new_game(new_profile: PlayerProfile, id: String) -> void:
 	profile = new_profile
 	select_country(id)
 	location = "home"
+	active_poi = {}
 	return_position = Vector2.ZERO
 	spawn_position = HomeSystem.INTERIOR_SPAWN
 	basic_state = {"rested": false}
@@ -53,6 +68,7 @@ func continue_game() -> bool:
 	profile = PlayerProfile.from_dict(data.profile)
 	select_country(profile.country_id)
 	location = data.location
+	active_poi = data.get("active_poi", {}).duplicate(true) if data.get("active_poi", {}) is Dictionary else {}
 	var return_data: Array = data.get("return_position", [])
 	return_position = Vector2(float(return_data[0]), float(return_data[1])) if return_data.size() == 2 else Vector2.ZERO
 	var limit := Vector2(800, 450) if location != "street" else district.world_size
@@ -67,11 +83,16 @@ func continue_game() -> bool:
 	travel_requested.emit()
 	return true
 
+func is_valid_location(value: String) -> bool:
+	return value in VALID_LOCATIONS
+
 func travel(destination: String) -> void:
-	if destination not in ["home", "street"] + PUBLIC_INTERIORS:
+	if not is_valid_location(destination):
 		return
 	var previous := location
 	location = destination
+	if destination in ["home", "street"]:
+		active_poi = {}
 	var home := HomeSystem.starter_home(country)
 	if destination == "home":
 		spawn_position = home.interior_spawn
@@ -84,6 +105,13 @@ func travel(destination: String) -> void:
 	travel_requested.emit()
 	LifeEvents.location_changed.emit(country.id, district.id, location)
 
+func serializable_active_poi() -> Dictionary:
+	var result := {}
+	for key in ["id", "type", "display_name", "opening_hours", "map_priority", "icon", "country", "city", "district"]:
+		if active_poi.has(key):
+			result[key] = active_poi[key]
+	return result
+
 func save_game() -> bool:
 	if not is_instance_valid(active_world):
 		return false
@@ -91,7 +119,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "active_poi": serializable_active_poi(), "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result

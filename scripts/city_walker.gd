@@ -243,6 +243,13 @@ func choose_activity() -> void:
 	if route_kind == "football":
 		wait_time = 0.4 + personality * 0.15
 		return
+	if route_kind == "employee":
+		activity = "look" if visits % 2 == 0 else "chat"
+		state = State.LOOK_AROUND if activity == "look" else State.CHAT
+		wait_time = 4.0 + personality * 0.5
+		activity_time = 0.0
+		queue_redraw()
+		return
 	var options := ["phone", "drink", "look", "rest", "chat", "eat"]
 	activity = "sit" if route_kind == "bench" and destination == 1 else "browse" if route_kind == "shop" and destination == 1 else "wait" if route_kind == "crossing" else options[(visits + profile.skin + profile.top) % options.size()]
 	state = {"sit": State.SIT, "phone": State.PHONE, "drink": State.DRINK, "eat": State.EAT, "look": State.LOOK_AROUND, "rest": State.REST, "chat": State.CHAT, "browse": State.SHOP, "wait": State.WAIT_CROSSING}.get(activity, State.IDLE)
