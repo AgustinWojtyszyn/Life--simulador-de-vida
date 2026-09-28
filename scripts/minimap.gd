@@ -3,7 +3,6 @@ extends Control
 var world: Node2D
 var expanded := false
 var refresh_clock := 0.0
-var cached_roads: Array[Rect2] = []
 
 func _ready() -> void:
 	add_to_group("city_minimap")
@@ -12,7 +11,6 @@ func _ready() -> void:
 	gui_input.connect(_on_gui_input)
 	get_viewport().size_changed.connect(layout)
 	layout()
-	cached_roads = DistrictBlocks.roads(WorldManager.district)
 	queue_redraw()
 
 func layout() -> void:
@@ -28,7 +26,8 @@ func layout() -> void:
 
 func _process(delta: float) -> void:
 	refresh_clock += delta
-	var interval := 0.25 if InputManager.touch_enabled else 0.12\n\tif refresh_clock < interval:
+	var interval := 0.25 if InputManager.touch_enabled else 0.12
+	if refresh_clock < interval:
 		return
 	refresh_clock = 0.0
 	if is_instance_valid(world):
@@ -77,7 +76,7 @@ func _draw() -> void:
 	var mapped_world := rect_to_map(world_rect, inner)
 	draw_rect(mapped_world, Color("9fa89a"))  # slightly warmer ground
 	# Roads
-	for road in cached_roads:
+	for road in DistrictBlocks.roads(WorldManager.district):
 		draw_rect(rect_to_map(road, inner), Color("34404a"))
 	# Buildings with color-coded types
 	for object in world.city_objects:
