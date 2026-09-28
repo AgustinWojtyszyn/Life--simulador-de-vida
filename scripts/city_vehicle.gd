@@ -31,6 +31,9 @@ var horn_cooldown := 0.0
 var blocked_time := 0.0
 var proximity_clock := 0.0
 var cached_gap := 99999.0
+var nearby_vehicles: Array[Node] = []
+var nearby_residents: Array[Node] = []
+var nearby_signals: Array[Node] = []
 ## Lane offset: lateral displacement from route centreline (negative = left, positive = right)
 var lane_offset := 0.0
 
@@ -127,10 +130,24 @@ func route_length() -> float:
 func forward_vector() -> Vector2:
 	return Vector2(direction, 0) if route_points.is_empty() else tangent(progress)
 
+func refresh_proximity_cache() -> void:
+	nearby_vehicles.clear()
+	nearby_residents.clear()
+	nearby_signals.clear()
+	for other in get_tree().get_nodes_in_group("city_traffic"):
+		if other != self and is_instance_valid(other) and position.distance_squared_to(other.position) < 520.0 * 520.0:
+			nearby_vehicles.append(other)
+	for resident in get_tree().get_nodes_in_group("city_residents"):
+		if is_instance_valid(resident) and resident.visible and position.distance_squared_to(resident.position) < 360.0 * 360.0:
+			nearby_residents.append(resident)
+	for signal in get_tree().get_nodes_in_group("traffic_signals"):
+		if is_instance_valid(signal) and position.distance_squared_to(signal.global_position) < 360.0 * 360.0:
+			nearby_signals.append(signal)
+
 func free_distance() -> float:
 	var gap := route_length()
 	var forward := forward_vector()
-	for other in get_tree().get_nodes_in_group("city_traffic"):
+	for other in nearby_vehicles:
 		if other == self:
 			continue
 		var relative: Vector2 = other.position - position
@@ -142,7 +159,7 @@ func free_distance() -> float:
 			var speed_factor: float = 1.0 + (current_speed / maxf(cruise_speed, 1.0)) * 0.5
 			var min_gap: float = (half_width + other.half_width + 30.0) * speed_factor
 			gap = minf(gap, ahead - min_gap)
-	var pedestrians: Array[Node] = get_tree().get_nodes_in_group("city_residents")
+	var pedestrians: Array[Node] = nearby_residents.duplicate()
 	if is_instance_valid(player):
 		pedestrians.append(player)
 	for pedestrian in pedestrians:
@@ -154,7 +171,7 @@ func free_distance() -> float:
 			gap = minf(gap, ahead - half_width - 20.0)
 	# Signals participate in the same cached proximity pass as cars and
 	# pedestrians, so red lights do not add per-frame work.
-	for traffic_signal in get_tree().get_nodes_in_group("traffic_signals"):
+	for traffic_signal in nearby_signals:
 		if not traffic_signal.has_method("blocking_distance"):
 			continue
 		var signal_gap: float = traffic_signal.blocking_distance(position, forward)
@@ -171,7 +188,7 @@ func has_honk_target() -> bool:
 		var ahead := relative.dot(forward)
 		if ahead > 0.0 and ahead < 90.0 and absf(relative.cross(forward)) < 28.0:
 			return true
-	for pedestrian in get_tree().get_nodes_in_group("city_residents"):
+	for pedestrian in nearby_residents:
 		if not is_instance_valid(pedestrian) or not pedestrian.visible:
 			continue
 		var relative: Vector2 = pedestrian.position - position
@@ -187,6 +204,7 @@ func _physics_process(delta: float) -> void:
 	# especially when the car is far from the player.
 	proximity_clock -= delta
 	if proximity_clock <= 0.0:
+		refresh_proximity_cache()
 		cached_gap = free_distance()
 		var near_player := is_instance_valid(player) and position.distance_squared_to(player.position) < 900.0 * 900.0
 		proximity_clock = 0.05 if near_player else 0.16
