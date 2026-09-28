@@ -249,7 +249,8 @@ func add_solid(rect: Rect2) -> void:
 func _draw() -> void:
 	var accent: Color = WorldManager.country.accent
 	var interior_type := InteriorCatalog.type_for(interior_kind)
-	var medical := interior_type in [InteriorCatalog.Type.HOSPITAL, InteriorCatalog.Type.CLINIC]
+	var hospital := interior_type == InteriorCatalog.Type.HOSPITAL
+	var medical := hospital or interior_type == InteriorCatalog.Type.CLINIC
 	if medical: accent = Color("91c9c3")
 	draw_rect(Rect2(0, 0, 800, 450), Color("172d31"))
 	draw_rect(Rect2(86, 64, 628, 340), Color("d5c3a5"))
@@ -259,11 +260,13 @@ func _draw() -> void:
 			draw_rect(Rect2(x + (12 if y % 48 else 0), y, 35, 23).intersection(Rect2(102, 80, 596, 308)), Color("c8d9d3") if medical else Color("9b856b") if x % 3 else Color("a48d73"))
 	draw_rect(Rect2(109, 82, 582, 29), accent)
 	draw_string(ThemeDB.fallback_font, Vector2(230, 103), interior_title().to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 340, 17, Color("293b3c"))
-	if medical:
+	if hospital:
 		draw_rect(Rect2(602, 294, 78, 63), Color("658b94"))
 		draw_string(ThemeDB.fallback_font, Vector2(607, 320), "ASCENSOR", HORIZONTAL_ALIGNMENT_LEFT, 70, 10, Color.WHITE)
 		if interior_kind != "hospital_ward":
 			draw_string(ThemeDB.fallback_font, Vector2(508, 111), "CONSULTORIO", HORIZONTAL_ALIGNMENT_LEFT, 150, 11, Color("254b51"))
+	elif interior_kind == "clinic":
+		draw_string(ThemeDB.fallback_font, Vector2(508, 111), "CONSULTORIO", HORIZONTAL_ALIGNMENT_LEFT, 150, 11, Color("254b51"))
 	elif interior_kind == "bookshop":
 		draw_string(ThemeDB.fallback_font, Vector2(158, 121), "LITERATURA     HISTORIA      INFANTIL", HORIZONTAL_ALIGNMENT_LEFT, 370, 11, Color("f1e2c5"))
 	draw_rect(Rect2(365, 381, 50, 12), Color("d6ba8b"))
