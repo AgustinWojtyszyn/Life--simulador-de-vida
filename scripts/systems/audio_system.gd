@@ -6,6 +6,7 @@ extends Node
 const SAMPLE_RATE := 16000
 const TRACK_SECONDS := 24.0
 const MAX_TRAFFIC_VOICES := 4
+const MAX_TRAFFIC_VOICES_MOBILE := 2
 # All tracks use uplifting major progressions (intervals 0,4,7,9,11 = major/happy).
 # Progression values = semitone steps from root (0=root, 4=major 3rd, 5=4th, 7=5th, 9=6th).
 # No minor 3rds (3) or minor 7ths (10) in progressions to keep the mood warm.
@@ -173,7 +174,8 @@ func ensure_traffic_voices() -> void:
 	if not is_instance_valid(WorldManager.active_world):
 		return
 	reset_traffic_world()
-	while traffic_voices.size() < MAX_TRAFFIC_VOICES:
+	var voice_limit := MAX_TRAFFIC_VOICES_MOBILE if InputManager.touch_enabled else MAX_TRAFFIC_VOICES
+	while traffic_voices.size() < voice_limit:
 		var voice := AudioStreamPlayer2D.new()
 		voice.name = "TrafficVoice_%d" % traffic_voices.size()
 		voice.max_distance = 760.0
