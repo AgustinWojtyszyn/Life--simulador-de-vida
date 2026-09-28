@@ -13,6 +13,7 @@ var playing := false
 var basic_state := {"rested": false}
 var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0}
 const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini", "ice_cream_shop", "grill", "hospital", "hospital_ward", "supermarket", "pharmacy", "gym", "gas_station"]
+const VALID_LOCATIONS := ["home", "street"] + PUBLIC_INTERIORS
 var active_poi: Dictionary = {}
 
 func _ready() -> void:
@@ -67,8 +68,11 @@ func continue_game() -> bool:
 	travel_requested.emit()
 	return true
 
+func is_valid_location(value: String) -> bool:
+	return value in VALID_LOCATIONS
+
 func travel(destination: String) -> void:
-	if destination not in ["home", "street"] + PUBLIC_INTERIORS:
+	if not is_valid_location(destination):
 		return
 	var previous := location
 	location = destination
