@@ -51,7 +51,7 @@ func _ready() -> void:
 	visual.profile = profile
 	add_child(visual)
 	sprite = visual.sprite
-	call_deferred("setup_navigation")
+	setup_navigation()
 
 func _physics_process(delta: float) -> void:
 	if indoor_time > 0:
