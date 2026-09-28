@@ -104,6 +104,13 @@ func travel(destination: String) -> void:
 	travel_requested.emit()
 	LifeEvents.location_changed.emit(country.id, district.id, location)
 
+func serializable_active_poi() -> Dictionary:
+	var result := {}
+	for key in ["id", "type", "display_name", "opening_hours", "map_priority", "icon", "country", "city", "district"]:
+		if active_poi.has(key):
+			result[key] = active_poi[key]
+	return result
+
 func save_game() -> bool:
 	if not is_instance_valid(active_world):
 		return false
@@ -111,7 +118,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "active_poi": active_poi.duplicate(true), "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "active_poi": serializable_active_poi(), "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result
