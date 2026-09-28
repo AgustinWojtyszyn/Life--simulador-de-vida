@@ -21,12 +21,25 @@ func _ready() -> void:
 	select_country("ar")
 
 func select_country(id: String) -> void:
+	# Preserve a saved city/district when the catalog grows beyond one city per
+	# country. Older saves or unknown ids safely fall back to the first entry.
+	var preferred_city := profile.city_id
+	var preferred_district := profile.district_id
 	for item in countries:
 		if item.id == id:
 			country = item
-			district = item.cities[0].districts[0]
+			var selected_city: CityData = item.cities[0]
+			for candidate in item.cities:
+				if candidate.id == preferred_city:
+					selected_city = candidate
+					break
+			district = selected_city.districts[0]
+			for candidate in selected_city.districts:
+				if candidate.id == preferred_district:
+					district = candidate
+					break
 			profile.country_id = id
-			profile.city_id = item.cities[0].id
+			profile.city_id = selected_city.id
 			profile.district_id = district.id
 			profile.home_id = id + "_home"
 			return
