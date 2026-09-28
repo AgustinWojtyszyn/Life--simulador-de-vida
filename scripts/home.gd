@@ -23,12 +23,12 @@ func _ready() -> void:
 	furniture("bathroom", Vector2(636, 185), Vector2(106, 89), Rect2(589, 110, 92, 42), "south-east")
 	add_target(Vector2(635, 219), "Ducharte", "shower", "shower")
 	add_target(Vector2(417, 202), "Cocinar", "cook", "stove")
-	add_target(Vector2(260, 245), "Descansar en tu cama", "rest", WorldManager.profile.home_id + "_bed")
+	add_target(Vector2(260, 245), "Dormir", "sleep", WorldManager.profile.home_id + "_bed")
 	add_target(Vector2(430, 295), "Mirar televisión", "tv", "tv")
 	add_target(Vector2(535, 266), "Usar la computadora", "pc", "pc")
 	add_target(Vector2(478, 207), "Abrir la heladera", "fridge", "fridge")
 	add_target(Vector2(590, 350), "Comer en la mesa", "eat", "table")
-	add_target(Vector2(440, 305), "Descansar en el sofá", "rest", "sofa")
+	add_target(Vector2(440, 305), "Relajarte en el sofá", "rest", "sofa")
 	add_target(Vector2(390, 362), "Salir al barrio", "exit_home", WorldManager.profile.home_id + "_exit")
 	var camera: Camera2D = $Player/Camera2D
 	camera.limit_right = 800
