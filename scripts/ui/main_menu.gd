@@ -157,12 +157,15 @@ func create_screen() -> void:
 		choice.item_selected.connect(func(i: int): draft.set(entry[0], i); preview.apply_profile(draft))
 		grid.add_child(choice)
 	error_label = label("", 12)
-	button("Continuar → Elegir país", func():
+	button("Comenzar mi vida", func():
 		if name_edit.text.strip_edges().is_empty():
 			error_label.text = "Ingresá un nombre para continuar."
 			return
 		draft.player_name = name_edit.text.strip_edges()
-		country_screen())
+		if busy:
+			return
+		busy = true
+		WorldManager.new_game(draft, "ar"))
 	button("Volver", main_screen)
 
 func country_screen() -> void:
