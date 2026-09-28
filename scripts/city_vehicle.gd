@@ -125,7 +125,7 @@ func detect_ground_contact_y(image: Image, bounds: Rect2) -> float:
 func visual_ground_y() -> float:
 	if facing_index < 0 or facing_index >= ground_contact_y.size():
 		return 0.0
-	return sprite.position.y + (ground_contact_y[facing_index] - art_bounds[facing_index].position.y) * visual_scale
+	return sprite.position.y + (ground_contact_y[facing_index] + sprite.offset.y) * visual_scale
 
 func build_curve() -> void:
 	curve.clear_points()
