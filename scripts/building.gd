@@ -19,6 +19,17 @@ var orientation := "south"
 var door_offset := Vector2(0, 16)
 var footprint := Rect2()
 
+static func visual_variation(building_type_value: String, variant_value: Dictionary, home := false) -> Vector2:
+	# Placement and rendering must use the exact same deterministic variation.
+	# Keeping this in one function prevents the visual sprite from growing beyond
+	# the bounds reserved by playground.gd.
+	if not building_type_value.begins_with("residential"):
+		return Vector2.ONE
+	var seed := int(variant_value.get("seed", 0))
+	var width_variation := 0.94 + float(posmod(seed * 7, 13)) / 100.0
+	var height_variation := 0.96 + float(posmod(seed * 11, 11)) / 100.0
+	return Vector2(width_variation, height_variation)
+
 func _ready() -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = facade
@@ -30,10 +41,9 @@ func _ready() -> void:
 	# rotating or mirroring signage. Variation stays deliberately subtle so the
 	# authored pixel art remains crisp.
 	var seed := int(variant.get("seed", 0))
-	var width_variation := 0.94 + float(posmod(seed * 7, 13)) / 100.0
-	var height_variation := 0.96 + float(posmod(seed * 11, 11)) / 100.0
+	var variation := visual_variation(building_type, variant, is_home)
 	if building_type.begins_with("residential"):
-		sprite.scale *= Vector2(width_variation, height_variation)
+		sprite.scale *= variation
 		var warmth := float(posmod(seed * 5, 9)) / 100.0
 		sprite.modulate = Color(1.0, 0.98 + warmth * 0.25, 0.95 + warmth * 0.35)
 	add_child(sprite)
