@@ -35,7 +35,6 @@ func switch_world() -> void:
 	InputManager.refresh_device_mode()
 	WorldManager.settings["touch_controls"] = InputManager.touch_enabled
 	AudioSystem.set_enabled(bool(WorldManager.settings.get("audio_enabled", true)))
-	AudioSystem.set_music_volume(float(WorldManager.settings.get("music_volume", 0.65)))
 	if is_instance_valid(menu):
 		menu.queue_free()
 		menu = null
@@ -64,7 +63,7 @@ func switch_world() -> void:
 	var environment := preload("res://scripts/world_environment.gd").new()
 	world.add_child(environment)
 	setup_overlay()
-	AudioSystem.start_world(WorldManager.country.id)
+	AudioSystem.start_world("")
 	changing = false
 
 func setup_overlay() -> void:
