@@ -22,18 +22,9 @@ func run() -> void:
 	var all_cars := get_nodes_in_group("city_traffic")
 	var cars := all_cars.filter(func(vehicle): return vehicle.route_points.is_empty() and vehicle.model != "colectivo")
 	var player: CharacterBody2D = world.get_node("Player")
-	check(all_cars.size() >= 16, "Expanded district must keep starter, circuit, grid and bus traffic")
+	check(all_cars.size() >= 12, "B2B hub keeps lightweight through-traffic across authored avenues")
 	check(cars.size() >= 12, "Expanded avenues must add straight-moving traffic beyond the starter six")
-	check(all_cars.filter(func(vehicle): return vehicle.model == "colectivo").size() >= 2, "Argentina keeps both circulating buses")
-	var circuit_cars := all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty() and vehicle.model != "colectivo")
-	for turning in circuit_cars:
-		var seen := {}
-		for distance in range(0, int(turning.curve.get_baked_length()), 3):
-			turning.heading = turning.tangent(float(distance)).angle()
-			turning.update_art()
-			seen[turning.facing_index] = true
-			check(is_zero_approx(turning.sprite.rotation), "Cornering must change frames without rotating artwork")
-		check(seen.size() == 8, "Circuit must use all eight directions through continuous arcs")
+	check(all_cars.filter(func(vehicle): return not vehicle.route_points.is_empty()).is_empty(), "B2B hub must not spawn closed-loop traffic")
 	for vehicle in all_cars:
 		check(vehicle.cruise_speed > 140.0, "Traffic cruise speed must exceed pedestrian speed")
 	var models := {}
@@ -58,15 +49,12 @@ func run() -> void:
 		same_lane = cars.filter(func(vehicle): return vehicle.direction > 0.0)
 	check(same_lane.size() >= 2, "Traffic test needs two same-direction vehicles")
 	var car: AnimatableBody2D = same_lane[0]
-	# Isolate braking behaviour from unrelated cars, pedestrians and red lights.
+	# Isolate braking behaviour from unrelated cars and pedestrians.
 	for other in all_cars:
 		if other != car:
 			other.remove_from_group("city_traffic")
 	for resident in get_nodes_in_group("city_residents"):
 		resident.remove_from_group("city_residents")
-	for traffic_signal in get_nodes_in_group("traffic_signals"):
-		traffic_signal.horizontal_state = "green"
-		traffic_signal.vertical_state = "green"
 	car.position = Vector2(340, car.position.y)
 	car.current_speed = 66.0
 	car.proximity_clock = 0.0
@@ -96,7 +84,7 @@ func run() -> void:
 	car.position = Vector2(car.route_right - 1.0, 454)
 	car.current_speed = 66.0
 	car._physics_process(0.1)
-	check(car.position.x < car.route_left + 20.0 and car.position.x >= car.route_left, "Cars must recycle outside the expanded visible map")
+	check(car.is_queued_for_deletion(), "Cars must leave the simulation after crossing the route boundary")
 	# Isolate the collision probe from the opposite lane car at x=300.
 	for other in all_cars:
 		if other != car: other.collision_layer = 0
