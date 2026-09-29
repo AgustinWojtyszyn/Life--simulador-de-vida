@@ -18,6 +18,7 @@ AudioSystem="*res://scripts/systems/audio_system.gd"
 CompanyCatalog="*res://scripts/systems/company_catalog.gd"
 EmploymentSystem="*res://scripts/systems/employment_system.gd"
 ShiftSystem="*res://scripts/systems/shift_system.gd"
+ProcedureRunner="*res://scripts/systems/procedure_runner.gd"
 MCPBridge="*res://addons/godot_mcp/mcp_bridge.gd"
 
 [display]
