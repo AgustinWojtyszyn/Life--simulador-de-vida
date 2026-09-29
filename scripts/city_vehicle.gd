@@ -148,8 +148,6 @@ func free_distance() -> float:
 			continue
 		var relative: Vector2 = other.position - position
 		var ahead := relative.dot(forward)
-		if route_points.is_empty() and other.route_points.is_empty() and other.direction == direction:
-			ahead = fposmod(ahead, route_length())
 		if ahead > 0 and absf(relative.cross(forward)) < 27.0:
 			# Increased minimum gap for better separation and progressive braking
 			# Braking distance is already handled by safe_speed. A speed-dependent
@@ -228,8 +226,7 @@ func _physics_process(delta: float) -> void:
 	# Do not spawn periodic per-car engine clips. A cluster of nearby vehicles
 	# used to create a machine-gun-like audio pattern and unnecessary audio nodes.
 	current_speed = move_toward(current_speed, safe_speed, (effective_braking if current_speed > safe_speed else driver_acceleration) * delta)
-	# Waiting at a red light or behind a pedestrian is valid. Never teleport
-	# through a queue after a timeout: the same rules apply to every model.
+	# Queues are resolved only by real obstacles ahead; traffic signals are intentionally disabled.
 	var step := minf(current_speed * delta, gap)
 	cached_gap = maxf(0.0, cached_gap - step)
 	var previous := position
