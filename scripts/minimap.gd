@@ -119,14 +119,6 @@ func _draw() -> void:
 		if expanded and poi_label != "":
 			var destination_name := str(object.get_meta("building_title", poi_label))
 			draw_string(font, p + Vector2(4, 4), destination_name, HORIZONTAL_ALIGNMENT_LEFT, 82, 7, col)
-	# Traffic signals
-	for traffic_light in get_tree().get_nodes_in_group("traffic_signals"):
-		if not is_instance_valid(traffic_light):
-			continue
-		var p := world_to_map(traffic_light.global_position, inner)
-		var tl_col := Color("72bd79") if traffic_light.horizontal_state == "green" else \
-			(Color("e8c840") if traffic_light.horizontal_state == "amber" else Color("dc6b60"))
-		draw_circle(p, 1.8 if not expanded else 2.5, tl_col)
 	# Vehicles
 	for vehicle in get_tree().get_nodes_in_group("city_traffic"):
 		if not is_instance_valid(vehicle):
