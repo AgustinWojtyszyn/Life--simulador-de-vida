@@ -1,8 +1,7 @@
 extends Node
 
-# VIDA keeps its soundtrack self-contained and original. Music is synthesized
-# once per track/country and cached; traffic uses a tiny pooled set of spatial
-# loop players instead of spawning short engine clips every few seconds.
+# Functional audio only: UI, interactions and lightweight spatial traffic SFX.
+# VIDA B2B intentionally has no soundtrack; training scenarios must not depend on music.
 const SAMPLE_RATE := 16000
 const MAX_TRAFFIC_VOICES := 4
 # Music intentionally removed: VIDA keeps only functional UI, interaction and traffic SFX.
