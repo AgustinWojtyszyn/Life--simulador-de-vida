@@ -138,8 +138,8 @@ func show_hire_dialogue(company_id: String, workplace_id: String, role_id: Strin
 	var company_name := company_id
 	var role_title := role_id
 	if cat != null:
-		var company := cat.find_company(company_id)
-		var role := cat.find_role(company_id, workplace_id, role_id)
+		var company: CompanyData = cat.find_company(company_id) as CompanyData
+		var role: JobRoleData = cat.find_role(company_id, workplace_id, role_id) as JobRoleData
 		if company != null:
 			company_name = company.display_name
 		if role != null:
@@ -149,7 +149,7 @@ func show_hire_dialogue(company_id: String, workplace_id: String, role_id: Strin
 	text_line("Sueldo por turno: $" + str(cat.find_role(company_id, workplace_id, role_id).base_salary if cat != null and cat.find_role(company_id, workplace_id, role_id) != null else "?"))
 	text_line("Turno: 09:00 – 13:00 · Sede Central, Centro")
 	action("Aceptar empleo", func():
-		var ok := EmploymentSystem.hire(company_id, workplace_id, role_id)
+		var ok: bool = EmploymentSystem.hire(company_id, workplace_id, role_id)
 		close()
 		if is_instance_valid(WorldManager.active_world):
 			var interactions: Node = WorldManager.active_world.get_node_or_null("Interactions")
