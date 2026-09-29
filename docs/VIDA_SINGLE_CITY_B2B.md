@@ -1,74 +1,170 @@
-# VIDA — Pivot a megaciudad única B2B
+# VIDA B2B — Plataforma web de capacitación interactiva
 
-## Decisión de producto
-VIDA deja de presentar países/ciudades seleccionables. El jugador crea su personaje y entra a una única megaciudad ficticia, enorme, persistente y viva. El juego sigue siendo un videojuego de vida urbana; B2B se integra dentro del mundo mediante empresas, trabajos, capacitación, operaciones y escenarios, no mediante un menú corporativo separado.
+## Norte de producto
+VIDA deja de optimizarse como un life-sim de megaciudad. El producto objetivo es una plataforma B2B web donde una empresa configura una experiencia de capacitación y el trabajador aprende un procedimiento haciéndolo dentro de un escenario jugable.
 
-## Regla de migración
-NO borrar assets regionales existentes. Argentina, Japón, Italia, Brasil y Estados Unidos pasan a ser bibliotecas de arquitectura/variaciones reutilizables dentro de una sola ciudad. Durante la migración se conserva el id interno `ar` como compatibilidad hasta desacoplar sistemas que todavía dependen de `country.id`.
+Promesa: **practicar el trabajo antes de hacerlo de verdad**.
 
-## Objetivo de mundo
-Una ciudad continua con distritos:
-- Centro / financiero: oficinas, bancos, servicios, departamentos, gastronomía.
-- Industrial: fábricas, plantas, talleres, seguridad industrial.
-- Logístico: depósitos, centros de distribución, flotas, estaciones.
-- Comercial: supermercados, retail, restaurantes, hoteles.
-- Residencial: casas, edificios, plazas, escuelas, gimnasios.
-- Salud: clínica, hospital, farmacia, laboratorio.
-- Tecnológico / campus: oficinas modernas, laboratorios, capacitación.
-- Periferia: rutas, estaciones de servicio, industria pesada y futuros complejos.
+La ciudad pasa a ser un hub compacto y funcional. El valor está en empresas, interiores, procedimientos, herramientas, EPP, decisiones, consecuencias, feedback y métricas; no en kilómetros de mapa.
 
-Los estilos regionales se mezclan de manera coherente por barrios; nunca se presentan como países elegibles.
+## Flujo objetivo
+Empresa -> Rubro -> Lugar de trabajo -> Puesto -> Procedimiento -> Escenario -> Evidencia/resultado.
 
-## Loop jugable B2B
-Vida personal -> desplazamiento -> trabajo/empresa -> situación o misión -> decisiones/interacciones -> consecuencias -> progreso/feedback -> regreso a la ciudad.
+Rubros iniciales candidatos:
+- Gastronomía
+- Salud
+- Industria
+- Logística
+- Construcción
+- Retail/servicios
+- Oficinas
+- Energía
 
-Una empresa es un lugar real del mapa. Puede tener exterior, interior, roles, NPC, turnos, procesos, misiones y permisos. El mismo motor debe servir para empresas distintas.
+No implementar todos a la vez. El primer módulo comercial debe ser uno solo y excelente. Gastronomía es el candidato inicial para validar venta y autoservicio.
 
-## Arquitectura objetivo
-1. `WorldManager`: una ciudad activa, múltiples distritos; eliminar gradualmente la semántica de country.
-2. `WorldCatalog`: catálogo de distritos de la megaciudad, no catálogo de países.
-3. `RegionalAssets`: conservarlo como biblioteca visual/style pool; que región signifique estilo, no ubicación.
-4. `Company/Workplace`: capa data-driven para empresas, puestos y escenarios.
-5. `MissionSystem`: misiones personales y laborales; resultados observables.
-6. Saves: migración compatible con saves existentes; nunca invalidarlos silenciosamente.
-7. Minimap/transporte/tráfico: deben funcionar entre distritos y escalar sin simular toda la ciudad fuera de cámara.
+## Arquitectura B2B objetivo
 
-## Primer vertical demostrable
-Construir un distrito funcional con:
-- vivienda del jugador;
-- calles/tráfico/NPC/transporte existentes;
-- zona comercial;
-- zona de oficinas;
-- complejo industrial/logístico;
-- al menos una empresa ficticia completa;
-- flujo casa -> traslado -> ingreso -> tarea laboral -> resultado -> regreso.
+### VIDA Core
+Motor reutilizable e independiente del rubro:
+- movimiento e interacción;
+- inventario y equipamiento;
+- interacción con objetos/NPC;
+- secuencias de procedimiento;
+- decisiones y consecuencias;
+- escenarios ramificados;
+- feedback;
+- resultados y telemetría;
+- persistencia;
+- input desktop/web y compatibilidad touch.
 
-La empresa ficticia debe demostrar onboarding, operación y una situación inesperada sin usar datos privados ni depender de una marca real.
+### Industry Modules
+Contenido reutilizable por rubro. Cada módulo define lugares, riesgos, equipamiento, EPP, procedimientos y escenarios. Nunca hardcodear un rubro en el motor.
 
-## No hacer todavía
-- No borrar carpetas `ar/us/jp/it/br`.
-- No regenerar masivamente arte.
-- No reescribir todos los sistemas en una sola iteración.
-- No crear 15 mapas separados.
-- No convertir el menú principal en dashboard SaaS.
-- No sacrificar Android, controles, rendimiento o estabilidad por el pivot.
+### Company Layer
+Personalización de cliente: identidad, sedes, puestos, procedimientos propios, branding y reglas internas. Un cliente estándar debe poder usar el catálogo sin intervención manual del desarrollador.
 
-## Orden de implementación
-P0: quitar selección de país del flujo nuevo (iniciado en esta rama).
-P0: crear identidad/nombre neutral de la megaciudad y distrito inicial.
-P0: mantener carga, guardado, Android y mundo actual funcionando.
-P1: desacoplar `country.id` de audio, eventos, home y regional content mediante compatibilidad.
-P1: modelar distritos y navegación/streaming entre distritos.
-P1: reutilizar assets regionales como variaciones arquitectónicas.
-P1: introducir CompanyData / WorkplaceData / JobRoleData / ScenarioData.
-P2: primer complejo empresarial jugable y misión laboral end-to-end.
-P2: métricas de escenario/resultados.
-P2: expansión de la ciudad y transporte interdistrital.
+## Modelo de datos a construir
+Los actuales CompanyData / WorkplaceData / JobRoleData / ScenarioData son la semilla, no el modelo final.
 
-## Criterios de aceptación inmediatos
-- Nueva partida no pregunta país.
-- El juego arranca y sigue siendo jugable.
-- Saves existentes siguen cargando.
-- No hay referencias visibles a “elegir Argentina/Japón/Italia/Brasil/Estados Unidos”.
-- El cambio no rompe desktop ni Android.
-- Los assets actuales se preservan.
+Agregar recursos data-driven equivalentes a:
+- IndustryData
+- ProcedureData
+- ProcedureStepData
+- PPEData / EquipmentData
+- RuleReferenceData
+- AssessmentData
+- TrainingResultData
+
+ProcedureStep debe poder representar como mínimo: acción requerida, orden, objetivo del mundo, prerequisitos, opcionalidad, feedback, error y evidencia registrada.
+
+Las reglas/normas deben guardar jurisdicción, fuente, versión/vigencia y referencia. VIDA no debe inventar requisitos regulatorios. El contenido normativo sensible debe poder ser validado/versionado por especialistas.
+
+## Evaluación
+No reducir el entrenamiento a correcto/incorrecto. Registrar:
+- pasos completados y omitidos;
+- orden;
+- errores;
+- reintentos;
+- tiempo;
+- decisiones;
+- uso de equipamiento/EPP cuando corresponda;
+- resultado del escenario.
+
+Separar la simulación de cualquier afirmación de certificación legal. El producto inicial es herramienta de práctica/capacitación interactiva.
+
+## Mundo
+Objetivo: un hub corporativo compacto, no una megaciudad.
+
+Conservar assets actuales como biblioteca mientras se migra. No borrar masivamente arte regional ni romper saves. Reducir el mundo solamente después de inventariar posiciones authored, cámara, minimapa, rutas, interiores y Nexovial.
+
+Los edificios prioritarios son arquetipos reutilizables:
+- restaurante/cocina;
+- hospital/clínica;
+- oficina;
+- depósito/logística;
+- planta/fábrica;
+- obra;
+- taller;
+- comercio/servicio.
+
+## Tráfico y audio
+Los semáforos están deshabilitados hasta contar con una implementación confiable. El tráfico recto debe entrar, recorrer y salir; no reciclarse mágicamente. Los circuitos cerrados heredados deben migrarse a rutas entrada->salida antes del MVP.
+
+VIDA B2B no tiene banda sonora. Mantener únicamente SFX funcionales y audio contextual útil para escenarios.
+
+## Web primero
+Objetivo comercial: acceso por URL sin instalación. Desktop web es el cliente principal. Touch/móvil se conserva como compatibilidad y para escenarios que rindan correctamente, sin diseñar el producto alrededor de una megaciudad móvil.
+
+Steam y tiendas de videojuegos no son prioridad del MVP B2B.
+
+## Modelo comercial que condiciona arquitectura
+El plan económico debe ser autoservicio. El precio de entrada no compra desarrollo personalizado. Catálogo estándar y configuración deben escalar sin intervención del desarrollador. Escenarios/edificios/procedimientos hechos a medida son implementación aparte.
+
+## Legacy: congelar, no destruir
+Mientras el pivot se estabiliza pueden permanecer por compatibilidad:
+- country/regional assets;
+- LifeSimulation;
+- clima/ciclo temporal;
+- vivienda;
+- saves anteriores;
+- misiones legacy.
+
+No ampliar estos sistemas salvo que sean necesarios para B2B. Migrarlos o retirarlos únicamente con tests y compatibilidad explícita.
+
+## Vertical existente: Nexovial
+Nexovial es el primer test end-to-end y debe seguir funcionando durante el pivot. Su valor futuro es probar que el motor genérico soporta Company -> Workplace -> Role -> Procedure/Scenario. No agregar más lógica especial de Nexovial al Core.
+
+---
+
+# ASTRA FRIDAY — iteración grande
+
+Objetivo de la sesión: convertir la semilla actual en un **vertical B2B genérico demostrable**, priorizando arquitectura y experiencia sobre cantidad de contenido.
+
+## P0 — antes de crear contenido
+1. Auditar repo completo y ejecutar tests/build disponibles. No asumir que main está sano.
+2. Preservar Nexovial y saves; no regenerar assets masivamente.
+3. Identificar y eliminar referencias activas a semáforos/música que hayan quedado, sin borrar material útil para una futura implementación.
+4. Convertir tráfico circular restante a rutas abiertas entrada->salida y agregar spawner limitado si hace falta mantener calles vivas.
+5. Medir nodos/NPC/tráfico y reducir coste del mundo antes de sumar escenarios.
+
+## P0 — motor B2B
+6. Implementar IndustryData, ProcedureData, ProcedureStepData, Equipment/PPE, RuleReference y TrainingResult de forma data-driven.
+7. Crear ProcedureRunner independiente de UI y de empresas concretas.
+8. Soportar prerequisitos, pasos obligatorios/opcionales, orden, errores, reintentos, interacción con world targets y feedback.
+9. Crear telemetría local de sesión: timestamps, acciones, pasos, errores, omisiones, resultado. No recolectar PII innecesaria.
+10. Integrar ProcedureRunner con Scenario/Shift sin convertir salario/dinero/reputación del viejo life-sim en el sistema de evaluación B2B.
+
+## P1 — selector y primer módulo
+11. Crear flujo Rubro -> Empresa/demo -> Puesto -> Capacitación.
+12. Mantener Nexovial como vertical de oficina y migrarlo al nuevo ProcedureRunner.
+13. Crear estructura del módulo Gastronomía con datos ficticios y sin afirmar certificación normativa.
+14. Construir UN procedimiento jugable corto y pulido (higiene/preparación del puesto) usando equipamiento e interacciones reales del mundo.
+15. El EPP/equipamiento debe depender del procedimiento/riesgo configurado; nunca imponer guantes/barbijo/cofia universalmente.
+
+## P1 — experiencia empresarial
+16. Resultado final entendible: completado, pasos, errores, omisiones, tiempo y feedback.
+17. Separar UI del trabajador de futura UI administrativa.
+18. Preparar interfaz/export serializable para que un backend web futuro pueda recibir TrainingResult.
+19. No construir todavía autenticación, pagos ni dashboard SaaS dentro de Godot.
+
+## P1 — mundo compacto
+20. Inventariar todas las coordenadas authored antes de redimensionar.
+21. Proponer y ejecutar una reducción segura del área jugable si Nexovial, rutas, cámara, minimapa e interiores pueden migrarse sin regresión.
+22. Priorizar densidad y calidad de 4-8 edificios laborales sobre expansión urbana.
+23. Mantener assets regionales como biblioteca visual; no volver a selección por países.
+
+## Calidad obligatoria
+- GDScript tipado donde evite inferencias ambiguas.
+- Sin lógica por empresa dentro del Core.
+- Sin strings mágicos para reglas críticas si pueden modelarse como datos.
+- Tests unitarios/lógicos del ProcedureRunner.
+- Test end-to-end de Nexovial.
+- Smoke test del módulo Gastronomía.
+- Desktop/web sin errores de parseo.
+- No declarar Android/web “resuelto” sin probar la build correspondiente.
+- Commits pequeños y reversibles.
+
+## Definición de terminado de la sesión
+Un usuario puede abrir VIDA, elegir un rubro disponible, entrar a una capacitación, realizar un procedimiento mediante acciones dentro del escenario, cometer un error, recibir feedback y finalizar con un TrainingResult estructurado. Nexovial sigue funcionando y el motor no contiene lógica específica del nuevo rubro.
+
+Todo lo demás es secundario.
