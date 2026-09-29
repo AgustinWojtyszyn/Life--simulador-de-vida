@@ -1,34 +1,51 @@
-# VIDA / LIFE
+# VIDA B2B
 
-**Tu vida. Tu ciudad. Tus decisiones.**
+**Capacitación laboral interactiva: aprender el procedimiento haciéndolo.**
 
-Juego de vida en Godot 4, con pixel art 2.5D y una misma base para PC/Android.
+VIDA está migrando de un life-sim urbano a una plataforma B2B web-first de simulación y capacitación. El mundo actual se conserva como banco de assets y compatibilidad mientras el producto converge hacia escenarios compactos, reutilizables y medibles.
+
+## Dirección actual
+
+Flujo objetivo:
+
+```text
+Rubro -> Empresa -> Lugar de trabajo -> Puesto -> Procedimiento -> Escenario -> Resultado
+```
+
+El motor B2B debe ser independiente de cada cliente. Nexovial S.A. es el vertical de oficina existente y funciona como prueba de compatibilidad durante la migración.
+
+Fundaciones disponibles:
+- `CompanyData`, `WorkplaceData`, `JobRoleData`, `ScenarioData`;
+- `IndustryData`;
+- `ProcedureData` y `ProcedureStepData`;
+- `EquipmentData` para herramientas/EPP;
+- `RuleReferenceData` para referencias normativas versionables;
+- `TrainingResultData`;
+- `ProcedureRunner` para ejecución, orden, prerequisitos, errores y telemetría.
+
+## Plataforma
+
+Objetivo comercial principal: **Web/Desktop mediante URL**, sin instalación. Android/touch permanece soportado como compatibilidad y cliente secundario. El proyecto usa GL Compatibility, adecuado para mantener una ruta web de Godot; cada export real debe validarse en hardware/navegador objetivo.
+
+## Qué está congelado
+
+Países, megaciudad, vida personal, economía, clima y expansión urbana son legacy mientras no aporten a capacitación. No extenderlos. No borrarlos masivamente hasta desacoplar saves/assets/tests.
+
+Semáforos y tráfico circular están retirados del hub B2B. La banda sonora está retirada; permanecen SFX funcionales.
+
+## Desarrollo
 
 ```sh
 godot --path .
+godot --headless --script tests/procedure_runner_test.gd
+godot --headless --script tests/b2b_vertical_test.gd
+godot --headless --script tests/traffic_test.gd
 ```
 
-**Nueva partida → crear personaje → elegir país → tu vivienda → explorar.**
-Argentina, Estados Unidos, Japón, Italia y Brasil tienen una zona inicial jugable.
-El barrio original se conserva dentro de Argentina y se amplía con calles,
-viviendas, comercios y población. Cada país usa fachadas e identidad propias. Hay 16 familias nuevas por país
-además del catálogo anterior, distribuidas en dos manzanas mixtas al sur.
+No considerar una plataforma validada sólo porque el proyecto parsea: Web y Android requieren export y smoke test reales.
 
-- WASD/flechas para caminar; **E** para la interacción cercana.
-- Puerta de tu casa: entrar/salir. Cama: descansar.
-- Bancos: sentarte; E o movimiento para levantarte. Vecinos: saludar.
-- Fuente: pedir un deseo sobre el agua animada. Comercios: consultar horario.
-- **Escape / Menú:** guardar, continuar jugando o guardar y volver al inicio.
-- Android: joystick multitouch y botón de acción contextual, sólo en móvil.
+## Documentación principal
 
-El creador ofrece hombre/mujer, nombre y apariencia básica con preview. Continuar
-recupera perfil, país, vivienda, posición y estado básico desde `user://`.
+Leer primero [docs/VIDA_SINGLE_CITY_B2B.md](docs/VIDA_SINGLE_CITY_B2B.md). Contiene arquitectura objetivo, límites de producto y el plan de la iteración grande de Astra.
 
-La Fase 1 no incluye misiones, trabajos, economía, relaciones ni progresión.
-Los interiores de viviendas son reutilizables y el tránsito aún no realiza giros.
-
-Documentación de arquitectura, límites y pruebas: [docs/PHASE1.md](docs/PHASE1.md).
-Preparación y límites de validación móvil: [docs/ANDROID.md](docs/ANDROID.md).
-Assets anteriores: [assets/README.md](assets/README.md).
-
-Iteración de ciudad y controles táctiles: [docs/ITERATION_ANDROID_CITY.md](docs/ITERATION_ANDROID_CITY.md).
+Los documentos `PHASE1`, `ITERATION_*` y `ANDROID` describen etapas anteriores y deben tratarse como historial/compatibilidad, no como dirección de producto.
