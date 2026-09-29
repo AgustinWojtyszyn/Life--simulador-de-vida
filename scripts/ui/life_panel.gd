@@ -94,13 +94,6 @@ func show_journal() -> void:
 			work_line += "\nTurno activo · Obj: " + ShiftSystem.current_objective()
 		text_line(work_line)
 	# ─────────────────────────────────────────────────────────────────────
-	var music_label := text_line("Banda sonora · ♫ " + AudioSystem.track_name())
-	action("♫ Canción anterior", func():
-		AudioSystem.previous_track()
-		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
-	action("♫ Siguiente canción", func():
-		AudioSystem.next_track()
-		music_label.text = "Banda sonora · ♫ " + AudioSystem.track_name())
 	action("Volver al barrio", close)
 
 func talk(person: String) -> void:
