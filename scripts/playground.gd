@@ -25,7 +25,7 @@ var occluders: Array[Sprite2D] = []
 var texture_used_cache: Dictionary = {}
 var road_cache: Array[Rect2] = []
 var occlusion_clock := 0.0
-# Two active lanes. Vehicles recycle beyond camera limits; parked cars stay solid.
+# Lightweight through-traffic. Vehicles enter the authored district and leave at route bounds.
 const TRAFFIC_LANES := [
 	{"from": Vector2(-140, 512), "to": Vector2(2540, 512), "direction": Vector2.RIGHT},
 	{"from": Vector2(2540, 454), "to": Vector2(-140, 454), "direction": Vector2.LEFT},
@@ -96,25 +96,7 @@ func _ready() -> void:
 				vehicle.route_right = map_size.x + 140.0
 				vehicle.player = $Player
 				add_child(vehicle)
-	# A second circuit turns through both intersections and the southern street.
-	# Chamfered waypoints keep vehicles in paved space through each turn.
-	var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
-	var circuit: Array[Vector2] = [Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)]
-	for i in 2:
-		# A circuit requires genuine directional art; never rotate the legacy PNG.
-		if not Vehicle.has_directional_art(regional_models[i]):
-			continue
-		var vehicle := AnimatableBody2D.new()
-		vehicle.set_script(Vehicle)
-		vehicle.name = "Circuit_%s" % i
-		vehicle.model = regional_models[i]
-		vehicle.route_points = circuit
-		vehicle.route_index = 1 if i == 0 else 7
-		vehicle.position = Vector2(958, 680) if i == 0 else Vector2(east_lane, 950)
-		vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 12.0
-		vehicle.player = $Player
-		add_child(vehicle)
-	add_expansion_traffic(regional_models)
+	# Closed-loop traffic is intentionally disabled for the B2B hub. Through-traffic only.
 	add_grid_traffic(regional_models)
 	for p in [Vector2(67, 341), Vector2(557, 333), Vector2(800, 338),
 		Vector2(1035, 340), Vector2(1360, 354), Vector2(126, 713),
@@ -191,24 +173,6 @@ func add_nexovial_building() -> void:
 	sign.detail = "Nexovial S.A."
 	add_child(sign)
 
-func add_traffic_signals() -> void:
-	var horizontal := DistrictBlocks.horizontal_roads(WorldManager.district)
-	var vertical := DistrictBlocks.vertical_roads(WorldManager.district)
-	for row in horizontal.size():
-		var h: Rect2 = horizontal[row]
-		for column in vertical.size():
-			var v: Rect2 = vertical[column]
-			var traffic_light := Node2D.new()
-			traffic_light.set_script(TrafficSignalScript)
-			traffic_light.name = "Signal_%d_%d" % [row, column]
-			traffic_light.position = Vector2(v.get_center().x, h.get_center().y)
-			traffic_light.horizontal_half = h.size.y * 0.5
-			traffic_light.vertical_half = v.size.x * 0.5
-			# A small row offset creates a green-wave feel instead of every
-			# intersection changing at the exact same instant.
-			traffic_light.cycle_offset = float(row) * 1.8 + float(column) * 0.35
-			add_child(traffic_light)
-
 func add_grid_traffic(regional_models: Array) -> void:
 	# The expanded city must not feel like traffic exists only around spawn.
 	# Two lightweight vehicles circulate on each additional avenue lane.
@@ -229,27 +193,6 @@ func add_grid_traffic(regional_models: Array) -> void:
 			vehicle.cruise_speed = Vehicle.profile_for(vehicle.model).speed - 7.0 - road_index * 2.0
 			vehicle.player = $Player
 			add_child(vehicle)
-
-func add_expansion_traffic(regional_models: Array) -> void:
-	var circuit: Array[Vector2] = [
-		Vector2(2842, 1190),
-		Vector2(2842, 1962),
-		Vector2(3822, 1962),
-		Vector2(3822, 1190),
-	]
-	for i in 2:
-		var model: String = regional_models[(i + 2) % regional_models.size()]
-		if not Vehicle.has_directional_art(model):
-			continue
-		var vehicle := AnimatableBody2D.new()
-		vehicle.set_script(Vehicle)
-		vehicle.name = "EastCircuit_%s" % i
-		vehicle.model = model
-		vehicle.route_points = circuit
-		vehicle.position = Vector2(2842, 1330 + i * 320)
-		vehicle.cruise_speed = Vehicle.profile_for(model).speed - 18.0
-		vehicle.player = $Player
-		add_child(vehicle)
 
 func configure_input() -> void:
 	var bindings := {
@@ -693,24 +636,7 @@ func integrate_argentina() -> void:
 		target.action = "buy_food"
 		stand.add_child(target)
 
-	# Keep the bus behaviour that already feels right, but let the second line
-	# serve the expanded eastern neighbourhood.
-	for i in 2:
-		var bus := Vehicle.new()
-		bus.name = "Colectivo" if i == 0 else "Colectivo2"
-		bus.model = "colectivo"
-		if i == 0:
-			var east_lane := WorldManager.district.side_street_x + WorldManager.district.side_street_width * 0.25
-			bus.route_points.assign([Vector2(958, 1160), Vector2(958, 512), Vector2(east_lane, 512), Vector2(east_lane, 1160)])
-			bus.position = Vector2(1450, 512)
-		else:
-			bus.route_points.assign([Vector2(2842, 1190), Vector2(2842, 1962), Vector2(3822, 1962), Vector2(3822, 1190)])
-			bus.position = Vector2(2842, 1510)
-		bus.direction = 1.0
-		bus.cruise_speed = Vehicle.profile_for("colectivo").speed
-		bus.player = $Player
-		add_child(bus)
-
+	# Public transport simulation is deferred until it can use open routes reliably.
 	add_local_resident("Tito", Vector2(3310, 1740), "eat")
 	add_local_resident("Luli", Vector2(1460, 610), "phone")
 	for i in 4:
