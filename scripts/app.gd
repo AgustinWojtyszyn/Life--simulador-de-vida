@@ -45,7 +45,15 @@ func switch_world() -> void:
 		remove_child(world)
 		world.queue_free()
 	get_tree().paused = false
-	var scene := HomeSystem.INTERIOR_SCENE if WorldManager.location == "home" else "res://scenes/shop.tscn" if WorldManager.location != "street" else "res://scenes/playground.tscn"
+	var scene: String
+	if WorldManager.location == "home":
+		scene = HomeSystem.INTERIOR_SCENE
+	elif WorldManager.location == "nexovial_office":
+		scene = "res://scenes/interiors/nexovial_office.tscn"
+	elif WorldManager.location == "street":
+		scene = "res://scenes/playground.tscn"
+	else:
+		scene = "res://scenes/shop.tscn"
 	world = load(scene).instantiate()
 	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(world)

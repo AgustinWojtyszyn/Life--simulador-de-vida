@@ -13,7 +13,7 @@ var active_world: Node2D
 var playing := false
 var basic_state := {"rested": false}
 var settings := {"touch_controls": false, "audio_enabled": true, "music_volume": 0.65, "music_track": 0}
-const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini", "ice_cream_shop", "grill", "hospital", "hospital_ward", "supermarket", "pharmacy", "gym", "gas_station"]
+const PUBLIC_INTERIORS := ["shop", "cafe", "market", "kiosk", "bakery", "restaurant", "pizzeria", "trattoria", "clinic", "office", "workshop", "bookshop", "diner", "konbini", "ice_cream_shop", "grill", "hospital", "hospital_ward", "supermarket", "pharmacy", "gym", "gas_station", "nexovial_office"]
 var active_poi: Dictionary = {}
 
 func _ready() -> void:
@@ -70,6 +70,8 @@ func new_game(new_profile: PlayerProfile, id: String = "ar") -> void:
 	WeatherSystem.restore({})
 	LifeSimulation.restore({})
 	MissionSystem.restore({})
+	EmploymentSystem.restore({})
+	ShiftSystem.restore({})
 	playing = true
 	LifeEvents.profile_created.emit(profile)
 	travel_requested.emit()
@@ -94,6 +96,8 @@ func continue_game() -> bool:
 	WeatherSystem.restore(data.get("weather", {}))
 	LifeSimulation.restore(data.get("life", {}))
 	MissionSystem.restore(data.get("mission", {}))
+	EmploymentSystem.restore(data.get("employment", {}))
+	ShiftSystem.restore(data.get("shift", {}))
 	playing = true
 	travel_requested.emit()
 	return true
@@ -122,7 +126,7 @@ func save_game() -> bool:
 	var pos := player.position
 	if player.seated:
 		pos = active_world.get_node("Interactions").stand_position
-	var result := SaveSystem.write_save({"profile": profile.to_dict(), "active_poi": active_poi, "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict()})
+	var result := SaveSystem.write_save({"profile": profile.to_dict(), "active_poi": active_poi, "location": location, "position": [pos.x, pos.y], "return_position": [return_position.x, return_position.y], "settings": settings, "state": basic_state, "clock": GameClock.to_dict(), "weather": WeatherSystem.to_dict(), "life": LifeSimulation.to_dict(), "mission": MissionSystem.to_dict(), "employment": EmploymentSystem.to_dict(), "shift": ShiftSystem.to_dict()})
 	if result:
 		LifeEvents.game_saved.emit()
 	return result
