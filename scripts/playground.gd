@@ -13,7 +13,6 @@ const BuildingVariants := preload("res://scripts/data/building_variant.gd")
 const CityBuildingScript := preload("res://scripts/building.gd")
 const CountryCatalogScript := preload("res://scripts/data/country_catalog.gd")
 const TextureBoundsScript := preload("res://scripts/data/texture_bounds.gd")
-const TrafficSignalScript := preload("res://scripts/traffic_signal.gd")
 const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
@@ -53,7 +52,6 @@ func _ready() -> void:
 		Rect2(map_size.x - 16, 0, 16, map_size.y),
 	]:
 		add_solid(rect)
-	add_traffic_signals()
 	# Northern commercial frontage, a side street, and a second block.
 	var frontages: Array = Regional.FRONTAGES[WorldManager.country.id]
 	for i in frontages.size():
