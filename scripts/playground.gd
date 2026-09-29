@@ -14,7 +14,6 @@ const CityBuildingScript := preload("res://scripts/building.gd")
 const CountryCatalogScript := preload("res://scripts/data/country_catalog.gd")
 const TextureBoundsScript := preload("res://scripts/data/texture_bounds.gd")
 const TrafficSignalScript := preload("res://scripts/traffic_signal.gd")
-const InteractionTargetScript := preload("res://scripts/interaction_target.gd")
 # World-space footprints are independent of sprite height; sorting uses the feet.
 var solid_rects: Array[Rect2] = []
 var building_bounds: Array[Rect2] = []
@@ -140,7 +139,6 @@ func _ready() -> void:
 	add_asset("props/bench", Vector2(600, 870), Vector2(58, 43), Rect2(-12, -18, 24, 18), Color.WHITE, "west")
 	populate()
 	add_neighbor("mara", "Mara", WorldManager.district.home_position + Vector2(80, 42))
-	add_nexovial_building()
 	var layer := CanvasLayer.new()
 	var hud := Control.new()
 	hud.set_script(Hud)
@@ -153,45 +151,6 @@ func _ready() -> void:
 	interactions.set_script(Interactions)
 	interactions.hud = hud
 	add_child(interactions)
-
-## Añade el edificio de Nexovial S.A. como POI authored en el mapa.
-## Posición elegida en la zona de expansión del Centro (lejos del hogar inicial)
-## para que el jugador tenga que desplazarse físicamente a encontrarla.
-func add_nexovial_building() -> void:
-	var nexovial_pos := Vector2(2560, 1480)
-	# Reutiliza la fachada de "office" existente (ar region).
-	var facade_path := "res://assets/regions/ar/office.png"
-	if not ResourceLoader.exists(facade_path):
-		facade_path = "res://assets/regions/us/office.png"
-	if not ResourceLoader.exists(facade_path):
-		return  # Sin fachada disponible, omitir sin crashear.
-	var building := CityBuildingScript.new()
-	building.position = nexovial_pos
-	building.building_id = "nexovial_sede_building"
-	building.title = "Nexovial S.A."
-	building.building_type = "nexovial_office"
-	building.interior_type = "nexovial_office"
-	building.country_id = WorldManager.country.id
-	building.access = CityBuilding.Access.ENTERABLE
-	building.facade = load(facade_path)
-	building.orientation = "south"
-	building.door_offset = Vector2(0, 18)
-	building.variant = BuildingVariants.make("ar", "office", 42)
-	fit_building(building)
-	building_bounds.append(building.get_meta("visual_bounds", Rect2(nexovial_pos, Vector2(208, 236))))
-	add_child(building)
-	city_objects.append(building)
-	if building.get_child_count() > 0 and building.get_child(0) is Sprite2D:
-		occluders.append(building.get_child(0))
-	add_building_solid(building)
-	# Cartel exterior de consulta laboral (visible antes de entrar).
-	var sign := InteractionTargetScript.new()
-	sign.position = nexovial_pos + Vector2(0, 32)
-	sign.label = "Nexovial S.A. — Consultar empleo"
-	sign.action = "nexovial_consult_job"
-	sign.target_id = "nexovial_sign"
-	sign.detail = "Nexovial S.A."
-	add_child(sign)
 
 func add_traffic_signals() -> void:
 	var horizontal := DistrictBlocks.horizontal_roads(WorldManager.district)
