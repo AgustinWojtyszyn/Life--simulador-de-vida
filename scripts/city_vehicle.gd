@@ -201,10 +201,6 @@ func _physics_process(delta: float) -> void:
 		var near_player := is_instance_valid(player) and position.distance_squared_to(player.position) < 900.0 * 900.0
 		proximity_clock = 0.05 if near_player else 0.16
 	var gap := cached_gap
-	# Permissions are live, never cached across phase changes or reservations.
-	var traffic := agents("city_traffic")
-	for signal_node in agents("traffic_signals"):
-		gap = minf(gap, signal_node.clearance_distance(self, traffic))
 	if gap < 46.0 and current_speed < 18.0 and has_honk_target():
 		blocked_time += delta
 		if blocked_time >= 2.0 and horn_cooldown <= 0.0:
@@ -238,8 +234,13 @@ func _physics_process(delta: float) -> void:
 	cached_gap = maxf(0.0, cached_gap - step)
 	var previous := position
 	if route_points.is_empty():
-		var new_x := route_left + fposmod(position.x + direction * step - route_left, route_length())
-		position = Vector2(new_x, position.y)  # lane_offset is baked into y at spawn
+		position.x += direction * step
+		# Straight traffic is intentionally one-way through the playable district:
+		# vehicles leave the simulation after crossing the authored route bounds.
+		# This avoids invisible recycling and keeps traffic predictable for B2B scenarios.
+		if (direction > 0.0 and position.x > route_right) or (direction < 0.0 and position.x < route_left):
+			queue_free()
+			return
 	else:
 		progress = fposmod(progress + step, curve.get_baked_length())
 		position = curve.sample_baked(progress)
